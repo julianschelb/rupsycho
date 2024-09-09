@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rupsycho.models.questionnaire &mdash; RUPsycho 0.10 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=ac14934e"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            RUPsycho
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../init.html">Get Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reader.html">Load Experiments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../experiment.html">Define Experiments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../run.html">Running an Experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../parser.html">Parse Answers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../parsers.html">Parsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../models.html">Data Models</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">RUPsycho</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../../rupsycho.html">rupsycho</a></li>
+      <li class="breadcrumb-item active">rupsycho.models.questionnaire</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for rupsycho.models.questionnaire</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ===========================================================================</span>
+<span class="c1">#                       Data Model: Questionnaire</span>
+<span class="c1"># ===========================================================================</span>
+<span class="c1"># This file contains the data model for a psychological questionnaire.</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span>
+
+
+<div class="viewcode-block" id="DemographicAttributes">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.questionnaire.DemographicAttributes">[docs]</a>
+<span class="k">class</span> <span class="nc">DemographicAttributes</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents the demographic attributes of a participant in a psychological test.</span>
+<span class="sd">    This model includes default fields such as &#39;age&#39;, &#39;title&#39;, and &#39;name&#39;, but it is</span>
+<span class="sd">    extendable to include additional demographic details as needed.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        age (Optional[int]): The age of the participant. Default is None.</span>
+<span class="sd">        title (Optional[str]): The title of the participant (e.g., Mr, Ms, Dr). Default is None.</span>
+<span class="sd">        name (Optional[str]): The name of the participant. Default is None.</span>
+
+<span class="sd">    The model is flexible to accept additional fields beyond the ones specified.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">age</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">title</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="DemographicAttributes.Config">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.questionnaire.DemographicAttributes.Config">[docs]</a>
+    <span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
+        <span class="n">extra</span> <span class="o">=</span> <span class="s2">&quot;allow&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="DemographicProfile">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.questionnaire.DemographicProfile">[docs]</a>
+<span class="k">class</span> <span class="nc">DemographicProfile</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents the demographic profile of a participant in a psychological test.</span>
+<span class="sd">    This includes attributes like age, title, name, and a template for formatting purposes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">attributes</span><span class="p">:</span> <span class="n">DemographicAttributes</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Attributes containing demographic information such as age, title, and name.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">template</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{title}</span><span class="s2"> </span><span class="si">{name}</span><span class="s2"> is </span><span class="si">{age}</span><span class="s2"> years old.&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;A template string to format the demographic information. &quot;</span>
+        <span class="s2">&quot;Use placeholders for attributes (e.g., &#39;</span><span class="si">{title}</span><span class="s2">&#39;, &#39;</span><span class="si">{name}</span><span class="s2">&#39;, &#39;</span><span class="si">{age}</span><span class="s2">&#39;).&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">model_dump</span><span class="p">())</span>
+
+<div class="viewcode-block" id="DemographicProfile.Config">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.questionnaire.DemographicProfile.Config">[docs]</a>
+    <span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
+        <span class="n">extra</span> <span class="o">=</span> <span class="s2">&quot;allow&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="AnswerOption">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.questionnaire.AnswerOption">[docs]</a>
+<span class="k">class</span> <span class="nc">AnswerOption</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents an answer option in a psychological test.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        text (str): The text of the answer option. This should describe the option in a way that is clear to the participant.</span>
+<span class="sd">        ignored_for_scale (bool): Indicates whether this answer option should be ignored when calculating scores on a scale. This can be useful for neutral options or non-applicable responses.</span>
+<span class="sd">        weight (int): The numerical weight assigned to this answer option. This is typically used in scoring the test, where different options have different point values.</span>
+
+<span class="sd">    The default values are set to represent a common scenario in psychological testing. Adjust as necessary for specific test requirements.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Choose an option&quot;</span>
+    <span class="n">ignored_for_scale</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">weight</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+
+
+<div class="viewcode-block" id="InstructionItem">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.questionnaire.InstructionItem">[docs]</a>
+<span class="k">class</span> <span class="nc">InstructionItem</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents a single question item in a psychological test, along with its answer options and specific attributes.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        question (str): The text of the question presented to the participant.</span>
+<span class="sd">        reversed (bool): A flag indicating whether the scoring for this question should be reversed. In some psychological tests, certain questions are scored in the opposite direction for certain scales.</span>
+<span class="sd">        answer_options (Optional[List[AnswerOption]]): A list of possible answer options that a participant can choose from in response to the question. This field is optional and can be None if the question does not have predefined answer options.</span>
+<span class="sd">        attributes (InstructionItemAttribute): Additional attributes related to the question, such as its dimension in a multi-dimensional test structure.</span>
+
+<span class="sd">    The default values and structure are designed to be flexible and can be adjusted to suit different types of psychological tests.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">question</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Enter question text here&quot;</span>
+    <span class="nb">reversed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">answer_options</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">AnswerOption</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">attributes</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Additional attributes related to the question, such as its dimension in a multi-dimensional test structure.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">answers</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]]]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">defaultdict</span><span class="p">(</span>
+            <span class="k">lambda</span><span class="p">:</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">))),</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;A nested dictionary storing answers indexed by model, profile, and run.&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="Questionnaire">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.questionnaire.Questionnaire">[docs]</a>
+<span class="k">class</span> <span class="nc">Questionnaire</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents a questionnaire used in a psychological test.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        name (str): The name of the questionnaire.</span>
+<span class="sd">        general_instruction (str): General instructions provided to the participants.</span>
+<span class="sd">        demographic_profiles (Optional[List[DemographicProfile]]): A list of demographic profiles for the participants. This field is optional.</span>
+<span class="sd">        default_answer_options (Optional[Dict[str, AnswerOption]]): A dictionary of default answer options for the questionnaire. The keys represent unique identifiers for each option. This field is optional.</span>
+<span class="sd">        instruction_items (Optional[List[InstructionItem]]): A list of instruction items (questions) included in the questionnaire. This field is optional.</span>
+
+<span class="sd">    Methods:</span>
+<span class="sd">        get_number_of_questions: Returns the number of questions in the questionnaire.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">general_instruction</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">demographic_profiles</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">DemographicProfile</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">attributes</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Additional attributes related to the question, such as its dimension in a multi-dimensional test structure.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">default_answer_options</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">AnswerOption</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">instruction_items</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">InstructionItem</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Questionnaire.get_number_of_questions">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.questionnaire.Questionnaire.get_number_of_questions">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_number_of_questions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the number of questions in the questionnaire.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instruction_items</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instruction_items</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Questionnaire.print_questionnaire">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.questionnaire.Questionnaire.print_questionnaire">[docs]</a>
+    <span class="k">def</span> <span class="nf">print_questionnaire</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prints the questionnaire in a human-readable format.&quot;&quot;&quot;</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Name: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;General Instruction: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">general_instruction</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">demographic_profiles</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Demographic Profiles:&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">profile</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">demographic_profiles</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- </span><span class="si">{</span><span class="n">profile</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># if self.default_answer_options:</span>
+        <span class="c1">#     print(&quot;\nDefault Answer Options:&quot;)</span>
+        <span class="c1">#     answer_options_table = [</span>
+        <span class="c1">#         [key, opt.text, opt.ignored_for_scale, opt.weight]</span>
+        <span class="c1">#         for key, opt in self.default_answer_options.items()</span>
+        <span class="c1">#     ]</span>
+        <span class="c1">#     print(</span>
+        <span class="c1">#         tabulate(</span>
+        <span class="c1">#             answer_options_table,</span>
+        <span class="c1">#             headers=[&quot;ID&quot;, &quot;Text&quot;, &quot;Ignored for Scale&quot;, &quot;Weight&quot;],</span>
+        <span class="c1">#         )</span>
+        <span class="c1">#     )</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instruction_items</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Instruction Items:&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">instruction_items</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- Question: </span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">question</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+</div>
+
+                <span class="c1"># print(&quot;  Answer Options:&quot;)</span>
+                <span class="c1"># if item.answer_options:</span>
+                <span class="c1">#     answer_options_table = [</span>
+                <span class="c1">#         [opt.text, opt.ignored_for_scale, opt.weight]</span>
+                <span class="c1">#         for opt in item.answer_options</span>
+                <span class="c1">#     ]</span>
+                <span class="c1">#     print(</span>
+                <span class="c1">#         tabulate(</span>
+                <span class="c1">#             answer_options_table,</span>
+                <span class="c1">#             headers=[&quot;Text&quot;, &quot;Ignored for Scale&quot;, &quot;Weight&quot;],</span>
+                <span class="c1">#         )</span>
+                <span class="c1">#     )</span>
+                <span class="c1"># print(&quot;  Attributes:&quot;)</span>
+                <span class="c1"># print(f&quot;    {item.attributes}&quot;)</span>
+                <span class="c1"># print()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

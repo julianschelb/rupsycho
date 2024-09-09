@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rupsycho.parsers.validators &mdash; RUPsycho 0.10 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=ac14934e"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            RUPsycho
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../init.html">Get Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reader.html">Load Experiments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../experiment.html">Define Experiments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../run.html">Running an Experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../parser.html">Parse Answers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../parsers.html">Parsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../models.html">Data Models</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">RUPsycho</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../../rupsycho.html">rupsycho</a></li>
+      <li class="breadcrumb-item active">rupsycho.parsers.validators</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for rupsycho.parsers.validators</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ===========================================================================</span>
+<span class="c1">#                              Validator Parser Class</span>
+<span class="c1"># ===========================================================================</span>
+<span class="c1"># This module defines a specialized parser class called Validator, designed to</span>
+<span class="c1"># assess and validate textual answers. The Validator parser takes an answer as</span>
+<span class="c1"># input and returns the original answer along with a validation status that</span>
+<span class="c1"># indicates whether the input meets specified criteria or rules.</span>
+
+<span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">Field</span>
+<span class="kn">from</span> <span class="nn">langchain_core.exceptions</span> <span class="kn">import</span> <span class="n">OutputParserException</span>
+<span class="kn">from</span> <span class="nn">langchain_core.output_parsers</span> <span class="kn">import</span> <span class="n">BaseOutputParser</span>
+<span class="kn">from</span> <span class="nn">rupsycho.parsers.parser_utils</span> <span class="kn">import</span> <span class="n">check_span</span>
+
+
+<span class="c1"># ================================= Apologies Validator ================================</span>
+
+<span class="n">APOLOGIES_HINTS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;apologies&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">&quot;sorry&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;i&#39;m sorry&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;i am sorry&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;i apologize&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;i apologise&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;apologies&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;my apologies&quot;</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="ApologiesValidatorParser">
+<a class="viewcode-back" href="../../../parsers.html#rupsycho.parsers.validators.ApologiesValidatorParser">[docs]</a>
+<span class="k">class</span> <span class="nc">ApologiesValidatorParser</span><span class="p">(</span><span class="n">BaseOutputParser</span><span class="p">[</span><span class="nb">dict</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A parser that validates the input text for apologies-related content.</span>
+<span class="sd">    Returns the original text along with a validation status.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ApologiesValidatorParser.parse">
+<a class="viewcode-back" href="../../../parsers.html#rupsycho.parsers.validators.ApologiesValidatorParser.parse">[docs]</a>
+    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Perform the validation check using check_span</span>
+            <span class="n">apologies_check</span> <span class="o">=</span> <span class="n">check_span</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">APOLOGIES_HINTS</span><span class="p">)</span>
+
+            <span class="c1"># Determine if the text is valid</span>
+            <span class="n">is_valid</span> <span class="o">=</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">apologies_check</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="n">text</span><span class="p">,</span>
+                <span class="s1">&#39;validation_status&#39;</span><span class="p">:</span> <span class="s1">&#39;valid&#39;</span> <span class="k">if</span> <span class="n">is_valid</span> <span class="k">else</span> <span class="s1">&#39;invalid&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;details&#39;</span><span class="p">:</span> <span class="n">apologies_check</span>
+            <span class="p">}</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">OutputParserException</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;ApologiesValidatorParser encountered an error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;apologies_validator_parser&quot;</span></div>
+
+
+<span class="c1"># ================================= Being AI Validator ================================</span>
+
+
+<span class="n">BEING_AI_HINTS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;being_ai&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">&quot;as an ai&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;as an artificial&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;i am an ai&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;i&#39;m an ai&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;i&#39;m just an ai&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;as a neutral&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;i&#39;m an artificial&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;i am an artificial&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;I was created&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;my programming does not allow&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;i would like to clarify that&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;i do not have a personal opinion&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;i do not have personal opinions&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;i am an artificial intelligence&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;i am an ai &quot;</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="BeingAiValidatorParser">
+<a class="viewcode-back" href="../../../parsers.html#rupsycho.parsers.validators.BeingAiValidatorParser">[docs]</a>
+<span class="k">class</span> <span class="nc">BeingAiValidatorParser</span><span class="p">(</span><span class="n">BaseOutputParser</span><span class="p">[</span><span class="nb">dict</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A parser that validates the input text for being_ai-related content.</span>
+<span class="sd">    Returns the original text along with a validation status.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="BeingAiValidatorParser.parse">
+<a class="viewcode-back" href="../../../parsers.html#rupsycho.parsers.validators.BeingAiValidatorParser.parse">[docs]</a>
+    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Perform the validation check using check_span</span>
+            <span class="n">being_ai_check</span> <span class="o">=</span> <span class="n">check_span</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">BEING_AI_HINTS</span><span class="p">)</span>
+
+            <span class="c1"># Determine if the text is valid</span>
+            <span class="n">is_valid</span> <span class="o">=</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">being_ai_check</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="n">text</span><span class="p">,</span>
+                <span class="s1">&#39;validation_status&#39;</span><span class="p">:</span> <span class="s1">&#39;valid&#39;</span> <span class="k">if</span> <span class="n">is_valid</span> <span class="k">else</span> <span class="s1">&#39;invalid&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;details&#39;</span><span class="p">:</span> <span class="n">being_ai_check</span>
+            <span class="p">}</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">OutputParserException</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;BeingAiValidatorParser encountered an error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;being_ai_validator_parser&quot;</span></div>
+
+
+
+<span class="c1"># ================================= Refusal Validator ================================</span>
+
+<span class="n">REFUSAL_HINTS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;refusal&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">&quot;no&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;not&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;cannot&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;no,&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;no.&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;i cannot&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;i can&#39;t&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;i&#39;m not able&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;i am not able&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;it is not appropriate&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;it&#39;s not appropriate&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;it is not accurate&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;it&#39;s not accurate&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;i am not sure that it&#39;s appropriate&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;i&#39;m not sure that it&#39;s appropriate&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;it is not ethical&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;it&#39;s not ethical&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;i do not have&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;i don&#39;t have&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;i would need more context&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;1. i cannot&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;1. i don&#39;t have&quot;</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="RefusalValidatorParser">
+<a class="viewcode-back" href="../../../parsers.html#rupsycho.parsers.validators.RefusalValidatorParser">[docs]</a>
+<span class="k">class</span> <span class="nc">RefusalValidatorParser</span><span class="p">(</span><span class="n">BaseOutputParser</span><span class="p">[</span><span class="nb">dict</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A parser that validates the input text for refusal-related content.</span>
+<span class="sd">    Returns the original text along with a validation status.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="RefusalValidatorParser.parse">
+<a class="viewcode-back" href="../../../parsers.html#rupsycho.parsers.validators.RefusalValidatorParser.parse">[docs]</a>
+    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Perform the validation check using check_span</span>
+            <span class="n">refusal_check</span> <span class="o">=</span> <span class="n">check_span</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">REFUSAL_HINTS</span><span class="p">)</span>
+
+            <span class="c1"># Determine if the text is valid</span>
+            <span class="n">is_valid</span> <span class="o">=</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">refusal_check</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="n">text</span><span class="p">,</span>
+                <span class="s1">&#39;validation_status&#39;</span><span class="p">:</span> <span class="s1">&#39;valid&#39;</span> <span class="k">if</span> <span class="n">is_valid</span> <span class="k">else</span> <span class="s1">&#39;invalid&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;details&#39;</span><span class="p">:</span> <span class="n">refusal_check</span>
+            <span class="p">}</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">OutputParserException</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;RefusalValidatorParser encountered an error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;refusal_validator_parser&quot;</span></div>
+
+
+
+<span class="c1"># ================================= Combined Validator ================================</span>
+
+<div class="viewcode-block" id="ValidatorParser">
+<a class="viewcode-back" href="../../../parsers.html#rupsycho.parsers.validators.ValidatorParser">[docs]</a>
+<span class="k">class</span> <span class="nc">ValidatorParser</span><span class="p">(</span><span class="n">BaseOutputParser</span><span class="p">[</span><span class="nb">dict</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A custom parser that combines the results of ApologiesValidatorParser,</span>
+<span class="sd">    BeingAiValidatorParser, and RefusalValidatorParser to validate the input text</span>
+<span class="sd">    against these checks and return the original text along with a combined validation status.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">apologies_parser</span><span class="p">:</span> <span class="n">ApologiesValidatorParser</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+    <span class="n">being_ai_parser</span><span class="p">:</span> <span class="n">BeingAiValidatorParser</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+    <span class="n">refusal_parser</span><span class="p">:</span> <span class="n">RefusalValidatorParser</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes the combined validator parser by creating instances of the</span>
+<span class="sd">        Apologies, Being AI, and Refusal validators.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apologies_parser</span> <span class="o">=</span> <span class="n">ApologiesValidatorParser</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">being_ai_parser</span> <span class="o">=</span> <span class="n">BeingAiValidatorParser</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">refusal_parser</span> <span class="o">=</span> <span class="n">RefusalValidatorParser</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ValidatorParser.parse">
+<a class="viewcode-back" href="../../../parsers.html#rupsycho.parsers.validators.ValidatorParser.parse">[docs]</a>
+    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parses the input text by running it through all three validators and</span>
+<span class="sd">        combining their results.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        text : str</span>
+<span class="sd">            The input string to be validated.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            A dictionary containing the original text, a combined validation status,</span>
+<span class="sd">            and detailed results from each individual validator.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Run each validator</span>
+            <span class="n">apologies_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apologies_parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+            <span class="n">being_ai_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">being_ai_parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+            <span class="n">refusal_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">refusal_parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+            <span class="c1"># Combine the results</span>
+            <span class="n">combined_results</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;apologies&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">apologies_result</span><span class="p">[</span><span class="s1">&#39;details&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="s1">&#39;being_ai&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">being_ai_result</span><span class="p">[</span><span class="s1">&#39;details&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="s1">&#39;refusal&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">refusal_result</span><span class="p">[</span><span class="s1">&#39;details&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="p">}</span>
+
+            <span class="c1"># Determine overall validity: If any of the validators return &#39;invalid&#39;, the overall status is &#39;invalid&#39;</span>
+            <span class="n">is_valid</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">apologies_result</span><span class="p">[</span><span class="s1">&#39;validation_status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;valid&#39;</span> <span class="ow">and</span>
+                <span class="n">being_ai_result</span><span class="p">[</span><span class="s1">&#39;validation_status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;valid&#39;</span> <span class="ow">and</span>
+                <span class="n">refusal_result</span><span class="p">[</span><span class="s1">&#39;validation_status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;valid&#39;</span>
+            <span class="p">)</span>
+
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="n">text</span><span class="p">,</span>
+                <span class="s1">&#39;validation_status&#39;</span><span class="p">:</span> <span class="s1">&#39;valid&#39;</span> <span class="k">if</span> <span class="n">is_valid</span> <span class="k">else</span> <span class="s1">&#39;invalid&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;details&#39;</span><span class="p">:</span> <span class="n">combined_results</span>
+            <span class="p">}</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">OutputParserException</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;ValidatorParser encountered an error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the type of the parser as a string identifier.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;validator_parser&quot;</span></div>
+
+
+
+<span class="c1"># ================================= MAIN ================================</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="c1"># Example texts to validate</span>
+    <span class="n">example_texts</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;general&quot;</span><span class="p">:</span> <span class="s2">&quot;I think I would choose option 1 because it seems the best. Also, I somewhat disagree with option 2.&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;apologies&quot;</span><span class="p">:</span> <span class="s2">&quot;I apologize for the inconvenience.&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;being_ai&quot;</span><span class="p">:</span> <span class="s2">&quot;As an AI, I do not have personal opinions.&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;refusal&quot;</span><span class="p">:</span> <span class="s2">&quot;I cannot provide that information.&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;combined&quot;</span><span class="p">:</span> <span class="s2">&quot;I apologize for any confusion, but as an AI, I cannot provide that information.&quot;</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Instantiate the individual validators</span>
+    <span class="n">apologies_parser</span> <span class="o">=</span> <span class="n">ApologiesValidatorParser</span><span class="p">()</span>
+    <span class="n">being_ai_parser</span> <span class="o">=</span> <span class="n">BeingAiValidatorParser</span><span class="p">()</span>
+    <span class="n">refusal_parser</span> <span class="o">=</span> <span class="n">RefusalValidatorParser</span><span class="p">()</span>
+
+    <span class="c1"># Function to validate text with a specific parser</span>
+    <span class="k">def</span> <span class="nf">validate_text</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">text_key</span><span class="p">):</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">example_texts</span><span class="p">[</span><span class="n">text_key</span><span class="p">]</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">parser</span><span class="o">.</span><span class="n">_type</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span><span class="si">}</span><span class="s1"> validation result: </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Validate using individual parsers</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running individual validators:&quot;</span><span class="p">)</span>
+    <span class="n">validate_text</span><span class="p">(</span><span class="n">apologies_parser</span><span class="p">,</span> <span class="s2">&quot;apologies&quot;</span><span class="p">)</span>
+    <span class="n">validate_text</span><span class="p">(</span><span class="n">being_ai_parser</span><span class="p">,</span> <span class="s2">&quot;being_ai&quot;</span><span class="p">)</span>
+    <span class="n">validate_text</span><span class="p">(</span><span class="n">refusal_parser</span><span class="p">,</span> <span class="s2">&quot;refusal&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Instantiate the combined ValidatorParser</span>
+    <span class="n">validator_parser</span> <span class="o">=</span> <span class="n">ValidatorParser</span><span class="p">()</span>
+
+    <span class="c1"># Validate using the combined parser</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running combined validator:&quot;</span><span class="p">)</span>
+    <span class="n">combined_result</span> <span class="o">=</span> <span class="n">validator_parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">example_texts</span><span class="p">[</span><span class="s2">&quot;combined&quot;</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Combined validation result: </span><span class="si">{</span><span class="n">combined_result</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

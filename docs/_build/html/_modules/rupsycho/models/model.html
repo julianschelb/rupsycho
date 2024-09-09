@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rupsycho.models.model &mdash; RUPsycho 0.10 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=ac14934e"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            RUPsycho
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../init.html">Get Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reader.html">Load Experiments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../experiment.html">Define Experiments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../run.html">Running an Experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../parser.html">Parse Answers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../parsers.html">Parsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../models.html">Data Models</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">RUPsycho</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../../rupsycho.html">rupsycho</a></li>
+      <li class="breadcrumb-item active">rupsycho.models.model</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for rupsycho.models.model</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ===========================================================================</span>
+<span class="c1">#                           Data Model: Language Models</span>
+<span class="c1"># ===========================================================================</span>
+<span class="c1"># This file contains the data model for the language models configs.</span>
+
+
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">langchain_core.load</span> <span class="kn">import</span> <span class="n">load</span>
+<span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">AutoModelForCausalLM</span><span class="p">,</span> <span class="n">AutoTokenizer</span><span class="p">,</span> <span class="n">pipeline</span>
+
+<span class="kn">from</span> <span class="nn">langchain_huggingface</span> <span class="kn">import</span> <span class="n">HuggingFaceEndpoint</span>
+<span class="kn">from</span> <span class="nn">langchain_huggingface</span> <span class="kn">import</span> <span class="n">HuggingFacePipeline</span>
+<span class="kn">from</span> <span class="nn">langchain_huggingface</span> <span class="kn">import</span> <span class="n">ChatHuggingFace</span>
+<span class="kn">from</span> <span class="nn">langchain_ollama.llms</span> <span class="kn">import</span> <span class="n">OllamaLLM</span>
+<span class="kn">from</span> <span class="nn">langchain_openai</span> <span class="kn">import</span> <span class="n">ChatOpenAI</span>
+
+<span class="kn">from</span> <span class="nn">.prompt</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ChatPromptTemplateConfig</span><span class="p">,</span>
+    <span class="n">LangchainPromptTemplateConfig</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="c1"># ------------------------------------------------</span>
+<span class="c1">#                Generic Config</span>
+<span class="c1"># ------------------------------------------------</span>
+
+
+<span class="c1"># class ModelConfig(BaseModel):</span>
+<span class="c1">#     &quot;&quot;&quot;Base class for all model configurations.&quot;&quot;&quot;</span>
+<span class="c1">#     definition: Dict[str, Any] = Field(</span>
+<span class="c1">#         {}, description=&quot;The definition of the model&quot;</span>
+<span class="c1">#     )</span>
+<span class="c1">#     parameters: Dict[str, Any] = Field(</span>
+<span class="c1">#         {}, description=&quot;The parameters for the model&quot;</span>
+<span class="c1">#     )</span>
+<span class="c1">#     secrets_map: Dict[str, Any] = Field(</span>
+<span class="c1">#         {}, description=&quot;The secrets map for the model&quot;</span>
+<span class="c1">#     )</span>
+
+<span class="c1">#     prompt_template: Optional[Dict[str, Any]] = Field(</span>
+<span class="c1">#         None, description=&quot;The prompt template used by the model&quot;</span>
+<span class="c1">#     )</span>
+
+<span class="c1"># ------------------------------------------------</span>
+<span class="c1">#                LangChain Config</span>
+<span class="c1"># ------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="LangChainModelConfig">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.model.LangChainModelConfig">[docs]</a>
+<span class="k">class</span> <span class="nc">LangChainModelConfig</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Configuration for a serialized LangChain model or any other runnable configuration.&quot;&quot;&quot;</span>
+
+    <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="s2">&quot;langchain&quot;</span><span class="p">,</span>
+                      <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The type of the model configuration.&quot;</span><span class="p">)</span>
+
+    <span class="n">definition</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;A dictionary containing the serialized LangChain model or other runnable configuration.&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">parameters</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="p">{},</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The parameters for text generation&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">prompt_template</span><span class="p">:</span> <span class="n">LangchainPromptTemplateConfig</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The prompt template used by the model&quot;</span>
+    <span class="p">)</span>
+
+<div class="viewcode-block" id="LangChainModelConfig.load_model">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.model.LangChainModelConfig.load_model">[docs]</a>
+    <span class="k">def</span> <span class="nf">load_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loads and returns a LangChain model based on the provided serialized configuration.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        config : LangChainModelConfig</span>
+<span class="sd">            The configuration object containing the serialized LangChain model definition.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Any</span>
+<span class="sd">            The deserialized LangChain model ready for use, or None if loading fails.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Load the LangChain model using the provided definition</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">definition</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">model</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to load LangChain model: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="ne">UserWarning</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+</div>
+
+
+
+<span class="c1"># ------------------------------------------------</span>
+<span class="c1">#                Local HF Config</span>
+<span class="c1"># ------------------------------------------------</span>
+
+<div class="viewcode-block" id="LocalHuggingFaceModelConfig">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.model.LocalHuggingFaceModelConfig">[docs]</a>
+<span class="k">class</span> <span class="nc">LocalHuggingFaceModelConfig</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Configuration for a local Hugging Face model.&quot;&quot;&quot;</span>
+
+    <span class="n">name_or_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The path to the local directory or the name of the Hugging Face model.&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">revision</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The specific model version to use (e.g., a branch name, tag, or commit hash).&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">tokenizer_name_or_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The name or path to the tokenizer to use. Defaults to `model_name_or_path` if not specified.&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">cache_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Path to the directory where the downloaded model and tokenizer files will be cached.&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">use_auth_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="kc">False</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Whether to use the token generated when running `huggingface-cli login` for private models.&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">device</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The device to load the model onto (&#39;cpu&#39; or &#39;cuda&#39;).&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">task</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="s2">&quot;text-generation&quot;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The type of pipeline to create (e.g., &#39;text-generation&#39;, &#39;text-classification&#39;, etc.).&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">parameters</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="p">{},</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The parameters for text generation (e.g., max_length, temperature, etc.).&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">prompt_template</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BaseModel</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The prompt template used by the model, if applicable.&quot;</span>
+    <span class="p">)</span>
+
+<div class="viewcode-block" id="LocalHuggingFaceModelConfig.Config">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.model.LocalHuggingFaceModelConfig.Config">[docs]</a>
+    <span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Pydantic model configuration.&quot;&quot;&quot;</span>
+        <span class="n">arbitrary_types_allowed</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="LocalHuggingFaceModelConfig.load_model">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.model.LocalHuggingFaceModelConfig.load_model">[docs]</a>
+    <span class="k">def</span> <span class="nf">load_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loads and returns a Hugging Face model pipeline wrapped in a LangChain HuggingFacePipeline.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        HuggingFacePipeline</span>
+<span class="sd">            The LangChain HuggingFacePipeline ready for integration into LangChain workflows.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Create the Hugging Face pipeline using the `from_model_id` method</span>
+            <span class="n">llm</span> <span class="o">=</span> <span class="n">HuggingFacePipeline</span><span class="o">.</span><span class="n">from_model_id</span><span class="p">(</span>
+                <span class="n">model_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name_or_path</span><span class="p">,</span>
+                <span class="n">task</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="p">,</span>
+                <span class="n">pipeline_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                    <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span>  <span class="c1"># Pass the text generation parameters from the config</span>
+                <span class="p">),</span>
+                <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span>  <span class="c1"># TODO: Add device parameter</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Wrap the HuggingFacePipeline in a ChatHuggingFace object for LangChain integration</span>
+            <span class="k">return</span> <span class="n">ChatHuggingFace</span><span class="p">(</span><span class="n">llm</span><span class="o">=</span><span class="n">llm</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Failed to load the Hugging Face model: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+</div>
+
+
+
+<span class="c1"># ------------------------------------------------</span>
+<span class="c1">#                Remote HF Config</span>
+<span class="c1"># ------------------------------------------------</span>
+
+<div class="viewcode-block" id="RemoteHuggingFaceModelConfig">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.model.RemoteHuggingFaceModelConfig">[docs]</a>
+<span class="k">class</span> <span class="nc">RemoteHuggingFaceModelConfig</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Configuration for a remote Hugging Face model using the Inference Endpoint API.&quot;&quot;&quot;</span>
+
+    <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="s2">&quot;remote_huggingface&quot;</span><span class="p">,</span>
+                      <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The type of the model configuration.&quot;</span><span class="p">)</span>
+
+    <span class="n">repo_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The repository ID of the Hugging Face model (e.g., &#39;HuggingFaceH4/zephyr-7b-beta&#39;).&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">task</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The task for the Hugging Face pipeline (e.g., &#39;text-generation&#39;, &#39;text-classification&#39;).&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">huggingfacehub_api_token</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The API token for accessing Hugging Face endpoints.&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">parameters</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="p">{},</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The parameters for text generation (e.g., max_length, temperature, etc.).&quot;</span>
+    <span class="p">)</span>
+
+<div class="viewcode-block" id="RemoteHuggingFaceModelConfig.Config">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.model.RemoteHuggingFaceModelConfig.Config">[docs]</a>
+    <span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Pydantic model configuration.&quot;&quot;&quot;</span>
+        <span class="n">arbitrary_types_allowed</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="RemoteHuggingFaceModelConfig.load_model">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.model.RemoteHuggingFaceModelConfig.load_model">[docs]</a>
+    <span class="k">def</span> <span class="nf">load_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loads and returns a Hugging Face model pipeline from a remote inference endpoint,</span>
+<span class="sd">        wrapped in a LangChain HuggingFacePipeline.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        HuggingFacePipeline</span>
+<span class="sd">            The LangChain HuggingFacePipeline ready for integration into LangChain workflows.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Create the Hugging Face Endpoint using the specified parameters</span>
+            <span class="n">endpoint</span> <span class="o">=</span> <span class="n">HuggingFaceEndpoint</span><span class="p">(</span>
+                <span class="n">repo_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">repo_id</span><span class="p">,</span>
+                <span class="n">task</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="p">,</span>
+                <span class="n">huggingfacehub_api_token</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">huggingfacehub_api_token</span><span class="p">,</span>
+                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span>  <span class="c1"># Pass the generation parameters</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Return the LangChain HuggingFacePipeline object with the endpoint</span>
+            <span class="k">return</span> <span class="n">ChatHuggingFace</span><span class="p">(</span><span class="n">llm</span><span class="o">=</span><span class="n">endpoint</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Failed to load the remote Hugging Face model: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+</div>
+
+
+<span class="c1"># ------------------------------------------------</span>
+<span class="c1">#                Ollama Config</span>
+<span class="c1"># ------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="OllamaModelConfig">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.model.OllamaModelConfig">[docs]</a>
+<span class="k">class</span> <span class="nc">OllamaModelConfig</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Configuration for loading an Ollama model.</span>
+<span class="sd">    This class holds all the necessary information for configuring and loading an OllamaLLM model.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="s2">&quot;ollama&quot;</span><span class="p">,</span>
+                      <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The type of the model configuration.&quot;</span><span class="p">)</span>
+
+    <span class="n">model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The identifier for the Ollama model (e.g., &#39;gemma2:2b&#39;).&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">base_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;http://localhost:11434&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base url the model is hosted under.&quot;&quot;&quot;</span>
+
+    <span class="n">parameters</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="p">{},</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The parameters for text generation&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">prompt_template</span><span class="p">:</span> <span class="n">ChatPromptTemplateConfig</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The prompt template used by the model&quot;</span>
+    <span class="p">)</span>
+
+<div class="viewcode-block" id="OllamaModelConfig.Config">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.model.OllamaModelConfig.Config">[docs]</a>
+    <span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Pydantic model configuration.&quot;&quot;&quot;</span>
+        <span class="n">arbitrary_types_allowed</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="OllamaModelConfig.load_model">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.model.OllamaModelConfig.load_model">[docs]</a>
+    <span class="k">def</span> <span class="nf">load_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loads and returns an Ollama model based on the provided configuration.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        OllamaLLM</span>
+<span class="sd">            The instantiated Ollama model ready for use.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Create the Ollama model instance using the provided configuration</span>
+            <span class="n">model_ollama</span> <span class="o">=</span> <span class="n">OllamaLLM</span><span class="p">(</span>
+                <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+                <span class="n">base_url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">base_url</span><span class="p">,</span>
+                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span>  <span class="c1"># Pass the text generation parameters</span>
+            <span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">model_ollama</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to load the Ollama model: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+</div>
+
+
+<span class="c1"># ------------------------------------------------</span>
+<span class="c1">#                OpenAI Config</span>
+<span class="c1"># ------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="OpenAIModelConfig">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.model.OpenAIModelConfig">[docs]</a>
+<span class="k">class</span> <span class="nc">OpenAIModelConfig</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Configuration for an OpenAI model.&quot;&quot;&quot;</span>
+
+    <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="s2">&quot;openai&quot;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The type of the model configuration.&quot;</span><span class="p">)</span>
+
+    <span class="n">model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The identifier for the OpenAI model (e.g., &#39;gpt-4&#39;).&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">api_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The API key for accessing OpenAI&#39;s models.&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">base_url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The base URL for the OpenAI API endpoint.&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">organization</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The organization ID associated with the OpenAI API key.&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">parameters</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="p">{},</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The parameters for text generation&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">prompt_template</span><span class="p">:</span> <span class="n">ChatPromptTemplateConfig</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The prompt template used by the model&quot;</span>
+    <span class="p">)</span>
+
+<div class="viewcode-block" id="OpenAIModelConfig.Config">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.model.OpenAIModelConfig.Config">[docs]</a>
+    <span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
+        <span class="n">arbitrary_types_allowed</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="OpenAIModelConfig.load_model">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.model.OpenAIModelConfig.load_model">[docs]</a>
+    <span class="k">def</span> <span class="nf">load_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loads and returns an OpenAI model based on the provided configuration.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        config : OpenAIModelConfig</span>
+<span class="sd">            The configuration object containing the details for loading the OpenAI model.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ChatOpenAI</span>
+<span class="sd">            The instantiated OpenAI model ready for use.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Create the OpenAI model instance using the provided config</span>
+            <span class="n">model_openai</span> <span class="o">=</span> <span class="n">ChatOpenAI</span><span class="p">(</span>
+                <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+                <span class="n">api_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">api_key</span><span class="p">,</span>
+                <span class="n">base_url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">base_url</span><span class="p">,</span>
+                <span class="n">organization</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="p">,</span>
+                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span>  <span class="c1"># Pass generation parameters</span>
+            <span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">model_openai</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to load the OpenAI model: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+</div>
+
+
+
+<span class="c1"># ------------------- Default Model -------------------</span>
+
+<span class="n">DEFAULT_MODEL_CONFIG_DICT</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;local_huggingface&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;name_or_path&quot;</span><span class="p">:</span> <span class="s2">&quot;HuggingFaceTB/SmolLM-1.7b-Instruct&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="s2">&quot;text-generation&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;generation_kwargs&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;min_new_tokens&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="s2">&quot;max_new_tokens&quot;</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>
+                <span class="s2">&quot;max_length&quot;</span><span class="p">:</span> <span class="mi">1024</span><span class="p">,</span>
+                <span class="s2">&quot;do_sample&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;repetition_penalty&quot;</span><span class="p">:</span> <span class="mf">1.03</span><span class="p">,</span>
+                <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span>
+                <span class="s2">&quot;top_k&quot;</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>
+                <span class="s2">&quot;top_p&quot;</span><span class="p">:</span> <span class="mf">0.95</span>
+            <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">DEFAULT_MODEL_CONFIG</span> <span class="o">=</span> <span class="n">LocalHuggingFaceModelConfig</span><span class="p">(</span><span class="o">**</span><span class="n">DEFAULT_MODEL_CONFIG_DICT</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

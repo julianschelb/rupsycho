@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rupsycho.experiment &mdash; RUPsycho 0.10 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=ac14934e"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            RUPsycho
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../init.html">Get Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reader.html">Load Experiments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../experiment.html">Define Experiments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../run.html">Running an Experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../parser.html">Parse Answers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../parsers.html">Parsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../models.html">Data Models</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">RUPsycho</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../rupsycho.html">rupsycho</a></li>
+      <li class="breadcrumb-item active">rupsycho.experiment</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for rupsycho.experiment</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ===========================================================================</span>
+<span class="c1">#                        ExperimentDocument Class Implementation</span>
+<span class="c1"># ===========================================================================</span>
+<span class="c1">#  This module defines the ExperimentDocument class for managing experimental</span>
+<span class="c1">#  data, questionnaires, and metadata. It integrates multiple mixins and</span>
+<span class="c1">#  extends BaseMedia and Pydantic&#39;s BaseModel.</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">langchain_core.documents.base</span> <span class="kn">import</span> <span class="n">BaseMedia</span>
+<span class="kn">from</span> <span class="nn">langchain_core.pydantic_v1</span> <span class="kn">import</span> <span class="n">Field</span>
+<span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">BaseModel</span>
+
+<span class="kn">from</span> <span class="nn">.models.model</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DEFAULT_MODEL_CONFIG</span><span class="p">,</span>
+    <span class="n">LangChainModelConfig</span><span class="p">,</span>
+    <span class="n">LocalHuggingFaceModelConfig</span><span class="p">,</span>
+    <span class="n">OllamaModelConfig</span><span class="p">,</span>
+    <span class="n">OpenAIModelConfig</span><span class="p">,</span>
+    <span class="n">RemoteHuggingFaceModelConfig</span>
+<span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">.models.prompt</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ChatPromptTemplateConfig</span><span class="p">,</span>
+    <span class="n">LangchainPromptTemplateConfig</span><span class="p">,</span>
+    <span class="n">NormalPromptTemplateConfig</span>
+<span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">.prompts</span> <span class="kn">import</span> <span class="n">DEFAULT_CHAT_PROMPT_TEMPLATE_CONFIG</span>
+<span class="kn">from</span> <span class="nn">.models.parameters</span> <span class="kn">import</span> <span class="n">Parameters</span>
+<span class="kn">from</span> <span class="nn">.models.questionnaire</span> <span class="kn">import</span> <span class="n">DemographicProfile</span><span class="p">,</span> <span class="n">Questionnaire</span>
+<span class="kn">from</span> <span class="nn">.mixins.experiment_processing</span> <span class="kn">import</span> <span class="n">ExperimentProcessingMixin</span>
+<span class="kn">from</span> <span class="nn">.mixins.experiment_exporting</span> <span class="kn">import</span> <span class="n">ExperimentExportMixin</span>
+<span class="kn">from</span> <span class="nn">.mixins.model_managing</span> <span class="kn">import</span> <span class="n">ModelManagementMixin</span>
+<span class="kn">from</span> <span class="nn">.mixins.prompt_managing</span> <span class="kn">import</span> <span class="n">PromptTemplateMixin</span>
+<span class="kn">from</span> <span class="nn">.mixins.persona_managing</span> <span class="kn">import</span> <span class="n">PersonaManagementMixin</span>
+
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+
+<span class="c1"># ================================= Prompt Type Mapping ================================</span>
+
+
+<span class="n">PROMPT_CONFIG_CLASSES</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Type</span><span class="p">[</span><span class="n">BaseModel</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;normal&quot;</span><span class="p">:</span> <span class="n">NormalPromptTemplateConfig</span><span class="p">,</span>
+    <span class="s2">&quot;chat&quot;</span><span class="p">:</span> <span class="n">ChatPromptTemplateConfig</span><span class="p">,</span>
+    <span class="s2">&quot;langchain&quot;</span><span class="p">:</span> <span class="n">LangchainPromptTemplateConfig</span>
+<span class="p">}</span>
+
+<span class="c1"># ================================= Model Type Mapping ================================</span>
+
+
+<span class="n">MODEL_CONFIG_CLASSES</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Type</span><span class="p">[</span><span class="n">BaseModel</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;local_huggingface&quot;</span><span class="p">:</span> <span class="n">LocalHuggingFaceModelConfig</span><span class="p">,</span>
+    <span class="s2">&quot;remote_huggingface&quot;</span><span class="p">:</span> <span class="n">RemoteHuggingFaceModelConfig</span><span class="p">,</span>
+    <span class="s2">&quot;ollama&quot;</span><span class="p">:</span> <span class="n">OllamaModelConfig</span><span class="p">,</span>
+    <span class="s2">&quot;openai&quot;</span><span class="p">:</span> <span class="n">OpenAIModelConfig</span><span class="p">,</span>
+    <span class="s2">&quot;langchain&quot;</span><span class="p">:</span> <span class="n">LangChainModelConfig</span>
+<span class="p">}</span>
+
+<span class="c1"># ================================= Experiment Class ================================</span>
+
+
+<div class="viewcode-block" id="ExperimentDocument">
+<a class="viewcode-back" href="../../experiment.html#rupsycho.experiment.ExperimentDocument">[docs]</a>
+<span class="k">class</span> <span class="nc">ExperimentDocument</span><span class="p">(</span>
+    <span class="n">BaseMedia</span><span class="p">,</span> <span class="n">ExperimentProcessingMixin</span><span class="p">,</span> <span class="n">ExperimentExportMixin</span><span class="p">,</span>
+    <span class="n">ModelManagementMixin</span><span class="p">,</span> <span class="n">PromptTemplateMixin</span><span class="p">,</span> <span class="n">PersonaManagementMixin</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for storing an experiment and associated questionnaires along with metadata.</span>
+
+<span class="sd">    Extends LangChain&#39;s BaseMedia and Pydantic&#39;s BaseModel, integrating data validation </span>
+<span class="sd">    and serialization capabilities with document handling features.</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            from my_module import ExperimentDocument</span>
+
+<span class="sd">            experiment_doc = ExperimentDocument(</span>
+<span class="sd">                name=&quot;Experiment 1&quot;,</span>
+<span class="sd">                description=&quot;Test Experiment&quot;,</span>
+<span class="sd">                demographic_profiles={...},</span>
+<span class="sd">                models={...},</span>
+<span class="sd">                questionnaire=...,</span>
+<span class="sd">                metadata={&quot;source&quot;: &quot;Lab A&quot;}</span>
+<span class="sd">            )</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># --------------------------------- Attributes --------------------------------</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="kc">None</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The name of the experiment&quot;</span><span class="p">,</span>
+        <span class="n">example</span><span class="o">=</span><span class="s2">&quot;Generative Models for Big Five Inventory&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="kc">None</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The description of the experiment&quot;</span><span class="p">,</span>
+        <span class="n">example</span><span class="o">=</span><span class="s2">&quot;Testing Generative Models for BFI questionnaire using Rupsycho.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parameters</span><span class="p">:</span> <span class="n">Parameters</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="n">Parameters</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The parameters for the experiment and text generation&quot;</span>
+    <span class="p">)</span>
+    <span class="n">prompt_template</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NormalPromptTemplateConfig</span><span class="p">,</span> <span class="n">ChatPromptTemplateConfig</span><span class="p">,</span> <span class="n">LangchainPromptTemplateConfig</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The prompt template used by the model&quot;</span>
+    <span class="p">)</span>
+    <span class="n">models</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span>
+        <span class="n">LangChainModelConfig</span><span class="p">,</span> <span class="n">LocalHuggingFaceModelConfig</span><span class="p">,</span> <span class="n">RemoteHuggingFaceModelConfig</span><span class="p">,</span>
+        <span class="n">OllamaModelConfig</span><span class="p">,</span> <span class="n">OpenAIModelConfig</span>
+    <span class="p">]]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The models in the experiment&quot;</span>
+    <span class="p">)</span>
+    <span class="n">demographic_profiles</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DemographicProfile</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The demographic profiles in the experiment&quot;</span>
+    <span class="p">)</span>
+    <span class="n">questionnaire</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Questionnaire</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The questionnaire in the experiment&quot;</span>
+    <span class="p">)</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Additional metadata for the experiment document.&quot;</span>
+    <span class="p">)</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;ExperimentDocument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;ExperimentDocument&quot;</span>
+    <span class="n">runnable_prompt</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The initialized prompts in the experiment&quot;</span>
+    <span class="p">)</span>
+    <span class="n">runnable_models</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The initialized models in the experiment&quot;</span>
+    <span class="p">)</span>
+    <span class="n">runnable_parser</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The initialized output parsers in the experiment&quot;</span>
+    <span class="p">)</span>
+
+    <span class="c1"># --------------------------------- Config --------------------------------</span>
+
+<div class="viewcode-block" id="ExperimentDocument.Config">
+<a class="viewcode-back" href="../../experiment.html#rupsycho.experiment.ExperimentDocument.Config">[docs]</a>
+    <span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
+        <span class="n">arbitrary_types_allowed</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+    <span class="c1"># --------------------------------- Initialization --------------------------------</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize ExperimentDocument with optional conversions for nested data.&quot;&quot;&quot;</span>
+
+        <span class="c1"># Handle nested data conversions for parameters</span>
+        <span class="k">if</span> <span class="s2">&quot;parameters&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;parameters&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_parameters</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;parameters&quot;</span><span class="p">])</span>
+
+        <span class="c1"># Convert demographic profiles to instances</span>
+        <span class="k">if</span> <span class="s2">&quot;demographic_profiles&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;demographic_profiles&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_demographic_profiles</span><span class="p">(</span>
+                <span class="n">data</span><span class="p">[</span><span class="s2">&quot;demographic_profiles&quot;</span><span class="p">])</span>
+
+        <span class="c1"># Convert prompt template to runnable form and load it</span>
+        <span class="k">if</span> <span class="s2">&quot;prompt_template&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;prompt_template&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_prompt</span><span class="p">(</span>
+                <span class="n">data</span><span class="p">[</span><span class="s2">&quot;prompt_template&quot;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;prompt_template&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">DEFAULT_CHAT_PROMPT_TEMPLATE_CONFIG</span>
+
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;runnable_prompt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_runnable_prompt</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;prompt_template&quot;</span><span class="p">])</span>
+
+        <span class="c1"># Convert models to runnable form and load them</span>
+        <span class="k">if</span> <span class="s2">&quot;models&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_models</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;default_model&quot;</span><span class="p">:</span> <span class="n">DEFAULT_MODEL_CONFIG</span><span class="p">}</span>
+
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;runnable_models&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_runnable_models</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">])</span>
+
+        <span class="c1"># Convert questionnaire to an instance of Questionnaire</span>
+        <span class="k">if</span> <span class="s2">&quot;questionnaire&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;questionnaire&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_questionnaire</span><span class="p">(</span>
+                <span class="n">data</span><span class="p">[</span><span class="s2">&quot;questionnaire&quot;</span><span class="p">])</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="c1"># --------------------------------- Conversion Methods --------------------------------</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_convert_parameters</span><span class="p">(</span><span class="n">parameters</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Parameters</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Parameters</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert parameters to an instance of Parameters.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">Parameters</span><span class="p">(</span><span class="o">**</span><span class="n">parameters</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">parameters</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_convert_demographic_profiles</span><span class="p">(</span>
+        <span class="n">profiles</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">DemographicProfile</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DemographicProfile</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert demographic profiles to instances of DemographicProfile.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">key</span><span class="p">:</span> <span class="n">DemographicProfile</span><span class="p">(</span>
+                <span class="o">**</span><span class="n">profile</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">profile</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="n">profile</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">profile</span> <span class="ow">in</span> <span class="n">profiles</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_convert_prompt</span><span class="p">(</span><span class="n">prompt</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="n">BaseModel</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">BaseModel</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert a single prompt configuration to an instance of its respective Pydantic PromptTemplateConfig class.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">prompt_type</span> <span class="o">=</span> <span class="n">prompt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">prompt_type</span> <span class="ow">and</span> <span class="n">prompt_type</span> <span class="ow">in</span> <span class="n">PROMPT_CONFIG_CLASSES</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">PROMPT_CONFIG_CLASSES</span><span class="p">[</span><span class="n">prompt_type</span><span class="p">](</span><span class="o">**</span><span class="n">prompt</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown or missing prompt type.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">prompt</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_convert_models</span><span class="p">(</span>
+        <span class="n">models</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="n">BaseModel</span><span class="p">]]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">BaseModel</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert model configurations to instances of their respective Pydantic ModelConfig classes.&quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">convert_model</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="n">BaseModel</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">BaseModel</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">model_type</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">model_type</span> <span class="ow">and</span> <span class="n">model_type</span> <span class="ow">in</span> <span class="n">MODEL_CONFIG_CLASSES</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">MODEL_CONFIG_CLASSES</span><span class="p">[</span><span class="n">model_type</span><span class="p">](</span><span class="o">**</span><span class="n">model</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Unknown or missing model type for key: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">model</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">convert_model</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_convert_questionnaire</span><span class="p">(</span><span class="n">questionnaire</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Questionnaire</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Questionnaire</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert questionnaire to an instance of Questionnaire.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">questionnaire</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">Questionnaire</span><span class="p">(</span><span class="o">**</span><span class="n">questionnaire</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">questionnaire</span>
+
+    <span class="k">def</span> <span class="nf">_load_runnable_models</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">models</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load models into runnable instances.&quot;&quot;&quot;</span>
+        <span class="n">runnable_models</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">runnable_models</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">load_model</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to load model: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">runnable_models</span>
+
+    <span class="k">def</span> <span class="nf">_load_runnable_prompt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prompt_template</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BaseModel</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load a prompt template into a runnable LangChain prompt.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prompt_template</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">prompt_template</span>  <span class="c1"># Directly use if it&#39;s a string</span>
+
+        <span class="n">runnable_prompt</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">runnable_prompt</span> <span class="o">=</span> <span class="n">prompt_template</span><span class="o">.</span><span class="n">load_prompt_template</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Failed to load prompt template: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="ne">UserWarning</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">runnable_prompt</span>
+
+    <span class="c1"># --------------------------------- String Representation --------------------------------</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Override __str__ to restrict it to experiment details and metadata.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;description=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s2">, &quot;</span>
+            <span class="c1"># f&quot;parameters={self.parameters}, &quot;</span>
+            <span class="c1"># f&quot;prompt_template={self.prompt_template}, &quot;</span>
+            <span class="c1"># f&quot;demographic_profiles={self.demographic_profiles}, &quot;</span>
+            <span class="c1"># f&quot;models={self.models}, &quot;</span>
+            <span class="c1"># f&quot;questionnaire={self.questionnaire}, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;metadata=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># --------------------------------- Getters and Setters --------------------------------</span>
+
+<div class="viewcode-block" id="ExperimentDocument.set_questionnaire">
+<a class="viewcode-back" href="../../experiment.html#rupsycho.experiment.ExperimentDocument.set_questionnaire">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_questionnaire</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">questionnaire</span><span class="p">:</span> <span class="n">Questionnaire</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the questionnaire for the experiment.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">questionnaire</span> <span class="o">=</span> <span class="n">questionnaire</span></div>
+
+
+<div class="viewcode-block" id="ExperimentDocument.set_parser">
+<a class="viewcode-back" href="../../experiment.html#rupsycho.experiment.ExperimentDocument.set_parser">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_parser</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds a parser to the experiment.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runnable_parser</span> <span class="o">=</span> <span class="n">parser</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

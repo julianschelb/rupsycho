@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Models &mdash; RUPsycho 0.10 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=ac14934e"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Parsers" href="parsers.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            RUPsycho
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="init.html">Get Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reader.html">Load Experiments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiment.html">Define Experiments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="run.html">Running an Experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parser.html">Parse Answers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parsers.html">Parsers</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Data Models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-rupsycho.models.questionnaire">Questionnaire</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.models.questionnaire.DemographicAttributes"><code class="docutils literal notranslate"><span class="pre">DemographicAttributes</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.DemographicAttributes.age"><code class="docutils literal notranslate"><span class="pre">DemographicAttributes.age</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.DemographicAttributes.title"><code class="docutils literal notranslate"><span class="pre">DemographicAttributes.title</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.DemographicAttributes.name"><code class="docutils literal notranslate"><span class="pre">DemographicAttributes.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">DemographicAttributes.age</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">DemographicAttributes.title</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">DemographicAttributes.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.DemographicAttributes.Config"><code class="docutils literal notranslate"><span class="pre">DemographicAttributes.Config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.DemographicAttributes.model_computed_fields"><code class="docutils literal notranslate"><span class="pre">DemographicAttributes.model_computed_fields</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.DemographicAttributes.model_config"><code class="docutils literal notranslate"><span class="pre">DemographicAttributes.model_config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.DemographicAttributes.model_fields"><code class="docutils literal notranslate"><span class="pre">DemographicAttributes.model_fields</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.models.questionnaire.DemographicProfile"><code class="docutils literal notranslate"><span class="pre">DemographicProfile</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.DemographicProfile.attributes"><code class="docutils literal notranslate"><span class="pre">DemographicProfile.attributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.DemographicProfile.template"><code class="docutils literal notranslate"><span class="pre">DemographicProfile.template</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.DemographicProfile.Config"><code class="docutils literal notranslate"><span class="pre">DemographicProfile.Config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.DemographicProfile.model_computed_fields"><code class="docutils literal notranslate"><span class="pre">DemographicProfile.model_computed_fields</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.DemographicProfile.model_config"><code class="docutils literal notranslate"><span class="pre">DemographicProfile.model_config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.DemographicProfile.model_fields"><code class="docutils literal notranslate"><span class="pre">DemographicProfile.model_fields</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.models.questionnaire.AnswerOption"><code class="docutils literal notranslate"><span class="pre">AnswerOption</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.AnswerOption.text"><code class="docutils literal notranslate"><span class="pre">AnswerOption.text</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.AnswerOption.ignored_for_scale"><code class="docutils literal notranslate"><span class="pre">AnswerOption.ignored_for_scale</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.AnswerOption.weight"><code class="docutils literal notranslate"><span class="pre">AnswerOption.weight</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3"><code class="docutils literal notranslate"><span class="pre">AnswerOption.text</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4"><code class="docutils literal notranslate"><span class="pre">AnswerOption.ignored_for_scale</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5"><code class="docutils literal notranslate"><span class="pre">AnswerOption.weight</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.AnswerOption.model_computed_fields"><code class="docutils literal notranslate"><span class="pre">AnswerOption.model_computed_fields</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.AnswerOption.model_config"><code class="docutils literal notranslate"><span class="pre">AnswerOption.model_config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.AnswerOption.model_fields"><code class="docutils literal notranslate"><span class="pre">AnswerOption.model_fields</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.models.questionnaire.InstructionItem"><code class="docutils literal notranslate"><span class="pre">InstructionItem</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.InstructionItem.question"><code class="docutils literal notranslate"><span class="pre">InstructionItem.question</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.InstructionItem.reversed"><code class="docutils literal notranslate"><span class="pre">InstructionItem.reversed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.InstructionItem.answer_options"><code class="docutils literal notranslate"><span class="pre">InstructionItem.answer_options</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.InstructionItem.attributes"><code class="docutils literal notranslate"><span class="pre">InstructionItem.attributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6"><code class="docutils literal notranslate"><span class="pre">InstructionItem.question</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7"><code class="docutils literal notranslate"><span class="pre">InstructionItem.reversed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8"><code class="docutils literal notranslate"><span class="pre">InstructionItem.answer_options</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id9"><code class="docutils literal notranslate"><span class="pre">InstructionItem.attributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.InstructionItem.answers"><code class="docutils literal notranslate"><span class="pre">InstructionItem.answers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.InstructionItem.model_computed_fields"><code class="docutils literal notranslate"><span class="pre">InstructionItem.model_computed_fields</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.InstructionItem.model_config"><code class="docutils literal notranslate"><span class="pre">InstructionItem.model_config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.InstructionItem.model_fields"><code class="docutils literal notranslate"><span class="pre">InstructionItem.model_fields</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.models.questionnaire.Questionnaire"><code class="docutils literal notranslate"><span class="pre">Questionnaire</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.Questionnaire.name"><code class="docutils literal notranslate"><span class="pre">Questionnaire.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.Questionnaire.general_instruction"><code class="docutils literal notranslate"><span class="pre">Questionnaire.general_instruction</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.Questionnaire.demographic_profiles"><code class="docutils literal notranslate"><span class="pre">Questionnaire.demographic_profiles</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.Questionnaire.default_answer_options"><code class="docutils literal notranslate"><span class="pre">Questionnaire.default_answer_options</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.Questionnaire.instruction_items"><code class="docutils literal notranslate"><span class="pre">Questionnaire.instruction_items</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.Questionnaire.get_number_of_questions"><code class="docutils literal notranslate"><span class="pre">Questionnaire.get_number_of_questions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id10"><code class="docutils literal notranslate"><span class="pre">Questionnaire.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id11"><code class="docutils literal notranslate"><span class="pre">Questionnaire.general_instruction</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id12"><code class="docutils literal notranslate"><span class="pre">Questionnaire.demographic_profiles</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.Questionnaire.attributes"><code class="docutils literal notranslate"><span class="pre">Questionnaire.attributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id13"><code class="docutils literal notranslate"><span class="pre">Questionnaire.default_answer_options</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id14"><code class="docutils literal notranslate"><span class="pre">Questionnaire.instruction_items</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id15"><code class="docutils literal notranslate"><span class="pre">Questionnaire.get_number_of_questions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.Questionnaire.print_questionnaire"><code class="docutils literal notranslate"><span class="pre">Questionnaire.print_questionnaire()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.Questionnaire.model_computed_fields"><code class="docutils literal notranslate"><span class="pre">Questionnaire.model_computed_fields</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.Questionnaire.model_config"><code class="docutils literal notranslate"><span class="pre">Questionnaire.model_config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.questionnaire.Questionnaire.model_fields"><code class="docutils literal notranslate"><span class="pre">Questionnaire.model_fields</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-rupsycho.models.instruction">Instruction</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.models.instruction.AnswerOption"><code class="docutils literal notranslate"><span class="pre">AnswerOption</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.instruction.AnswerOption.text"><code class="docutils literal notranslate"><span class="pre">AnswerOption.text</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.instruction.AnswerOption.weight"><code class="docutils literal notranslate"><span class="pre">AnswerOption.weight</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.instruction.AnswerOption.reversed"><code class="docutils literal notranslate"><span class="pre">AnswerOption.reversed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.instruction.AnswerOption.ignored_for_scale"><code class="docutils literal notranslate"><span class="pre">AnswerOption.ignored_for_scale</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.instruction.AnswerOption.model_computed_fields"><code class="docutils literal notranslate"><span class="pre">AnswerOption.model_computed_fields</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.instruction.AnswerOption.model_config"><code class="docutils literal notranslate"><span class="pre">AnswerOption.model_config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.instruction.AnswerOption.model_fields"><code class="docutils literal notranslate"><span class="pre">AnswerOption.model_fields</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.models.instruction.InstructionItem"><code class="docutils literal notranslate"><span class="pre">InstructionItem</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.instruction.InstructionItem.question"><code class="docutils literal notranslate"><span class="pre">InstructionItem.question</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.instruction.InstructionItem.answer_options"><code class="docutils literal notranslate"><span class="pre">InstructionItem.answer_options</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.instruction.InstructionItem.model_computed_fields"><code class="docutils literal notranslate"><span class="pre">InstructionItem.model_computed_fields</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.instruction.InstructionItem.model_config"><code class="docutils literal notranslate"><span class="pre">InstructionItem.model_config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.instruction.InstructionItem.model_fields"><code class="docutils literal notranslate"><span class="pre">InstructionItem.model_fields</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-rupsycho.models.profile">Profile</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.models.profile.DemographicProfile"><code class="docutils literal notranslate"><span class="pre">DemographicProfile</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.profile.DemographicProfile.attributes"><code class="docutils literal notranslate"><span class="pre">DemographicProfile.attributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.profile.DemographicProfile.template"><code class="docutils literal notranslate"><span class="pre">DemographicProfile.template</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.profile.DemographicProfile.Config"><code class="docutils literal notranslate"><span class="pre">DemographicProfile.Config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.profile.DemographicProfile.model_computed_fields"><code class="docutils literal notranslate"><span class="pre">DemographicProfile.model_computed_fields</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.profile.DemographicProfile.model_config"><code class="docutils literal notranslate"><span class="pre">DemographicProfile.model_config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.profile.DemographicProfile.model_fields"><code class="docutils literal notranslate"><span class="pre">DemographicProfile.model_fields</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-rupsycho.models.model">Model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.models.model.LangChainModelConfig"><code class="docutils literal notranslate"><span class="pre">LangChainModelConfig</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.LangChainModelConfig.type"><code class="docutils literal notranslate"><span class="pre">LangChainModelConfig.type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.LangChainModelConfig.definition"><code class="docutils literal notranslate"><span class="pre">LangChainModelConfig.definition</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.LangChainModelConfig.parameters"><code class="docutils literal notranslate"><span class="pre">LangChainModelConfig.parameters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.LangChainModelConfig.prompt_template"><code class="docutils literal notranslate"><span class="pre">LangChainModelConfig.prompt_template</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.LangChainModelConfig.load_model"><code class="docutils literal notranslate"><span class="pre">LangChainModelConfig.load_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.LangChainModelConfig.model_computed_fields"><code class="docutils literal notranslate"><span class="pre">LangChainModelConfig.model_computed_fields</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.LangChainModelConfig.model_config"><code class="docutils literal notranslate"><span class="pre">LangChainModelConfig.model_config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.LangChainModelConfig.model_fields"><code class="docutils literal notranslate"><span class="pre">LangChainModelConfig.model_fields</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.models.model.LocalHuggingFaceModelConfig"><code class="docutils literal notranslate"><span class="pre">LocalHuggingFaceModelConfig</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.LocalHuggingFaceModelConfig.name_or_path"><code class="docutils literal notranslate"><span class="pre">LocalHuggingFaceModelConfig.name_or_path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.LocalHuggingFaceModelConfig.revision"><code class="docutils literal notranslate"><span class="pre">LocalHuggingFaceModelConfig.revision</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.LocalHuggingFaceModelConfig.tokenizer_name_or_path"><code class="docutils literal notranslate"><span class="pre">LocalHuggingFaceModelConfig.tokenizer_name_or_path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.LocalHuggingFaceModelConfig.cache_dir"><code class="docutils literal notranslate"><span class="pre">LocalHuggingFaceModelConfig.cache_dir</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.LocalHuggingFaceModelConfig.use_auth_token"><code class="docutils literal notranslate"><span class="pre">LocalHuggingFaceModelConfig.use_auth_token</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.LocalHuggingFaceModelConfig.device"><code class="docutils literal notranslate"><span class="pre">LocalHuggingFaceModelConfig.device</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.LocalHuggingFaceModelConfig.task"><code class="docutils literal notranslate"><span class="pre">LocalHuggingFaceModelConfig.task</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.LocalHuggingFaceModelConfig.parameters"><code class="docutils literal notranslate"><span class="pre">LocalHuggingFaceModelConfig.parameters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.LocalHuggingFaceModelConfig.prompt_template"><code class="docutils literal notranslate"><span class="pre">LocalHuggingFaceModelConfig.prompt_template</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.LocalHuggingFaceModelConfig.Config"><code class="docutils literal notranslate"><span class="pre">LocalHuggingFaceModelConfig.Config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.LocalHuggingFaceModelConfig.load_model"><code class="docutils literal notranslate"><span class="pre">LocalHuggingFaceModelConfig.load_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.LocalHuggingFaceModelConfig.model_computed_fields"><code class="docutils literal notranslate"><span class="pre">LocalHuggingFaceModelConfig.model_computed_fields</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.LocalHuggingFaceModelConfig.model_config"><code class="docutils literal notranslate"><span class="pre">LocalHuggingFaceModelConfig.model_config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.LocalHuggingFaceModelConfig.model_fields"><code class="docutils literal notranslate"><span class="pre">LocalHuggingFaceModelConfig.model_fields</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.models.model.RemoteHuggingFaceModelConfig"><code class="docutils literal notranslate"><span class="pre">RemoteHuggingFaceModelConfig</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.RemoteHuggingFaceModelConfig.type"><code class="docutils literal notranslate"><span class="pre">RemoteHuggingFaceModelConfig.type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.RemoteHuggingFaceModelConfig.repo_id"><code class="docutils literal notranslate"><span class="pre">RemoteHuggingFaceModelConfig.repo_id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.RemoteHuggingFaceModelConfig.task"><code class="docutils literal notranslate"><span class="pre">RemoteHuggingFaceModelConfig.task</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.RemoteHuggingFaceModelConfig.huggingfacehub_api_token"><code class="docutils literal notranslate"><span class="pre">RemoteHuggingFaceModelConfig.huggingfacehub_api_token</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.RemoteHuggingFaceModelConfig.parameters"><code class="docutils literal notranslate"><span class="pre">RemoteHuggingFaceModelConfig.parameters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.RemoteHuggingFaceModelConfig.Config"><code class="docutils literal notranslate"><span class="pre">RemoteHuggingFaceModelConfig.Config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.RemoteHuggingFaceModelConfig.load_model"><code class="docutils literal notranslate"><span class="pre">RemoteHuggingFaceModelConfig.load_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.RemoteHuggingFaceModelConfig.model_computed_fields"><code class="docutils literal notranslate"><span class="pre">RemoteHuggingFaceModelConfig.model_computed_fields</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.RemoteHuggingFaceModelConfig.model_config"><code class="docutils literal notranslate"><span class="pre">RemoteHuggingFaceModelConfig.model_config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.RemoteHuggingFaceModelConfig.model_fields"><code class="docutils literal notranslate"><span class="pre">RemoteHuggingFaceModelConfig.model_fields</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.models.model.OllamaModelConfig"><code class="docutils literal notranslate"><span class="pre">OllamaModelConfig</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.OllamaModelConfig.type"><code class="docutils literal notranslate"><span class="pre">OllamaModelConfig.type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.OllamaModelConfig.model"><code class="docutils literal notranslate"><span class="pre">OllamaModelConfig.model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.OllamaModelConfig.base_url"><code class="docutils literal notranslate"><span class="pre">OllamaModelConfig.base_url</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.OllamaModelConfig.parameters"><code class="docutils literal notranslate"><span class="pre">OllamaModelConfig.parameters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.OllamaModelConfig.prompt_template"><code class="docutils literal notranslate"><span class="pre">OllamaModelConfig.prompt_template</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.OllamaModelConfig.Config"><code class="docutils literal notranslate"><span class="pre">OllamaModelConfig.Config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.OllamaModelConfig.load_model"><code class="docutils literal notranslate"><span class="pre">OllamaModelConfig.load_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.OllamaModelConfig.model_computed_fields"><code class="docutils literal notranslate"><span class="pre">OllamaModelConfig.model_computed_fields</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.OllamaModelConfig.model_config"><code class="docutils literal notranslate"><span class="pre">OllamaModelConfig.model_config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.OllamaModelConfig.model_fields"><code class="docutils literal notranslate"><span class="pre">OllamaModelConfig.model_fields</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.models.model.OpenAIModelConfig"><code class="docutils literal notranslate"><span class="pre">OpenAIModelConfig</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.OpenAIModelConfig.type"><code class="docutils literal notranslate"><span class="pre">OpenAIModelConfig.type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.OpenAIModelConfig.model"><code class="docutils literal notranslate"><span class="pre">OpenAIModelConfig.model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.OpenAIModelConfig.api_key"><code class="docutils literal notranslate"><span class="pre">OpenAIModelConfig.api_key</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.OpenAIModelConfig.base_url"><code class="docutils literal notranslate"><span class="pre">OpenAIModelConfig.base_url</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.OpenAIModelConfig.organization"><code class="docutils literal notranslate"><span class="pre">OpenAIModelConfig.organization</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.OpenAIModelConfig.parameters"><code class="docutils literal notranslate"><span class="pre">OpenAIModelConfig.parameters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.OpenAIModelConfig.prompt_template"><code class="docutils literal notranslate"><span class="pre">OpenAIModelConfig.prompt_template</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.OpenAIModelConfig.Config"><code class="docutils literal notranslate"><span class="pre">OpenAIModelConfig.Config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.OpenAIModelConfig.load_model"><code class="docutils literal notranslate"><span class="pre">OpenAIModelConfig.load_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.OpenAIModelConfig.model_computed_fields"><code class="docutils literal notranslate"><span class="pre">OpenAIModelConfig.model_computed_fields</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.OpenAIModelConfig.model_config"><code class="docutils literal notranslate"><span class="pre">OpenAIModelConfig.model_config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.models.model.OpenAIModelConfig.model_fields"><code class="docutils literal notranslate"><span class="pre">OpenAIModelConfig.model_fields</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">RUPsycho</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Data Models</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/models.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="data-models">
+<h1>Data Models<a class="headerlink" href="#data-models" title="Link to this heading"></a></h1>
+<section id="module-rupsycho.models.questionnaire">
+<span id="questionnaire"></span><h2>Questionnaire<a class="headerlink" href="#module-rupsycho.models.questionnaire" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.DemographicAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rupsycho.models.questionnaire.</span></span><span class="sig-name descname"><span class="pre">DemographicAttributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">age</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">extra_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/models/questionnaire.html#DemographicAttributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.models.questionnaire.DemographicAttributes" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Represents the demographic attributes of a participant in a psychological test.
+This model includes default fields such as ‘age’, ‘title’, and ‘name’, but it is
+extendable to include additional demographic details as needed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>age</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>title</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>name</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>extra_data</strong> (<em>Any</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.DemographicAttributes.age">
+<span class="sig-name descname"><span class="pre">age</span></span><a class="headerlink" href="#rupsycho.models.questionnaire.DemographicAttributes.age" title="Link to this definition"></a></dt>
+<dd><p>The age of the participant. Default is None.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[int]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.DemographicAttributes.title">
+<span class="sig-name descname"><span class="pre">title</span></span><a class="headerlink" href="#rupsycho.models.questionnaire.DemographicAttributes.title" title="Link to this definition"></a></dt>
+<dd><p>The title of the participant (e.g., Mr, Ms, Dr). Default is None.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.DemographicAttributes.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#rupsycho.models.questionnaire.DemographicAttributes.name" title="Link to this definition"></a></dt>
+<dd><p>The name of the participant. Default is None.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>The model is flexible to accept additional fields beyond the ones specified.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">age</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">title</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.DemographicAttributes.Config">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Config</span></span><a class="reference internal" href="_modules/rupsycho/models/questionnaire.html#DemographicAttributes.Config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.models.questionnaire.DemographicAttributes.Config" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.DemographicAttributes.Config.extra">
+<span class="sig-name descname"><span class="pre">extra</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'allow'</span></em><a class="headerlink" href="#rupsycho.models.questionnaire.DemographicAttributes.Config.extra" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.DemographicAttributes.model_computed_fields">
+<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ComputedFieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#rupsycho.models.questionnaire.DemographicAttributes.model_computed_fields" title="Link to this definition"></a></dt>
+<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.DemographicAttributes.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'allow'}</span></em><a class="headerlink" href="#rupsycho.models.questionnaire.DemographicAttributes.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.DemographicAttributes.model_fields">
+<span class="sig-name descname"><span class="pre">model_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">FieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'age':</span> <span class="pre">FieldInfo(annotation=Union[int,</span> <span class="pre">NoneType],</span> <span class="pre">required=False,</span> <span class="pre">default=None),</span> <span class="pre">'name':</span> <span class="pre">FieldInfo(annotation=Union[str,</span> <span class="pre">NoneType],</span> <span class="pre">required=False,</span> <span class="pre">default=None),</span> <span class="pre">'title':</span> <span class="pre">FieldInfo(annotation=Union[str,</span> <span class="pre">NoneType],</span> <span class="pre">required=False,</span> <span class="pre">default=None)}</span></em><a class="headerlink" href="#rupsycho.models.questionnaire.DemographicAttributes.model_fields" title="Link to this definition"></a></dt>
+<dd><p>Metadata about the fields defined on the model,
+mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo].</p>
+<p>This replaces <cite>Model.__fields__</cite> from Pydantic V1.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.DemographicProfile">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rupsycho.models.questionnaire.</span></span><span class="sig-name descname"><span class="pre">DemographicProfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'{title}</span> <span class="pre">{name}</span> <span class="pre">is</span> <span class="pre">{age}</span> <span class="pre">years</span> <span class="pre">old.'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">extra_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/models/questionnaire.html#DemographicProfile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.models.questionnaire.DemographicProfile" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Represents the demographic profile of a participant in a psychological test.
+This includes attributes like age, title, name, and a template for formatting purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attributes</strong> (<a class="reference internal" href="#rupsycho.models.questionnaire.DemographicAttributes" title="rupsycho.models.questionnaire.DemographicAttributes"><em>DemographicAttributes</em></a>)</p></li>
+<li><p><strong>template</strong> (<em>str</em>)</p></li>
+<li><p><strong>extra_data</strong> (<em>Any</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.DemographicProfile.attributes">
+<span class="sig-name descname"><span class="pre">attributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#rupsycho.models.questionnaire.DemographicAttributes" title="rupsycho.models.questionnaire.DemographicAttributes"><span class="pre">DemographicAttributes</span></a></em><a class="headerlink" href="#rupsycho.models.questionnaire.DemographicProfile.attributes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.DemographicProfile.template">
+<span class="sig-name descname"><span class="pre">template</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rupsycho.models.questionnaire.DemographicProfile.template" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.DemographicProfile.Config">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Config</span></span><a class="reference internal" href="_modules/rupsycho/models/questionnaire.html#DemographicProfile.Config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.models.questionnaire.DemographicProfile.Config" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.DemographicProfile.Config.extra">
+<span class="sig-name descname"><span class="pre">extra</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'allow'</span></em><a class="headerlink" href="#rupsycho.models.questionnaire.DemographicProfile.Config.extra" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.DemographicProfile.model_computed_fields">
+<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ComputedFieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#rupsycho.models.questionnaire.DemographicProfile.model_computed_fields" title="Link to this definition"></a></dt>
+<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.DemographicProfile.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'allow'}</span></em><a class="headerlink" href="#rupsycho.models.questionnaire.DemographicProfile.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.DemographicProfile.model_fields">
+<span class="sig-name descname"><span class="pre">model_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">FieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'attributes':</span> <span class="pre">FieldInfo(annotation=DemographicAttributes,</span> <span class="pre">required=True,</span> <span class="pre">description='Attributes</span> <span class="pre">containing</span> <span class="pre">demographic</span> <span class="pre">information</span> <span class="pre">such</span> <span class="pre">as</span> <span class="pre">age,</span> <span class="pre">title,</span> <span class="pre">and</span> <span class="pre">name.'),</span> <span class="pre">'template':</span> <span class="pre">FieldInfo(annotation=str,</span> <span class="pre">required=False,</span> <span class="pre">default='{title}</span> <span class="pre">{name}</span> <span class="pre">is</span> <span class="pre">{age}</span> <span class="pre">years</span> <span class="pre">old.',</span> <span class="pre">description=&quot;A</span> <span class="pre">template</span> <span class="pre">string</span> <span class="pre">to</span> <span class="pre">format</span> <span class="pre">the</span> <span class="pre">demographic</span> <span class="pre">information.</span> <span class="pre">Use</span> <span class="pre">placeholders</span> <span class="pre">for</span> <span class="pre">attributes</span> <span class="pre">(e.g.,</span> <span class="pre">'{title}',</span> <span class="pre">'{name}',</span> <span class="pre">'{age}').&quot;)}</span></em><a class="headerlink" href="#rupsycho.models.questionnaire.DemographicProfile.model_fields" title="Link to this definition"></a></dt>
+<dd><p>Metadata about the fields defined on the model,
+mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo].</p>
+<p>This replaces <cite>Model.__fields__</cite> from Pydantic V1.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.AnswerOption">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rupsycho.models.questionnaire.</span></span><span class="sig-name descname"><span class="pre">AnswerOption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Choose</span> <span class="pre">an</span> <span class="pre">option'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignored_for_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/models/questionnaire.html#AnswerOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.models.questionnaire.AnswerOption" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Represents an answer option in a psychological test.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<em>str</em>)</p></li>
+<li><p><strong>ignored_for_scale</strong> (<em>bool</em>)</p></li>
+<li><p><strong>weight</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.AnswerOption.text">
+<span class="sig-name descname"><span class="pre">text</span></span><a class="headerlink" href="#rupsycho.models.questionnaire.AnswerOption.text" title="Link to this definition"></a></dt>
+<dd><p>The text of the answer option. This should describe the option in a way that is clear to the participant.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.AnswerOption.ignored_for_scale">
+<span class="sig-name descname"><span class="pre">ignored_for_scale</span></span><a class="headerlink" href="#rupsycho.models.questionnaire.AnswerOption.ignored_for_scale" title="Link to this definition"></a></dt>
+<dd><p>Indicates whether this answer option should be ignored when calculating scores on a scale. This can be useful for neutral options or non-applicable responses.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.AnswerOption.weight">
+<span class="sig-name descname"><span class="pre">weight</span></span><a class="headerlink" href="#rupsycho.models.questionnaire.AnswerOption.weight" title="Link to this definition"></a></dt>
+<dd><p>The numerical weight assigned to this answer option. This is typically used in scoring the test, where different options have different point values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>The default values are set to represent a common scenario in psychological testing. Adjust as necessary for specific test requirements.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">text</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id4">
+<span class="sig-name descname"><span class="pre">ignored_for_scale</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#id4" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id5">
+<span class="sig-name descname"><span class="pre">weight</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#id5" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.AnswerOption.model_computed_fields">
+<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ComputedFieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#rupsycho.models.questionnaire.AnswerOption.model_computed_fields" title="Link to this definition"></a></dt>
+<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.AnswerOption.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#rupsycho.models.questionnaire.AnswerOption.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.AnswerOption.model_fields">
+<span class="sig-name descname"><span class="pre">model_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">FieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'ignored_for_scale':</span> <span class="pre">FieldInfo(annotation=bool,</span> <span class="pre">required=False,</span> <span class="pre">default=False),</span> <span class="pre">'text':</span> <span class="pre">FieldInfo(annotation=str,</span> <span class="pre">required=False,</span> <span class="pre">default='Choose</span> <span class="pre">an</span> <span class="pre">option'),</span> <span class="pre">'weight':</span> <span class="pre">FieldInfo(annotation=int,</span> <span class="pre">required=False,</span> <span class="pre">default=0)}</span></em><a class="headerlink" href="#rupsycho.models.questionnaire.AnswerOption.model_fields" title="Link to this definition"></a></dt>
+<dd><p>Metadata about the fields defined on the model,
+mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo].</p>
+<p>This replaces <cite>Model.__fields__</cite> from Pydantic V1.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.InstructionItem">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rupsycho.models.questionnaire.</span></span><span class="sig-name descname"><span class="pre">InstructionItem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">question</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Enter</span> <span class="pre">question</span> <span class="pre">text</span> <span class="pre">here'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reversed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">answer_options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">answers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/models/questionnaire.html#InstructionItem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.models.questionnaire.InstructionItem" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Represents a single question item in a psychological test, along with its answer options and specific attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>question</strong> (<em>str</em>)</p></li>
+<li><p><strong>reversed</strong> (<em>bool</em>)</p></li>
+<li><p><strong>answer_options</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><a class="reference internal" href="#rupsycho.models.questionnaire.AnswerOption" title="rupsycho.models.questionnaire.AnswerOption"><em>AnswerOption</em></a><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>attributes</strong> (<em>Dict</em>)</p></li>
+<li><p><strong>answers</strong> (<em>Dict</em><em>[</em><em>int</em><em>, </em><em>Dict</em><em>[</em><em>int</em><em>, </em><em>Dict</em><em>[</em><em>int</em><em>, </em><em>str</em><em>]</em><em>]</em><em>] </em><em>| </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.InstructionItem.question">
+<span class="sig-name descname"><span class="pre">question</span></span><a class="headerlink" href="#rupsycho.models.questionnaire.InstructionItem.question" title="Link to this definition"></a></dt>
+<dd><p>The text of the question presented to the participant.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.InstructionItem.reversed">
+<span class="sig-name descname"><span class="pre">reversed</span></span><a class="headerlink" href="#rupsycho.models.questionnaire.InstructionItem.reversed" title="Link to this definition"></a></dt>
+<dd><p>A flag indicating whether the scoring for this question should be reversed. In some psychological tests, certain questions are scored in the opposite direction for certain scales.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.InstructionItem.answer_options">
+<span class="sig-name descname"><span class="pre">answer_options</span></span><a class="headerlink" href="#rupsycho.models.questionnaire.InstructionItem.answer_options" title="Link to this definition"></a></dt>
+<dd><p>A list of possible answer options that a participant can choose from in response to the question. This field is optional and can be None if the question does not have predefined answer options.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[List[<a class="reference internal" href="#rupsycho.models.questionnaire.AnswerOption" title="rupsycho.models.questionnaire.AnswerOption">AnswerOption</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.InstructionItem.attributes">
+<span class="sig-name descname"><span class="pre">attributes</span></span><a class="headerlink" href="#rupsycho.models.questionnaire.InstructionItem.attributes" title="Link to this definition"></a></dt>
+<dd><p>Additional attributes related to the question, such as its dimension in a multi-dimensional test structure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>InstructionItemAttribute</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>The default values and structure are designed to be flexible and can be adjusted to suit different types of psychological tests.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id6">
+<span class="sig-name descname"><span class="pre">question</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#id6" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id7">
+<span class="sig-name descname"><span class="pre">reversed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#id7" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id8">
+<span class="sig-name descname"><span class="pre">answer_options</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#rupsycho.models.questionnaire.AnswerOption" title="rupsycho.models.questionnaire.AnswerOption"><span class="pre">AnswerOption</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#id8" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id9">
+<span class="sig-name descname"><span class="pre">attributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span></em><a class="headerlink" href="#id9" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.InstructionItem.answers">
+<span class="sig-name descname"><span class="pre">answers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#rupsycho.models.questionnaire.InstructionItem.answers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.InstructionItem.model_computed_fields">
+<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ComputedFieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#rupsycho.models.questionnaire.InstructionItem.model_computed_fields" title="Link to this definition"></a></dt>
+<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.InstructionItem.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#rupsycho.models.questionnaire.InstructionItem.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.InstructionItem.model_fields">
+<span class="sig-name descname"><span class="pre">model_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">FieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'answer_options':</span> <span class="pre">FieldInfo(annotation=Union[Dict[str,</span> <span class="pre">AnswerOption],</span> <span class="pre">NoneType],</span> <span class="pre">required=False,</span> <span class="pre">default=None),</span> <span class="pre">'answers':</span> <span class="pre">FieldInfo(annotation=Union[Dict[int,</span> <span class="pre">Dict[int,</span> <span class="pre">Dict[int,</span> <span class="pre">str]]],</span> <span class="pre">NoneType],</span> <span class="pre">required=False,</span> <span class="pre">default_factory=&lt;lambda&gt;,</span> <span class="pre">description='A</span> <span class="pre">nested</span> <span class="pre">dictionary</span> <span class="pre">storing</span> <span class="pre">answers</span> <span class="pre">indexed</span> <span class="pre">by</span> <span class="pre">model,</span> <span class="pre">profile,</span> <span class="pre">and</span> <span class="pre">run.'),</span> <span class="pre">'attributes':</span> <span class="pre">FieldInfo(annotation=Dict,</span> <span class="pre">required=False,</span> <span class="pre">default_factory=dict,</span> <span class="pre">description='Additional</span> <span class="pre">attributes</span> <span class="pre">related</span> <span class="pre">to</span> <span class="pre">the</span> <span class="pre">question,</span> <span class="pre">such</span> <span class="pre">as</span> <span class="pre">its</span> <span class="pre">dimension</span> <span class="pre">in</span> <span class="pre">a</span> <span class="pre">multi-dimensional</span> <span class="pre">test</span> <span class="pre">structure.'),</span> <span class="pre">'question':</span> <span class="pre">FieldInfo(annotation=str,</span> <span class="pre">required=False,</span> <span class="pre">default='Enter</span> <span class="pre">question</span> <span class="pre">text</span> <span class="pre">here'),</span> <span class="pre">'reversed':</span> <span class="pre">FieldInfo(annotation=bool,</span> <span class="pre">required=False,</span> <span class="pre">default=False)}</span></em><a class="headerlink" href="#rupsycho.models.questionnaire.InstructionItem.model_fields" title="Link to this definition"></a></dt>
+<dd><p>Metadata about the fields defined on the model,
+mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo].</p>
+<p>This replaces <cite>Model.__fields__</cite> from Pydantic V1.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.Questionnaire">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rupsycho.models.questionnaire.</span></span><span class="sig-name descname"><span class="pre">Questionnaire</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">general_instruction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">demographic_profiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_answer_options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instruction_items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/models/questionnaire.html#Questionnaire"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.models.questionnaire.Questionnaire" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Represents a questionnaire used in a psychological test.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>)</p></li>
+<li><p><strong>general_instruction</strong> (<em>str</em>)</p></li>
+<li><p><strong>demographic_profiles</strong> (<em>List</em><em>[</em><a class="reference internal" href="#rupsycho.models.questionnaire.DemographicProfile" title="rupsycho.models.questionnaire.DemographicProfile"><em>DemographicProfile</em></a><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>attributes</strong> (<em>Dict</em>)</p></li>
+<li><p><strong>default_answer_options</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><a class="reference internal" href="#rupsycho.models.questionnaire.AnswerOption" title="rupsycho.models.questionnaire.AnswerOption"><em>AnswerOption</em></a><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>instruction_items</strong> (<em>List</em><em>[</em><a class="reference internal" href="#rupsycho.models.questionnaire.InstructionItem" title="rupsycho.models.questionnaire.InstructionItem"><em>InstructionItem</em></a><em>] </em><em>| </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.Questionnaire.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#rupsycho.models.questionnaire.Questionnaire.name" title="Link to this definition"></a></dt>
+<dd><p>The name of the questionnaire.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.Questionnaire.general_instruction">
+<span class="sig-name descname"><span class="pre">general_instruction</span></span><a class="headerlink" href="#rupsycho.models.questionnaire.Questionnaire.general_instruction" title="Link to this definition"></a></dt>
+<dd><p>General instructions provided to the participants.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.Questionnaire.demographic_profiles">
+<span class="sig-name descname"><span class="pre">demographic_profiles</span></span><a class="headerlink" href="#rupsycho.models.questionnaire.Questionnaire.demographic_profiles" title="Link to this definition"></a></dt>
+<dd><p>A list of demographic profiles for the participants. This field is optional.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[List[<a class="reference internal" href="#rupsycho.models.questionnaire.DemographicProfile" title="rupsycho.models.questionnaire.DemographicProfile">DemographicProfile</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.Questionnaire.default_answer_options">
+<span class="sig-name descname"><span class="pre">default_answer_options</span></span><a class="headerlink" href="#rupsycho.models.questionnaire.Questionnaire.default_answer_options" title="Link to this definition"></a></dt>
+<dd><p>A dictionary of default answer options for the questionnaire. The keys represent unique identifiers for each option. This field is optional.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[Dict[str, <a class="reference internal" href="#rupsycho.models.questionnaire.AnswerOption" title="rupsycho.models.questionnaire.AnswerOption">AnswerOption</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.Questionnaire.instruction_items">
+<span class="sig-name descname"><span class="pre">instruction_items</span></span><a class="headerlink" href="#rupsycho.models.questionnaire.Questionnaire.instruction_items" title="Link to this definition"></a></dt>
+<dd><p>A list of instruction items (questions) included in the questionnaire. This field is optional.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[List[<a class="reference internal" href="#rupsycho.models.questionnaire.InstructionItem" title="rupsycho.models.questionnaire.InstructionItem">InstructionItem</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.Questionnaire.get_number_of_questions">
+<span class="sig-name descname"><span class="pre">get_number_of_questions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/models/questionnaire.html#Questionnaire.get_number_of_questions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.models.questionnaire.Questionnaire.get_number_of_questions" title="Link to this definition"></a></dt>
+<dd><p>Returns the number of questions in the questionnaire.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id10">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#id10" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id11">
+<span class="sig-name descname"><span class="pre">general_instruction</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#id11" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id12">
+<span class="sig-name descname"><span class="pre">demographic_profiles</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#rupsycho.models.questionnaire.DemographicProfile" title="rupsycho.models.questionnaire.DemographicProfile"><span class="pre">DemographicProfile</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#id12" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.Questionnaire.attributes">
+<span class="sig-name descname"><span class="pre">attributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span></em><a class="headerlink" href="#rupsycho.models.questionnaire.Questionnaire.attributes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id13">
+<span class="sig-name descname"><span class="pre">default_answer_options</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#rupsycho.models.questionnaire.AnswerOption" title="rupsycho.models.questionnaire.AnswerOption"><span class="pre">AnswerOption</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#id13" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id14">
+<span class="sig-name descname"><span class="pre">instruction_items</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#rupsycho.models.questionnaire.InstructionItem" title="rupsycho.models.questionnaire.InstructionItem"><span class="pre">InstructionItem</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#id14" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id15">
+<span class="sig-name descname"><span class="pre">get_number_of_questions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/models/questionnaire.html#Questionnaire.get_number_of_questions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id15" title="Link to this definition"></a></dt>
+<dd><p>Returns the number of questions in the questionnaire.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.Questionnaire.print_questionnaire">
+<span class="sig-name descname"><span class="pre">print_questionnaire</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/models/questionnaire.html#Questionnaire.print_questionnaire"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.models.questionnaire.Questionnaire.print_questionnaire" title="Link to this definition"></a></dt>
+<dd><p>Prints the questionnaire in a human-readable format.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.Questionnaire.model_computed_fields">
+<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ComputedFieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#rupsycho.models.questionnaire.Questionnaire.model_computed_fields" title="Link to this definition"></a></dt>
+<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.Questionnaire.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#rupsycho.models.questionnaire.Questionnaire.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.questionnaire.Questionnaire.model_fields">
+<span class="sig-name descname"><span class="pre">model_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">FieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'attributes':</span> <span class="pre">FieldInfo(annotation=Dict,</span> <span class="pre">required=False,</span> <span class="pre">default_factory=dict,</span> <span class="pre">description='Additional</span> <span class="pre">attributes</span> <span class="pre">related</span> <span class="pre">to</span> <span class="pre">the</span> <span class="pre">question,</span> <span class="pre">such</span> <span class="pre">as</span> <span class="pre">its</span> <span class="pre">dimension</span> <span class="pre">in</span> <span class="pre">a</span> <span class="pre">multi-dimensional</span> <span class="pre">test</span> <span class="pre">structure.'),</span> <span class="pre">'default_answer_options':</span> <span class="pre">FieldInfo(annotation=Union[Dict[str,</span> <span class="pre">AnswerOption],</span> <span class="pre">NoneType],</span> <span class="pre">required=False,</span> <span class="pre">default=None),</span> <span class="pre">'demographic_profiles':</span> <span class="pre">FieldInfo(annotation=Union[List[DemographicProfile],</span> <span class="pre">NoneType],</span> <span class="pre">required=False,</span> <span class="pre">default=None),</span> <span class="pre">'general_instruction':</span> <span class="pre">FieldInfo(annotation=str,</span> <span class="pre">required=True),</span> <span class="pre">'instruction_items':</span> <span class="pre">FieldInfo(annotation=Union[List[InstructionItem],</span> <span class="pre">NoneType],</span> <span class="pre">required=False,</span> <span class="pre">default=None),</span> <span class="pre">'name':</span> <span class="pre">FieldInfo(annotation=str,</span> <span class="pre">required=True)}</span></em><a class="headerlink" href="#rupsycho.models.questionnaire.Questionnaire.model_fields" title="Link to this definition"></a></dt>
+<dd><p>Metadata about the fields defined on the model,
+mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo].</p>
+<p>This replaces <cite>Model.__fields__</cite> from Pydantic V1.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-rupsycho.models.instruction">
+<span id="instruction"></span><h2>Instruction<a class="headerlink" href="#module-rupsycho.models.instruction" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.models.instruction.AnswerOption">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rupsycho.models.instruction.</span></span><span class="sig-name descname"><span class="pre">AnswerOption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reversed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignored_for_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/models/instruction.html#AnswerOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.models.instruction.AnswerOption" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<em>str</em>)</p></li>
+<li><p><strong>weight</strong> (<em>int</em>)</p></li>
+<li><p><strong>reversed</strong> (<em>bool</em>)</p></li>
+<li><p><strong>ignored_for_scale</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.instruction.AnswerOption.text">
+<span class="sig-name descname"><span class="pre">text</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rupsycho.models.instruction.AnswerOption.text" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.instruction.AnswerOption.weight">
+<span class="sig-name descname"><span class="pre">weight</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#rupsycho.models.instruction.AnswerOption.weight" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.instruction.AnswerOption.reversed">
+<span class="sig-name descname"><span class="pre">reversed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#rupsycho.models.instruction.AnswerOption.reversed" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.instruction.AnswerOption.ignored_for_scale">
+<span class="sig-name descname"><span class="pre">ignored_for_scale</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#rupsycho.models.instruction.AnswerOption.ignored_for_scale" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.instruction.AnswerOption.model_computed_fields">
+<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ComputedFieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#rupsycho.models.instruction.AnswerOption.model_computed_fields" title="Link to this definition"></a></dt>
+<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.instruction.AnswerOption.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#rupsycho.models.instruction.AnswerOption.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.instruction.AnswerOption.model_fields">
+<span class="sig-name descname"><span class="pre">model_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">FieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'ignored_for_scale':</span> <span class="pre">FieldInfo(annotation=bool,</span> <span class="pre">required=False,</span> <span class="pre">default=False),</span> <span class="pre">'reversed':</span> <span class="pre">FieldInfo(annotation=bool,</span> <span class="pre">required=True),</span> <span class="pre">'text':</span> <span class="pre">FieldInfo(annotation=str,</span> <span class="pre">required=True),</span> <span class="pre">'weight':</span> <span class="pre">FieldInfo(annotation=int,</span> <span class="pre">required=True)}</span></em><a class="headerlink" href="#rupsycho.models.instruction.AnswerOption.model_fields" title="Link to this definition"></a></dt>
+<dd><p>Metadata about the fields defined on the model,
+mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo].</p>
+<p>This replaces <cite>Model.__fields__</cite> from Pydantic V1.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.models.instruction.InstructionItem">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rupsycho.models.instruction.</span></span><span class="sig-name descname"><span class="pre">InstructionItem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">question</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">answer_options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/models/instruction.html#InstructionItem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.models.instruction.InstructionItem" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>question</strong> (<em>str</em>)</p></li>
+<li><p><strong>answer_options</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><a class="reference internal" href="#rupsycho.models.instruction.AnswerOption" title="rupsycho.models.instruction.AnswerOption"><em>AnswerOption</em></a><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.instruction.InstructionItem.question">
+<span class="sig-name descname"><span class="pre">question</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rupsycho.models.instruction.InstructionItem.question" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.instruction.InstructionItem.answer_options">
+<span class="sig-name descname"><span class="pre">answer_options</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#rupsycho.models.instruction.AnswerOption" title="rupsycho.models.instruction.AnswerOption"><span class="pre">AnswerOption</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#rupsycho.models.instruction.InstructionItem.answer_options" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.instruction.InstructionItem.model_computed_fields">
+<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ComputedFieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#rupsycho.models.instruction.InstructionItem.model_computed_fields" title="Link to this definition"></a></dt>
+<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.instruction.InstructionItem.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#rupsycho.models.instruction.InstructionItem.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.instruction.InstructionItem.model_fields">
+<span class="sig-name descname"><span class="pre">model_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">FieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'answer_options':</span> <span class="pre">FieldInfo(annotation=Dict[str,</span> <span class="pre">AnswerOption],</span> <span class="pre">required=True),</span> <span class="pre">'question':</span> <span class="pre">FieldInfo(annotation=str,</span> <span class="pre">required=True)}</span></em><a class="headerlink" href="#rupsycho.models.instruction.InstructionItem.model_fields" title="Link to this definition"></a></dt>
+<dd><p>Metadata about the fields defined on the model,
+mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo].</p>
+<p>This replaces <cite>Model.__fields__</cite> from Pydantic V1.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-rupsycho.models.profile">
+<span id="profile"></span><h2>Profile<a class="headerlink" href="#module-rupsycho.models.profile" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.models.profile.DemographicProfile">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rupsycho.models.profile.</span></span><span class="sig-name descname"><span class="pre">DemographicProfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">extra_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/models/profile.html#DemographicProfile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.models.profile.DemographicProfile" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attributes</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>)</p></li>
+<li><p><strong>template</strong> (<em>str</em>)</p></li>
+<li><p><strong>extra_data</strong> (<em>Any</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.profile.DemographicProfile.attributes">
+<span class="sig-name descname"><span class="pre">attributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#rupsycho.models.profile.DemographicProfile.attributes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.profile.DemographicProfile.template">
+<span class="sig-name descname"><span class="pre">template</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rupsycho.models.profile.DemographicProfile.template" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.models.profile.DemographicProfile.Config">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Config</span></span><a class="reference internal" href="_modules/rupsycho/models/profile.html#DemographicProfile.Config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.models.profile.DemographicProfile.Config" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Pydantic model configuration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.profile.DemographicProfile.Config.arbitrary_types_allowed">
+<span class="sig-name descname"><span class="pre">arbitrary_types_allowed</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#rupsycho.models.profile.DemographicProfile.Config.arbitrary_types_allowed" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.profile.DemographicProfile.Config.extra">
+<span class="sig-name descname"><span class="pre">extra</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'allow'</span></em><a class="headerlink" href="#rupsycho.models.profile.DemographicProfile.Config.extra" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.profile.DemographicProfile.model_computed_fields">
+<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ComputedFieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#rupsycho.models.profile.DemographicProfile.model_computed_fields" title="Link to this definition"></a></dt>
+<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.profile.DemographicProfile.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'arbitrary_types_allowed':</span> <span class="pre">True,</span> <span class="pre">'extra':</span> <span class="pre">'allow'}</span></em><a class="headerlink" href="#rupsycho.models.profile.DemographicProfile.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.profile.DemographicProfile.model_fields">
+<span class="sig-name descname"><span class="pre">model_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">FieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'attributes':</span> <span class="pre">FieldInfo(annotation=Dict[str,</span> <span class="pre">Any],</span> <span class="pre">required=True),</span> <span class="pre">'template':</span> <span class="pre">FieldInfo(annotation=str,</span> <span class="pre">required=True)}</span></em><a class="headerlink" href="#rupsycho.models.profile.DemographicProfile.model_fields" title="Link to this definition"></a></dt>
+<dd><p>Metadata about the fields defined on the model,
+mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo].</p>
+<p>This replaces <cite>Model.__fields__</cite> from Pydantic V1.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-rupsycho.models.model">
+<span id="model"></span><h2>Model<a class="headerlink" href="#module-rupsycho.models.model" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.models.model.LangChainModelConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rupsycho.models.model.</span></span><span class="sig-name descname"><span class="pre">LangChainModelConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'langchain'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">definition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prompt_template</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/models/model.html#LangChainModelConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.models.model.LangChainModelConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Configuration for a serialized LangChain model or any other runnable configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> (<em>str</em>)</p></li>
+<li><p><strong>definition</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>)</p></li>
+<li><p><strong>parameters</strong> (<em>Dict</em>)</p></li>
+<li><p><strong>prompt_template</strong> (<em>LangchainPromptTemplateConfig</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.LangChainModelConfig.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rupsycho.models.model.LangChainModelConfig.type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.LangChainModelConfig.definition">
+<span class="sig-name descname"><span class="pre">definition</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#rupsycho.models.model.LangChainModelConfig.definition" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.LangChainModelConfig.parameters">
+<span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span></em><a class="headerlink" href="#rupsycho.models.model.LangChainModelConfig.parameters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.LangChainModelConfig.prompt_template">
+<span class="sig-name descname"><span class="pre">prompt_template</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">LangchainPromptTemplateConfig</span></em><a class="headerlink" href="#rupsycho.models.model.LangChainModelConfig.prompt_template" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.models.model.LangChainModelConfig.load_model">
+<span class="sig-name descname"><span class="pre">load_model</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/models/model.html#LangChainModelConfig.load_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.models.model.LangChainModelConfig.load_model" title="Link to this definition"></a></dt>
+<dd><p>Loads and returns a LangChain model based on the provided serialized configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> (<a class="reference internal" href="#rupsycho.models.model.LangChainModelConfig" title="rupsycho.models.model.LangChainModelConfig"><em>LangChainModelConfig</em></a>) – The configuration object containing the serialized LangChain model definition.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The deserialized LangChain model ready for use, or None if loading fails.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Any</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.LangChainModelConfig.model_computed_fields">
+<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ComputedFieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#rupsycho.models.model.LangChainModelConfig.model_computed_fields" title="Link to this definition"></a></dt>
+<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.LangChainModelConfig.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#rupsycho.models.model.LangChainModelConfig.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.LangChainModelConfig.model_fields">
+<span class="sig-name descname"><span class="pre">model_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">FieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'definition':</span> <span class="pre">FieldInfo(annotation=Dict[str,</span> <span class="pre">Any],</span> <span class="pre">required=True,</span> <span class="pre">description='A</span> <span class="pre">dictionary</span> <span class="pre">containing</span> <span class="pre">the</span> <span class="pre">serialized</span> <span class="pre">LangChain</span> <span class="pre">model</span> <span class="pre">or</span> <span class="pre">other</span> <span class="pre">runnable</span> <span class="pre">configuration.'),</span> <span class="pre">'parameters':</span> <span class="pre">FieldInfo(annotation=Dict,</span> <span class="pre">required=False,</span> <span class="pre">default={},</span> <span class="pre">description='The</span> <span class="pre">parameters</span> <span class="pre">for</span> <span class="pre">text</span> <span class="pre">generation'),</span> <span class="pre">'prompt_template':</span> <span class="pre">FieldInfo(annotation=LangchainPromptTemplateConfig,</span> <span class="pre">required=False,</span> <span class="pre">default=None,</span> <span class="pre">description='The</span> <span class="pre">prompt</span> <span class="pre">template</span> <span class="pre">used</span> <span class="pre">by</span> <span class="pre">the</span> <span class="pre">model'),</span> <span class="pre">'type':</span> <span class="pre">FieldInfo(annotation=str,</span> <span class="pre">required=False,</span> <span class="pre">default='langchain',</span> <span class="pre">description='The</span> <span class="pre">type</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">model</span> <span class="pre">configuration.')}</span></em><a class="headerlink" href="#rupsycho.models.model.LangChainModelConfig.model_fields" title="Link to this definition"></a></dt>
+<dd><p>Metadata about the fields defined on the model,
+mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo].</p>
+<p>This replaces <cite>Model.__fields__</cite> from Pydantic V1.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.models.model.LocalHuggingFaceModelConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rupsycho.models.model.</span></span><span class="sig-name descname"><span class="pre">LocalHuggingFaceModelConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_or_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">revision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tokenizer_name_or_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_auth_token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'text-generation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prompt_template</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/models/model.html#LocalHuggingFaceModelConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.models.model.LocalHuggingFaceModelConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Configuration for a local Hugging Face model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name_or_path</strong> (<em>str</em>)</p></li>
+<li><p><strong>revision</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>tokenizer_name_or_path</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>cache_dir</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>use_auth_token</strong> (<em>bool</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>device</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>task</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>parameters</strong> (<em>Dict</em>)</p></li>
+<li><p><strong>prompt_template</strong> (<em>str</em><em> | </em><em>BaseModel</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.LocalHuggingFaceModelConfig.name_or_path">
+<span class="sig-name descname"><span class="pre">name_or_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rupsycho.models.model.LocalHuggingFaceModelConfig.name_or_path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.LocalHuggingFaceModelConfig.revision">
+<span class="sig-name descname"><span class="pre">revision</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#rupsycho.models.model.LocalHuggingFaceModelConfig.revision" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.LocalHuggingFaceModelConfig.tokenizer_name_or_path">
+<span class="sig-name descname"><span class="pre">tokenizer_name_or_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#rupsycho.models.model.LocalHuggingFaceModelConfig.tokenizer_name_or_path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.LocalHuggingFaceModelConfig.cache_dir">
+<span class="sig-name descname"><span class="pre">cache_dir</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#rupsycho.models.model.LocalHuggingFaceModelConfig.cache_dir" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.LocalHuggingFaceModelConfig.use_auth_token">
+<span class="sig-name descname"><span class="pre">use_auth_token</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#rupsycho.models.model.LocalHuggingFaceModelConfig.use_auth_token" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.LocalHuggingFaceModelConfig.device">
+<span class="sig-name descname"><span class="pre">device</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#rupsycho.models.model.LocalHuggingFaceModelConfig.device" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.LocalHuggingFaceModelConfig.task">
+<span class="sig-name descname"><span class="pre">task</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#rupsycho.models.model.LocalHuggingFaceModelConfig.task" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.LocalHuggingFaceModelConfig.parameters">
+<span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span></em><a class="headerlink" href="#rupsycho.models.model.LocalHuggingFaceModelConfig.parameters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.LocalHuggingFaceModelConfig.prompt_template">
+<span class="sig-name descname"><span class="pre">prompt_template</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">BaseModel</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#rupsycho.models.model.LocalHuggingFaceModelConfig.prompt_template" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.models.model.LocalHuggingFaceModelConfig.Config">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Config</span></span><a class="reference internal" href="_modules/rupsycho/models/model.html#LocalHuggingFaceModelConfig.Config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.models.model.LocalHuggingFaceModelConfig.Config" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Pydantic model configuration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.LocalHuggingFaceModelConfig.Config.arbitrary_types_allowed">
+<span class="sig-name descname"><span class="pre">arbitrary_types_allowed</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#rupsycho.models.model.LocalHuggingFaceModelConfig.Config.arbitrary_types_allowed" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.models.model.LocalHuggingFaceModelConfig.load_model">
+<span class="sig-name descname"><span class="pre">load_model</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/models/model.html#LocalHuggingFaceModelConfig.load_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.models.model.LocalHuggingFaceModelConfig.load_model" title="Link to this definition"></a></dt>
+<dd><p>Loads and returns a Hugging Face model pipeline wrapped in a LangChain HuggingFacePipeline.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The LangChain HuggingFacePipeline ready for integration into LangChain workflows.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>HuggingFacePipeline</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.LocalHuggingFaceModelConfig.model_computed_fields">
+<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ComputedFieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#rupsycho.models.model.LocalHuggingFaceModelConfig.model_computed_fields" title="Link to this definition"></a></dt>
+<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.LocalHuggingFaceModelConfig.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'arbitrary_types_allowed':</span> <span class="pre">True}</span></em><a class="headerlink" href="#rupsycho.models.model.LocalHuggingFaceModelConfig.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.LocalHuggingFaceModelConfig.model_fields">
+<span class="sig-name descname"><span class="pre">model_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">FieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'cache_dir':</span> <span class="pre">FieldInfo(annotation=Union[str,</span> <span class="pre">NoneType],</span> <span class="pre">required=False,</span> <span class="pre">default=None,</span> <span class="pre">description='Path</span> <span class="pre">to</span> <span class="pre">the</span> <span class="pre">directory</span> <span class="pre">where</span> <span class="pre">the</span> <span class="pre">downloaded</span> <span class="pre">model</span> <span class="pre">and</span> <span class="pre">tokenizer</span> <span class="pre">files</span> <span class="pre">will</span> <span class="pre">be</span> <span class="pre">cached.'),</span> <span class="pre">'device':</span> <span class="pre">FieldInfo(annotation=Union[int,</span> <span class="pre">NoneType],</span> <span class="pre">required=False,</span> <span class="pre">default=-1,</span> <span class="pre">description=&quot;The</span> <span class="pre">device</span> <span class="pre">to</span> <span class="pre">load</span> <span class="pre">the</span> <span class="pre">model</span> <span class="pre">onto</span> <span class="pre">('cpu'</span> <span class="pre">or</span> <span class="pre">'cuda').&quot;),</span> <span class="pre">'name_or_path':</span> <span class="pre">FieldInfo(annotation=str,</span> <span class="pre">required=True,</span> <span class="pre">description='The</span> <span class="pre">path</span> <span class="pre">to</span> <span class="pre">the</span> <span class="pre">local</span> <span class="pre">directory</span> <span class="pre">or</span> <span class="pre">the</span> <span class="pre">name</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">Hugging</span> <span class="pre">Face</span> <span class="pre">model.'),</span> <span class="pre">'parameters':</span> <span class="pre">FieldInfo(annotation=Dict,</span> <span class="pre">required=False,</span> <span class="pre">default={},</span> <span class="pre">description='The</span> <span class="pre">parameters</span> <span class="pre">for</span> <span class="pre">text</span> <span class="pre">generation</span> <span class="pre">(e.g.,</span> <span class="pre">max_length,</span> <span class="pre">temperature,</span> <span class="pre">etc.).'),</span> <span class="pre">'prompt_template':</span> <span class="pre">FieldInfo(annotation=Union[str,</span> <span class="pre">BaseModel,</span> <span class="pre">NoneType],</span> <span class="pre">required=False,</span> <span class="pre">default=None,</span> <span class="pre">description='The</span> <span class="pre">prompt</span> <span class="pre">template</span> <span class="pre">used</span> <span class="pre">by</span> <span class="pre">the</span> <span class="pre">model,</span> <span class="pre">if</span> <span class="pre">applicable.'),</span> <span class="pre">'revision':</span> <span class="pre">FieldInfo(annotation=Union[str,</span> <span class="pre">NoneType],</span> <span class="pre">required=False,</span> <span class="pre">default=None,</span> <span class="pre">description='The</span> <span class="pre">specific</span> <span class="pre">model</span> <span class="pre">version</span> <span class="pre">to</span> <span class="pre">use</span> <span class="pre">(e.g.,</span> <span class="pre">a</span> <span class="pre">branch</span> <span class="pre">name,</span> <span class="pre">tag,</span> <span class="pre">or</span> <span class="pre">commit</span> <span class="pre">hash).'),</span> <span class="pre">'task':</span> <span class="pre">FieldInfo(annotation=Union[str,</span> <span class="pre">NoneType],</span> <span class="pre">required=False,</span> <span class="pre">default='text-generation',</span> <span class="pre">description=&quot;The</span> <span class="pre">type</span> <span class="pre">of</span> <span class="pre">pipeline</span> <span class="pre">to</span> <span class="pre">create</span> <span class="pre">(e.g.,</span> <span class="pre">'text-generation',</span> <span class="pre">'text-classification',</span> <span class="pre">etc.).&quot;),</span> <span class="pre">'tokenizer_name_or_path':</span> <span class="pre">FieldInfo(annotation=Union[str,</span> <span class="pre">NoneType],</span> <span class="pre">required=False,</span> <span class="pre">default=None,</span> <span class="pre">description='The</span> <span class="pre">name</span> <span class="pre">or</span> <span class="pre">path</span> <span class="pre">to</span> <span class="pre">the</span> <span class="pre">tokenizer</span> <span class="pre">to</span> <span class="pre">use.</span> <span class="pre">Defaults</span> <span class="pre">to</span> <span class="pre">`model_name_or_path`</span> <span class="pre">if</span> <span class="pre">not</span> <span class="pre">specified.'),</span> <span class="pre">'use_auth_token':</span> <span class="pre">FieldInfo(annotation=Union[bool,</span> <span class="pre">NoneType],</span> <span class="pre">required=False,</span> <span class="pre">default=False,</span> <span class="pre">description='Whether</span> <span class="pre">to</span> <span class="pre">use</span> <span class="pre">the</span> <span class="pre">token</span> <span class="pre">generated</span> <span class="pre">when</span> <span class="pre">running</span> <span class="pre">`huggingface-cli</span> <span class="pre">login`</span> <span class="pre">for</span> <span class="pre">private</span> <span class="pre">models.')}</span></em><a class="headerlink" href="#rupsycho.models.model.LocalHuggingFaceModelConfig.model_fields" title="Link to this definition"></a></dt>
+<dd><p>Metadata about the fields defined on the model,
+mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo].</p>
+<p>This replaces <cite>Model.__fields__</cite> from Pydantic V1.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.models.model.RemoteHuggingFaceModelConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rupsycho.models.model.</span></span><span class="sig-name descname"><span class="pre">RemoteHuggingFaceModelConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'remote_huggingface'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repo_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">huggingfacehub_api_token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/models/model.html#RemoteHuggingFaceModelConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.models.model.RemoteHuggingFaceModelConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Configuration for a remote Hugging Face model using the Inference Endpoint API.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> (<em>str</em>)</p></li>
+<li><p><strong>repo_id</strong> (<em>str</em>)</p></li>
+<li><p><strong>task</strong> (<em>str</em>)</p></li>
+<li><p><strong>huggingfacehub_api_token</strong> (<em>str</em>)</p></li>
+<li><p><strong>parameters</strong> (<em>Dict</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.RemoteHuggingFaceModelConfig.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rupsycho.models.model.RemoteHuggingFaceModelConfig.type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.RemoteHuggingFaceModelConfig.repo_id">
+<span class="sig-name descname"><span class="pre">repo_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rupsycho.models.model.RemoteHuggingFaceModelConfig.repo_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.RemoteHuggingFaceModelConfig.task">
+<span class="sig-name descname"><span class="pre">task</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rupsycho.models.model.RemoteHuggingFaceModelConfig.task" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.RemoteHuggingFaceModelConfig.huggingfacehub_api_token">
+<span class="sig-name descname"><span class="pre">huggingfacehub_api_token</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rupsycho.models.model.RemoteHuggingFaceModelConfig.huggingfacehub_api_token" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.RemoteHuggingFaceModelConfig.parameters">
+<span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span></em><a class="headerlink" href="#rupsycho.models.model.RemoteHuggingFaceModelConfig.parameters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.models.model.RemoteHuggingFaceModelConfig.Config">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Config</span></span><a class="reference internal" href="_modules/rupsycho/models/model.html#RemoteHuggingFaceModelConfig.Config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.models.model.RemoteHuggingFaceModelConfig.Config" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Pydantic model configuration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.RemoteHuggingFaceModelConfig.Config.arbitrary_types_allowed">
+<span class="sig-name descname"><span class="pre">arbitrary_types_allowed</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#rupsycho.models.model.RemoteHuggingFaceModelConfig.Config.arbitrary_types_allowed" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.models.model.RemoteHuggingFaceModelConfig.load_model">
+<span class="sig-name descname"><span class="pre">load_model</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/models/model.html#RemoteHuggingFaceModelConfig.load_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.models.model.RemoteHuggingFaceModelConfig.load_model" title="Link to this definition"></a></dt>
+<dd><p>Loads and returns a Hugging Face model pipeline from a remote inference endpoint,
+wrapped in a LangChain HuggingFacePipeline.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The LangChain HuggingFacePipeline ready for integration into LangChain workflows.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>HuggingFacePipeline</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.RemoteHuggingFaceModelConfig.model_computed_fields">
+<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ComputedFieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#rupsycho.models.model.RemoteHuggingFaceModelConfig.model_computed_fields" title="Link to this definition"></a></dt>
+<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.RemoteHuggingFaceModelConfig.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'arbitrary_types_allowed':</span> <span class="pre">True}</span></em><a class="headerlink" href="#rupsycho.models.model.RemoteHuggingFaceModelConfig.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.RemoteHuggingFaceModelConfig.model_fields">
+<span class="sig-name descname"><span class="pre">model_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">FieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'huggingfacehub_api_token':</span> <span class="pre">FieldInfo(annotation=str,</span> <span class="pre">required=True,</span> <span class="pre">description='The</span> <span class="pre">API</span> <span class="pre">token</span> <span class="pre">for</span> <span class="pre">accessing</span> <span class="pre">Hugging</span> <span class="pre">Face</span> <span class="pre">endpoints.'),</span> <span class="pre">'parameters':</span> <span class="pre">FieldInfo(annotation=Dict,</span> <span class="pre">required=False,</span> <span class="pre">default={},</span> <span class="pre">description='The</span> <span class="pre">parameters</span> <span class="pre">for</span> <span class="pre">text</span> <span class="pre">generation</span> <span class="pre">(e.g.,</span> <span class="pre">max_length,</span> <span class="pre">temperature,</span> <span class="pre">etc.).'),</span> <span class="pre">'repo_id':</span> <span class="pre">FieldInfo(annotation=str,</span> <span class="pre">required=True,</span> <span class="pre">description=&quot;The</span> <span class="pre">repository</span> <span class="pre">ID</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">Hugging</span> <span class="pre">Face</span> <span class="pre">model</span> <span class="pre">(e.g.,</span> <span class="pre">'HuggingFaceH4/zephyr-7b-beta').&quot;),</span> <span class="pre">'task':</span> <span class="pre">FieldInfo(annotation=str,</span> <span class="pre">required=True,</span> <span class="pre">description=&quot;The</span> <span class="pre">task</span> <span class="pre">for</span> <span class="pre">the</span> <span class="pre">Hugging</span> <span class="pre">Face</span> <span class="pre">pipeline</span> <span class="pre">(e.g.,</span> <span class="pre">'text-generation',</span> <span class="pre">'text-classification').&quot;),</span> <span class="pre">'type':</span> <span class="pre">FieldInfo(annotation=str,</span> <span class="pre">required=False,</span> <span class="pre">default='remote_huggingface',</span> <span class="pre">description='The</span> <span class="pre">type</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">model</span> <span class="pre">configuration.')}</span></em><a class="headerlink" href="#rupsycho.models.model.RemoteHuggingFaceModelConfig.model_fields" title="Link to this definition"></a></dt>
+<dd><p>Metadata about the fields defined on the model,
+mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo].</p>
+<p>This replaces <cite>Model.__fields__</cite> from Pydantic V1.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.models.model.OllamaModelConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rupsycho.models.model.</span></span><span class="sig-name descname"><span class="pre">OllamaModelConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ollama'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'http://localhost:11434'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prompt_template</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/models/model.html#OllamaModelConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.models.model.OllamaModelConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Configuration for loading an Ollama model.
+This class holds all the necessary information for configuring and loading an OllamaLLM model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> (<em>str</em>)</p></li>
+<li><p><strong>model</strong> (<em>str</em>)</p></li>
+<li><p><strong>base_url</strong> (<em>str</em>)</p></li>
+<li><p><strong>parameters</strong> (<em>Dict</em>)</p></li>
+<li><p><strong>prompt_template</strong> (<em>ChatPromptTemplateConfig</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.OllamaModelConfig.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rupsycho.models.model.OllamaModelConfig.type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.OllamaModelConfig.model">
+<span class="sig-name descname"><span class="pre">model</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rupsycho.models.model.OllamaModelConfig.model" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.OllamaModelConfig.base_url">
+<span class="sig-name descname"><span class="pre">base_url</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rupsycho.models.model.OllamaModelConfig.base_url" title="Link to this definition"></a></dt>
+<dd><p>Base url the model is hosted under.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.OllamaModelConfig.parameters">
+<span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span></em><a class="headerlink" href="#rupsycho.models.model.OllamaModelConfig.parameters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.OllamaModelConfig.prompt_template">
+<span class="sig-name descname"><span class="pre">prompt_template</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ChatPromptTemplateConfig</span></em><a class="headerlink" href="#rupsycho.models.model.OllamaModelConfig.prompt_template" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.models.model.OllamaModelConfig.Config">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Config</span></span><a class="reference internal" href="_modules/rupsycho/models/model.html#OllamaModelConfig.Config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.models.model.OllamaModelConfig.Config" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Pydantic model configuration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.OllamaModelConfig.Config.arbitrary_types_allowed">
+<span class="sig-name descname"><span class="pre">arbitrary_types_allowed</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#rupsycho.models.model.OllamaModelConfig.Config.arbitrary_types_allowed" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.models.model.OllamaModelConfig.load_model">
+<span class="sig-name descname"><span class="pre">load_model</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/models/model.html#OllamaModelConfig.load_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.models.model.OllamaModelConfig.load_model" title="Link to this definition"></a></dt>
+<dd><p>Loads and returns an Ollama model based on the provided configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The instantiated Ollama model ready for use.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>OllamaLLM</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.OllamaModelConfig.model_computed_fields">
+<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ComputedFieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#rupsycho.models.model.OllamaModelConfig.model_computed_fields" title="Link to this definition"></a></dt>
+<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.OllamaModelConfig.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'arbitrary_types_allowed':</span> <span class="pre">True}</span></em><a class="headerlink" href="#rupsycho.models.model.OllamaModelConfig.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.OllamaModelConfig.model_fields">
+<span class="sig-name descname"><span class="pre">model_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">FieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'base_url':</span> <span class="pre">FieldInfo(annotation=str,</span> <span class="pre">required=False,</span> <span class="pre">default='http://localhost:11434'),</span> <span class="pre">'model':</span> <span class="pre">FieldInfo(annotation=str,</span> <span class="pre">required=True,</span> <span class="pre">description=&quot;The</span> <span class="pre">identifier</span> <span class="pre">for</span> <span class="pre">the</span> <span class="pre">Ollama</span> <span class="pre">model</span> <span class="pre">(e.g.,</span> <span class="pre">'gemma2:2b').&quot;),</span> <span class="pre">'parameters':</span> <span class="pre">FieldInfo(annotation=Dict,</span> <span class="pre">required=False,</span> <span class="pre">default={},</span> <span class="pre">description='The</span> <span class="pre">parameters</span> <span class="pre">for</span> <span class="pre">text</span> <span class="pre">generation'),</span> <span class="pre">'prompt_template':</span> <span class="pre">FieldInfo(annotation=ChatPromptTemplateConfig,</span> <span class="pre">required=False,</span> <span class="pre">default=None,</span> <span class="pre">description='The</span> <span class="pre">prompt</span> <span class="pre">template</span> <span class="pre">used</span> <span class="pre">by</span> <span class="pre">the</span> <span class="pre">model'),</span> <span class="pre">'type':</span> <span class="pre">FieldInfo(annotation=str,</span> <span class="pre">required=False,</span> <span class="pre">default='ollama',</span> <span class="pre">description='The</span> <span class="pre">type</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">model</span> <span class="pre">configuration.')}</span></em><a class="headerlink" href="#rupsycho.models.model.OllamaModelConfig.model_fields" title="Link to this definition"></a></dt>
+<dd><p>Metadata about the fields defined on the model,
+mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo].</p>
+<p>This replaces <cite>Model.__fields__</cite> from Pydantic V1.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.models.model.OpenAIModelConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rupsycho.models.model.</span></span><span class="sig-name descname"><span class="pre">OpenAIModelConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'openai'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">organization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prompt_template</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/models/model.html#OpenAIModelConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.models.model.OpenAIModelConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Configuration for an OpenAI model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> (<em>str</em>)</p></li>
+<li><p><strong>model</strong> (<em>str</em>)</p></li>
+<li><p><strong>api_key</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>base_url</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>organization</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>parameters</strong> (<em>Dict</em>)</p></li>
+<li><p><strong>prompt_template</strong> (<em>ChatPromptTemplateConfig</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.OpenAIModelConfig.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rupsycho.models.model.OpenAIModelConfig.type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.OpenAIModelConfig.model">
+<span class="sig-name descname"><span class="pre">model</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rupsycho.models.model.OpenAIModelConfig.model" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.OpenAIModelConfig.api_key">
+<span class="sig-name descname"><span class="pre">api_key</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#rupsycho.models.model.OpenAIModelConfig.api_key" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.OpenAIModelConfig.base_url">
+<span class="sig-name descname"><span class="pre">base_url</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#rupsycho.models.model.OpenAIModelConfig.base_url" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.OpenAIModelConfig.organization">
+<span class="sig-name descname"><span class="pre">organization</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#rupsycho.models.model.OpenAIModelConfig.organization" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.OpenAIModelConfig.parameters">
+<span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span></em><a class="headerlink" href="#rupsycho.models.model.OpenAIModelConfig.parameters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.OpenAIModelConfig.prompt_template">
+<span class="sig-name descname"><span class="pre">prompt_template</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ChatPromptTemplateConfig</span></em><a class="headerlink" href="#rupsycho.models.model.OpenAIModelConfig.prompt_template" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.models.model.OpenAIModelConfig.Config">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Config</span></span><a class="reference internal" href="_modules/rupsycho/models/model.html#OpenAIModelConfig.Config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.models.model.OpenAIModelConfig.Config" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.OpenAIModelConfig.Config.arbitrary_types_allowed">
+<span class="sig-name descname"><span class="pre">arbitrary_types_allowed</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#rupsycho.models.model.OpenAIModelConfig.Config.arbitrary_types_allowed" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.models.model.OpenAIModelConfig.load_model">
+<span class="sig-name descname"><span class="pre">load_model</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/models/model.html#OpenAIModelConfig.load_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.models.model.OpenAIModelConfig.load_model" title="Link to this definition"></a></dt>
+<dd><p>Loads and returns an OpenAI model based on the provided configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> (<a class="reference internal" href="#rupsycho.models.model.OpenAIModelConfig" title="rupsycho.models.model.OpenAIModelConfig"><em>OpenAIModelConfig</em></a>) – The configuration object containing the details for loading the OpenAI model.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The instantiated OpenAI model ready for use.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ChatOpenAI</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.OpenAIModelConfig.model_computed_fields">
+<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ComputedFieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#rupsycho.models.model.OpenAIModelConfig.model_computed_fields" title="Link to this definition"></a></dt>
+<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.OpenAIModelConfig.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'arbitrary_types_allowed':</span> <span class="pre">True}</span></em><a class="headerlink" href="#rupsycho.models.model.OpenAIModelConfig.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.models.model.OpenAIModelConfig.model_fields">
+<span class="sig-name descname"><span class="pre">model_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">FieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'api_key':</span> <span class="pre">FieldInfo(annotation=Union[str,</span> <span class="pre">NoneType],</span> <span class="pre">required=False,</span> <span class="pre">default=None,</span> <span class="pre">description=&quot;The</span> <span class="pre">API</span> <span class="pre">key</span> <span class="pre">for</span> <span class="pre">accessing</span> <span class="pre">OpenAI's</span> <span class="pre">models.&quot;),</span> <span class="pre">'base_url':</span> <span class="pre">FieldInfo(annotation=Union[str,</span> <span class="pre">NoneType],</span> <span class="pre">required=False,</span> <span class="pre">default=None,</span> <span class="pre">description='The</span> <span class="pre">base</span> <span class="pre">URL</span> <span class="pre">for</span> <span class="pre">the</span> <span class="pre">OpenAI</span> <span class="pre">API</span> <span class="pre">endpoint.'),</span> <span class="pre">'model':</span> <span class="pre">FieldInfo(annotation=str,</span> <span class="pre">required=True,</span> <span class="pre">description=&quot;The</span> <span class="pre">identifier</span> <span class="pre">for</span> <span class="pre">the</span> <span class="pre">OpenAI</span> <span class="pre">model</span> <span class="pre">(e.g.,</span> <span class="pre">'gpt-4').&quot;),</span> <span class="pre">'organization':</span> <span class="pre">FieldInfo(annotation=Union[str,</span> <span class="pre">NoneType],</span> <span class="pre">required=False,</span> <span class="pre">default=None,</span> <span class="pre">description='The</span> <span class="pre">organization</span> <span class="pre">ID</span> <span class="pre">associated</span> <span class="pre">with</span> <span class="pre">the</span> <span class="pre">OpenAI</span> <span class="pre">API</span> <span class="pre">key.'),</span> <span class="pre">'parameters':</span> <span class="pre">FieldInfo(annotation=Dict,</span> <span class="pre">required=False,</span> <span class="pre">default={},</span> <span class="pre">description='The</span> <span class="pre">parameters</span> <span class="pre">for</span> <span class="pre">text</span> <span class="pre">generation'),</span> <span class="pre">'prompt_template':</span> <span class="pre">FieldInfo(annotation=ChatPromptTemplateConfig,</span> <span class="pre">required=False,</span> <span class="pre">default=None,</span> <span class="pre">description='The</span> <span class="pre">prompt</span> <span class="pre">template</span> <span class="pre">used</span> <span class="pre">by</span> <span class="pre">the</span> <span class="pre">model'),</span> <span class="pre">'type':</span> <span class="pre">FieldInfo(annotation=str,</span> <span class="pre">required=False,</span> <span class="pre">default='openai',</span> <span class="pre">description='The</span> <span class="pre">type</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">model</span> <span class="pre">configuration.')}</span></em><a class="headerlink" href="#rupsycho.models.model.OpenAIModelConfig.model_fields" title="Link to this definition"></a></dt>
+<dd><p>Metadata about the fields defined on the model,
+mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo].</p>
+<p>This replaces <cite>Model.__fields__</cite> from Pydantic V1.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

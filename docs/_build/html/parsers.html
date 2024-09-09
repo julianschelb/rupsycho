@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Parsers &mdash; RUPsycho 0.10 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=ac14934e"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Data Models" href="models.html" />
+    <link rel="prev" title="Parse Answers" href="parser.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            RUPsycho
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="init.html">Get Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reader.html">Load Experiments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiment.html">Define Experiments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="run.html">Running an Experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parser.html">Parse Answers</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Parsers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#cleaners">Cleaners</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.parsers.cleaners.BasicCleaner"><code class="docutils literal notranslate"><span class="pre">BasicCleaner</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.parsers.cleaners.BasicCleaner.parse"><code class="docutils literal notranslate"><span class="pre">BasicCleaner.parse()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.parsers.cleaners.PromptRemovalCleaner"><code class="docutils literal notranslate"><span class="pre">PromptRemovalCleaner</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.parsers.cleaners.PromptRemovalCleaner.prompt"><code class="docutils literal notranslate"><span class="pre">PromptRemovalCleaner.prompt</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.parsers.cleaners.PromptRemovalCleaner.similarity_threshold"><code class="docutils literal notranslate"><span class="pre">PromptRemovalCleaner.similarity_threshold</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.parsers.cleaners.PromptRemovalCleaner.fast"><code class="docutils literal notranslate"><span class="pre">PromptRemovalCleaner.fast</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.parsers.cleaners.PromptRemovalCleaner.parse"><code class="docutils literal notranslate"><span class="pre">PromptRemovalCleaner.parse()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#judges">Judges</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.parsers.judges.MultipleChoiceParser"><code class="docutils literal notranslate"><span class="pre">MultipleChoiceParser</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.parsers.judges.MultipleChoiceParser.possible_answers"><code class="docutils literal notranslate"><span class="pre">MultipleChoiceParser.possible_answers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.parsers.judges.MultipleChoiceParser.parse"><code class="docutils literal notranslate"><span class="pre">MultipleChoiceParser.parse()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#validators">Validators</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.parsers.validators.ApologiesValidatorParser"><code class="docutils literal notranslate"><span class="pre">ApologiesValidatorParser</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.parsers.validators.ApologiesValidatorParser.parse"><code class="docutils literal notranslate"><span class="pre">ApologiesValidatorParser.parse()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.parsers.validators.BeingAiValidatorParser"><code class="docutils literal notranslate"><span class="pre">BeingAiValidatorParser</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.parsers.validators.BeingAiValidatorParser.parse"><code class="docutils literal notranslate"><span class="pre">BeingAiValidatorParser.parse()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.parsers.validators.RefusalValidatorParser"><code class="docutils literal notranslate"><span class="pre">RefusalValidatorParser</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.parsers.validators.RefusalValidatorParser.parse"><code class="docutils literal notranslate"><span class="pre">RefusalValidatorParser.parse()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.parsers.validators.ValidatorParser"><code class="docutils literal notranslate"><span class="pre">ValidatorParser</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.parsers.validators.ValidatorParser.apologies_parser"><code class="docutils literal notranslate"><span class="pre">ValidatorParser.apologies_parser</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.parsers.validators.ValidatorParser.being_ai_parser"><code class="docutils literal notranslate"><span class="pre">ValidatorParser.being_ai_parser</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.parsers.validators.ValidatorParser.refusal_parser"><code class="docutils literal notranslate"><span class="pre">ValidatorParser.refusal_parser</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.parsers.validators.ValidatorParser.parse"><code class="docutils literal notranslate"><span class="pre">ValidatorParser.parse()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Data Models</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">RUPsycho</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Parsers</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/parsers.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="parsers">
+<h1>Parsers<a class="headerlink" href="#parsers" title="Link to this heading"></a></h1>
+<p>This document provides an overview of the various parser classes available in the <cite>rupsycho.parsers</cite> module. The parsers are organized into three categories: cleaners, judges, and validators.</p>
+<section id="cleaners">
+<h2>Cleaners<a class="headerlink" href="#cleaners" title="Link to this heading"></a></h2>
+<p>This section defines specialized parser classes called Cleaners, designed to process and clean textual answers by removing artifacts that may have been introduced during the text generation process.</p>
+<dl class="py class" id="module-rupsycho.parsers.cleaners">
+<dt class="sig sig-object py" id="rupsycho.parsers.cleaners.BasicCleaner">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rupsycho.parsers.cleaners.</span></span><span class="sig-name descname"><span class="pre">BasicCleaner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/parsers/cleaners.html#BasicCleaner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.parsers.cleaners.BasicCleaner" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseOutputParser</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</p>
+<p>A custom parser that processes and cleans text by removing line breaks
+and non-ASCII Unicode characters.</p>
+<p>This parser is designed to work with LangChain and can be integrated
+into various chains or agents that require cleaned text output.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> (<em>Any</em>)</p></li>
+<li><p><strong>name</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.parsers.cleaners.BasicCleaner.parse">
+<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/parsers/cleaners.html#BasicCleaner.parse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.parsers.cleaners.BasicCleaner.parse" title="Link to this definition"></a></dt>
+<dd><p>Parses the input text to remove line breaks and non-ASCII Unicode characters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>text</strong> (<em>str</em>) – The input string to be cleaned.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The cleaned string with line breaks and non-ASCII Unicode characters removed.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>OutputParserException</strong> – If an error occurs during parsing, an OutputParserException is raised with a
+    descriptive error message.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.parsers.cleaners.PromptRemovalCleaner">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rupsycho.parsers.cleaners.</span></span><span class="sig-name descname"><span class="pre">PromptRemovalCleaner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prompt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">similarity_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fast</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/parsers/cleaners.html#PromptRemovalCleaner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.parsers.cleaners.PromptRemovalCleaner" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseOutputParser</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</p>
+<p>A custom parser that removes prompt-related text from a completion.
+It uses the prompt_cleaner function to process and clean the input text.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prompt</strong> (<em>str</em>)</p></li>
+<li><p><strong>similarity_threshold</strong> (<em>float</em>)</p></li>
+<li><p><strong>fast</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.parsers.cleaners.PromptRemovalCleaner.prompt">
+<span class="sig-name descname"><span class="pre">prompt</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#rupsycho.parsers.cleaners.PromptRemovalCleaner.prompt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.parsers.cleaners.PromptRemovalCleaner.similarity_threshold">
+<span class="sig-name descname"><span class="pre">similarity_threshold</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#rupsycho.parsers.cleaners.PromptRemovalCleaner.similarity_threshold" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.parsers.cleaners.PromptRemovalCleaner.fast">
+<span class="sig-name descname"><span class="pre">fast</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#rupsycho.parsers.cleaners.PromptRemovalCleaner.fast" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.parsers.cleaners.PromptRemovalCleaner.parse">
+<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">completion</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/parsers/cleaners.html#PromptRemovalCleaner.parse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.parsers.cleaners.PromptRemovalCleaner.parse" title="Link to this definition"></a></dt>
+<dd><p>Cleans the input completion text by removing prompt-related content.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>completion</strong> (<em>str</em>) – The input text (completion) that needs to be cleaned.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The cleaned completion text.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>OutputParserException</strong> – If an error occurs during parsing, an OutputParserException is raised with a
+    descriptive error message.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="judges">
+<h2>Judges<a class="headerlink" href="#judges" title="Link to this heading"></a></h2>
+<p>This section defines specialized parser classes called Judges, designed to evaluate and process input answers. The Judges parser takes in a textual answer and applies a series of checks and transformations to determine a final prediction or verdict.</p>
+<dl class="py class" id="module-rupsycho.parsers.judges">
+<dt class="sig sig-object py" id="rupsycho.parsers.judges.MultipleChoiceParser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rupsycho.parsers.judges.</span></span><span class="sig-name descname"><span class="pre">MultipleChoiceParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">possible_answers</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/parsers/judges.html#MultipleChoiceParser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.parsers.judges.MultipleChoiceParser" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseOutputParser</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</p>
+<p>A custom parser that processes a text input and returns the most likely
+answer from a set of possible multiple-choice answers using the
+check_multiple_choice_answers function.</p>
+<p>This parser is designed to work with LangChain and can be integrated
+into various chains or agents that require decision-making based on
+textual analysis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>possible_answers</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>)</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.parsers.judges.MultipleChoiceParser.possible_answers">
+<span class="sig-name descname"><span class="pre">possible_answers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#rupsycho.parsers.judges.MultipleChoiceParser.possible_answers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.parsers.judges.MultipleChoiceParser.parse">
+<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/parsers/judges.html#MultipleChoiceParser.parse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.parsers.judges.MultipleChoiceParser.parse" title="Link to this definition"></a></dt>
+<dd><p>Parses the input text to determine the most likely answer from the
+possible answers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>text</strong> (<em>str</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="validators">
+<h2>Validators<a class="headerlink" href="#validators" title="Link to this heading"></a></h2>
+<p>This section defines specialized parser classes called Validators, designed to assess and validate textual answers. The Validator parser takes an answer as input and returns the original answer along with a validation status that indicates whether the input meets specified criteria or rules.</p>
+<dl class="py class" id="module-rupsycho.parsers.validators">
+<dt class="sig sig-object py" id="rupsycho.parsers.validators.ApologiesValidatorParser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rupsycho.parsers.validators.</span></span><span class="sig-name descname"><span class="pre">ApologiesValidatorParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/parsers/validators.html#ApologiesValidatorParser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.parsers.validators.ApologiesValidatorParser" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseOutputParser</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]</p>
+<p>A parser that validates the input text for apologies-related content.
+Returns the original text along with a validation status.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> (<em>Any</em>)</p></li>
+<li><p><strong>name</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.parsers.validators.ApologiesValidatorParser.parse">
+<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/parsers/validators.html#ApologiesValidatorParser.parse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.parsers.validators.ApologiesValidatorParser.parse" title="Link to this definition"></a></dt>
+<dd><p>Parse a single string model output into some structure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>text</strong> (<em>str</em>) – String output of a language model.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Structured output.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.parsers.validators.BeingAiValidatorParser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rupsycho.parsers.validators.</span></span><span class="sig-name descname"><span class="pre">BeingAiValidatorParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/parsers/validators.html#BeingAiValidatorParser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.parsers.validators.BeingAiValidatorParser" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseOutputParser</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]</p>
+<p>A parser that validates the input text for being_ai-related content.
+Returns the original text along with a validation status.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> (<em>Any</em>)</p></li>
+<li><p><strong>name</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.parsers.validators.BeingAiValidatorParser.parse">
+<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/parsers/validators.html#BeingAiValidatorParser.parse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.parsers.validators.BeingAiValidatorParser.parse" title="Link to this definition"></a></dt>
+<dd><p>Parse a single string model output into some structure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>text</strong> (<em>str</em>) – String output of a language model.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Structured output.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.parsers.validators.RefusalValidatorParser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rupsycho.parsers.validators.</span></span><span class="sig-name descname"><span class="pre">RefusalValidatorParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/parsers/validators.html#RefusalValidatorParser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.parsers.validators.RefusalValidatorParser" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseOutputParser</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]</p>
+<p>A parser that validates the input text for refusal-related content.
+Returns the original text along with a validation status.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> (<em>Any</em>)</p></li>
+<li><p><strong>name</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.parsers.validators.RefusalValidatorParser.parse">
+<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/parsers/validators.html#RefusalValidatorParser.parse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.parsers.validators.RefusalValidatorParser.parse" title="Link to this definition"></a></dt>
+<dd><p>Parse a single string model output into some structure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>text</strong> (<em>str</em>) – String output of a language model.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Structured output.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.parsers.validators.ValidatorParser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rupsycho.parsers.validators.</span></span><span class="sig-name descname"><span class="pre">ValidatorParser</span></span><a class="reference internal" href="_modules/rupsycho/parsers/validators.html#ValidatorParser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.parsers.validators.ValidatorParser" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseOutputParser</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]</p>
+<p>A custom parser that combines the results of ApologiesValidatorParser,
+BeingAiValidatorParser, and RefusalValidatorParser to validate the input text
+against these checks and return the original text along with a combined validation status.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.parsers.validators.ValidatorParser.apologies_parser">
+<span class="sig-name descname"><span class="pre">apologies_parser</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#rupsycho.parsers.validators.ApologiesValidatorParser" title="rupsycho.parsers.validators.ApologiesValidatorParser"><span class="pre">ApologiesValidatorParser</span></a></em><a class="headerlink" href="#rupsycho.parsers.validators.ValidatorParser.apologies_parser" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.parsers.validators.ValidatorParser.being_ai_parser">
+<span class="sig-name descname"><span class="pre">being_ai_parser</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#rupsycho.parsers.validators.BeingAiValidatorParser" title="rupsycho.parsers.validators.BeingAiValidatorParser"><span class="pre">BeingAiValidatorParser</span></a></em><a class="headerlink" href="#rupsycho.parsers.validators.ValidatorParser.being_ai_parser" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.parsers.validators.ValidatorParser.refusal_parser">
+<span class="sig-name descname"><span class="pre">refusal_parser</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#rupsycho.parsers.validators.RefusalValidatorParser" title="rupsycho.parsers.validators.RefusalValidatorParser"><span class="pre">RefusalValidatorParser</span></a></em><a class="headerlink" href="#rupsycho.parsers.validators.ValidatorParser.refusal_parser" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.parsers.validators.ValidatorParser.parse">
+<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/parsers/validators.html#ValidatorParser.parse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.parsers.validators.ValidatorParser.parse" title="Link to this definition"></a></dt>
+<dd><p>Parses the input text by running it through all three validators and
+combining their results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>text</strong> (<em>str</em>) – The input string to be validated.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary containing the original text, a combined validation status,
+and detailed results from each individual validator.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

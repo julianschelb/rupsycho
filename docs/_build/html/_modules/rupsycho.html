@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rupsycho &mdash; RUPsycho 0.10 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=ac14934e"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            RUPsycho
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../init.html">Get Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reader.html">Load Experiments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../experiment.html">Define Experiments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../run.html">Running an Experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../parser.html">Parse Answers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../parsers.html">Parsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../models.html">Data Models</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">RUPsycho</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">rupsycho</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for rupsycho</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">RUPsycho: A Python Package for Social Science Research Using Large Language Models (LLMs)</span>
+<span class="sd">=========================================================================================</span>
+
+<span class="sd">RUPsycho is a Python package designed to facilitate the application of large language models (LLMs) </span>
+<span class="sd">in social science research. It offers tools to explore human-like behaviors through LLMs, providing </span>
+<span class="sd">a novel approach in the field of natural language processing (NLP).</span>
+
+<span class="sd">This module within RUPsycho provides functions to load and validate experimental data from JSON </span>
+<span class="sd">dictionaries and files. It supports both single and multiple experiment loading, making it easy </span>
+<span class="sd">to manage and analyze experiments in various formats.</span>
+
+
+<span class="sd">Functions</span>
+<span class="sd">---------</span>
+<span class="sd">- `experiment_from_dict(json_data: dict) -&gt; ExperimentDocument`:</span>
+<span class="sd">    Load a single experiment from a JSON dictionary.</span>
+
+<span class="sd">- `experiment_from_file(path: str) -&gt; ExperimentDocument`:</span>
+<span class="sd">    Load a single experiment from a JSON file.</span>
+
+<span class="sd">- `experiments_from_dicts(json_data_list: List[dict]) -&gt; Iterator[ExperimentDocument]`:</span>
+<span class="sd">    Load multiple experiments from a list of JSON dictionaries.</span>
+
+<span class="sd">- `experiments_from_files(paths: List[str]) -&gt; Iterator[ExperimentDocument]`:</span>
+<span class="sd">    Load multiple experiments from a list of JSON files.</span>
+
+<span class="sd">Usage</span>
+<span class="sd">-----</span>
+<span class="sd">- **Single Experiment Loading**:</span>
+<span class="sd">    - Use `experiment_from_dict` for loading an experiment from an in-memory JSON dictionary.</span>
+<span class="sd">    - Use `experiment_from_file` for loading an experiment from a JSON file.</span>
+
+<span class="sd">- **Multiple Experiments Loading**:</span>
+<span class="sd">    - Use `experiments_from_dicts` to load multiple experiments from a list of JSON dictionaries.</span>
+<span class="sd">    - Use `experiments_from_files` to load multiple experiments from a list of JSON files.</span>
+
+<span class="sd">Example</span>
+<span class="sd">-------</span>
+<span class="sd">After importing RUPsycho, you can start using it in your Python script or Jupyter notebook:</span>
+
+<span class="sd">    import rupsycho as rup</span>
+
+<span class="sd">    # Load experiment data</span>
+<span class="sd">    experiment = rup.experiment_from_file(&quot;bfi.json&quot;)</span>
+
+<span class="sd">    # Run the experiment</span>
+<span class="sd">    experiment.run()</span>
+
+<span class="sd">    # Save the results</span>
+<span class="sd">    experiment.export_to_file(&quot;results.json&quot;)</span>
+
+<span class="sd">For more detailed examples and usage, refer to the official RUPsycho documentation.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">langchain_core.output_parsers</span> <span class="kn">import</span> <span class="n">StrOutputParser</span>
+<span class="kn">from</span> <span class="nn">langchain_core.prompts</span> <span class="kn">import</span> <span class="n">ChatPromptTemplate</span>
+<span class="kn">from</span> <span class="nn">langchain_huggingface</span> <span class="kn">import</span> <span class="n">HuggingFacePipeline</span>
+<span class="kn">from</span> <span class="nn">rupsycho.experiment_collection</span> <span class="kn">import</span> <span class="n">ExperimentCollection</span>
+<span class="kn">from</span> <span class="nn">rupsycho.reader</span> <span class="kn">import</span> <span class="n">ExperimentLoader</span><span class="p">,</span> <span class="n">ExperimentDocument</span>
+<span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">pipeline</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Iterator</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+
+
+<span class="c1"># ================================= Create Single Experiment ================================</span>
+
+
+<div class="viewcode-block" id="experiment_from_dict">
+<a class="viewcode-back" href="../init.html#rupsycho.experiment_from_dict">[docs]</a>
+<span class="k">def</span> <span class="nf">experiment_from_dict</span><span class="p">(</span><span class="n">json_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ExperimentDocument</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a new experiment from a JSON dictionary.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">loader</span> <span class="o">=</span> <span class="n">ExperimentLoader</span><span class="p">()</span>
+        <span class="c1"># Use the loader to validate and return the ExperimentDocument</span>
+        <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="n">loader</span><span class="o">.</span><span class="n">lazy_load_from_dicts</span><span class="p">([</span><span class="n">json_data</span><span class="p">]))</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Failed to create experiment from dict: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span></div>
+
+
+
+<div class="viewcode-block" id="experiment_from_file">
+<a class="viewcode-back" href="../init.html#rupsycho.experiment_from_file">[docs]</a>
+<span class="k">def</span> <span class="nf">experiment_from_file</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ExperimentDocument</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a new experiment from a JSON file.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">experiments</span> <span class="o">=</span> <span class="n">ExperimentLoader</span><span class="p">(</span><span class="n">path_pattern</span><span class="o">=</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">experiments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">experiments</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Failed to create experiment from file </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span></div>
+
+
+<span class="c1"># ================================= Create Multiple Experiments ================================</span>
+
+
+<div class="viewcode-block" id="experiments_from_dicts">
+<a class="viewcode-back" href="../init.html#rupsycho.experiments_from_dicts">[docs]</a>
+<span class="k">def</span> <span class="nf">experiments_from_dicts</span><span class="p">(</span><span class="n">json_data_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">ExperimentDocument</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create multiple experiments from a list of JSON dictionaries.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">loader</span> <span class="o">=</span> <span class="n">ExperimentLoader</span><span class="p">()</span>
+        <span class="c1"># Use the loader to validate and return ExperimentDocuments</span>
+        <span class="k">return</span> <span class="n">loader</span><span class="o">.</span><span class="n">lazy_load_from_dicts</span><span class="p">(</span><span class="n">json_data_list</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Failed to create experiments from list of dicts: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span></div>
+
+
+
+<div class="viewcode-block" id="experiments_from_files">
+<a class="viewcode-back" href="../init.html#rupsycho.experiments_from_files">[docs]</a>
+<span class="k">def</span> <span class="nf">experiments_from_files</span><span class="p">(</span><span class="n">path_pattern</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">ExperimentDocument</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create multiple experiments from a list of JSON files.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">experiments</span> <span class="o">=</span> <span class="n">ExperimentLoader</span><span class="p">(</span><span class="n">path_pattern</span><span class="o">=</span><span class="n">path_pattern</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">ExperimentCollection</span><span class="p">(</span><span class="n">experiments</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Failed to create experiments from files matching </span><span class="si">{</span><span class="n">path_pattern</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span></div>
+
+
+<span class="c1"># ================================= Create Example Experiments ================================</span>
+
+
+<div class="viewcode-block" id="example_experiment_bfi">
+<a class="viewcode-back" href="../init.html#rupsycho.example_experiment_bfi">[docs]</a>
+<span class="k">def</span> <span class="nf">example_experiment_bfi</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;google/flan-t5-small&quot;</span><span class="p">,</span>
+    <span class="n">pipeline_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;text2text-generation&quot;</span><span class="p">,</span>
+    <span class="n">temperature</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.7</span><span class="p">,</span>
+    <span class="n">max_new_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">128</span><span class="p">,</span>
+    <span class="n">api_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ExperimentDocument</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create an example experiment with a specified model, pipeline type, and generative parameters.</span>
+
+<span class="sd">    :param model_name: Name of the Hugging Face model to use.</span>
+<span class="sd">    :param pipeline_type: Type of pipeline to use (e.g., &#39;text2text-generation&#39;).</span>
+<span class="sd">    :param temperature: Temperature setting for the generative model.</span>
+<span class="sd">    :param max_new_tokens: Maximum number of new tokens to generate.</span>
+<span class="sd">    :param api_key: Optional Hugging Face API key for accessing gated models.</span>
+<span class="sd">    :return: Configured ExperimentDocument.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Set the Hugging Face API key if provided</span>
+    <span class="k">if</span> <span class="n">api_key</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">huggingface_hub</span> <span class="kn">import</span> <span class="n">login</span>
+        <span class="n">login</span><span class="p">(</span><span class="n">api_key</span><span class="p">)</span>
+
+    <span class="c1"># Example experiment data</span>
+    <span class="n">experiment_data</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Generative Models for Big Five Inventory&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Description: Testing Generative Models for BFI questionnaire using Rupsycho.&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;demographic_profiles&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;Profile 1&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;attributes&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Mr&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Grueber&quot;</span>
+                <span class="p">},</span>
+                <span class="s2">&quot;template&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="si">{title}</span><span class="s2"> </span><span class="si">{name}</span><span class="s2">&quot;</span>
+            <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;parameters&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;seeds&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;7&quot;</span><span class="p">],</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;questionnaire&quot;</span><span class="p">:</span>  <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;BIG FIVE INVENTORY RESPONSE FORM AND INSTRUCTIONS TO PARTICIPANTS&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;general_instruction&quot;</span><span class="p">:</span> <span class="s2">&quot;Here are a number of characteristics that may or may not apply to you. For example, do you agree that you are someone who likes to spend time with others? Please return the number corresponding to the answer options to indicate the extent to which you agree or disagree with that statement.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;attributes&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;dimension&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="s2">&quot;Extraversion&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;2&quot;</span><span class="p">:</span> <span class="s2">&quot;Agreeableness&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;3&quot;</span><span class="p">:</span> <span class="s2">&quot;Conscientiousness&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;4&quot;</span><span class="p">:</span> <span class="s2">&quot;Neuroticism&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;5&quot;</span><span class="p">:</span> <span class="s2">&quot;Openness&quot;</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;default_answer_options&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;1. Disagree strongly&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;ignored_for_scale&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="mi">1</span>
+                <span class="p">},</span>
+                <span class="s2">&quot;2&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;2. Disagree a little&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;ignored_for_scale&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="mi">2</span>
+                <span class="p">},</span>
+                <span class="s2">&quot;3&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;3. Neither agree nor disagree&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;ignored_for_scale&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="mi">3</span>
+                <span class="p">},</span>
+                <span class="s2">&quot;4&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;4. Agree a little&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;ignored_for_scale&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="mi">4</span>
+                <span class="p">},</span>
+                <span class="s2">&quot;5&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;5. Agree strongly&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;ignored_for_scale&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="mi">5</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;instruction_items&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;question&quot;</span><span class="p">:</span> <span class="s2">&quot;I see myself as someone who...&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;reversed&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="s2">&quot;attributes&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;dimension&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;question&quot;</span><span class="p">:</span> <span class="s2">&quot;Tends to find fault with others&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;reversed&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="s2">&quot;attributes&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;dimension&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;question&quot;</span><span class="p">:</span> <span class="s2">&quot;Does a thorough job&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;reversed&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="s2">&quot;attributes&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;dimension&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;question&quot;</span><span class="p">:</span> <span class="s2">&quot;Is depressed, blue&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;reversed&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="s2">&quot;attributes&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;dimension&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Load a single experiment from the example data</span>
+    <span class="n">experiment</span> <span class="o">=</span> <span class="n">experiment_from_dict</span><span class="p">(</span><span class="n">experiment_data</span><span class="p">)</span>
+
+    <span class="c1"># Load the specified Hugging Face generative model</span>
+    <span class="n">pipe</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
+        <span class="n">pipeline_type</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">model_name</span><span class="p">,</span>
+        <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
+        <span class="n">max_new_tokens</span><span class="o">=</span><span class="n">max_new_tokens</span>
+    <span class="p">)</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">HuggingFacePipeline</span><span class="p">(</span><span class="n">pipeline</span><span class="o">=</span><span class="n">pipe</span><span class="p">)</span>
+
+    <span class="c1"># Add the model to the experiment</span>
+    <span class="n">experiment</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">identifier</span><span class="o">=</span><span class="s2">&quot;hf_generative_model&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Create the provided ChatPromptTemplate for the experiment</span>
+    <span class="n">system_message_template</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        Objective: &quot;</span><span class="si">{general_instruction}</span><span class="s2">&quot;</span>
+<span class="s2">        Answer with respect to the following persona description and question.</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+    <span class="c1"># Create the user message template</span>
+    <span class="n">user_message_template</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot; </span>
+<span class="s2">        Question:</span>
+<span class="s2">        </span><span class="si">{persona_description}</span><span class="s2"> was asked the following question. </span><span class="si">{question}</span>
+
+<span class="s2">        Answer Options: </span>
+<span class="s2">        </span><span class="si">{answer_options}</span>
+
+<span class="s2">        Instructions: Choose from the list of answer options to answer the question. Answer the question using only the provided answer options. If none of the options are correct, choose the option that is closest to being correct.</span>
+<span class="s2">        </span>
+<span class="s2">        Answer:</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Create the chat prompt template</span>
+    <span class="n">chat_prompt</span> <span class="o">=</span> <span class="n">ChatPromptTemplate</span><span class="o">.</span><span class="n">from_messages</span><span class="p">([</span>
+        <span class="p">(</span><span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="n">system_message_template</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="n">user_message_template</span><span class="p">)</span>
+    <span class="p">])</span>
+
+    <span class="c1"># Set the chat prompt for the experiment</span>
+    <span class="n">experiment</span><span class="o">.</span><span class="n">set_prompt</span><span class="p">(</span><span class="n">chat_prompt</span><span class="p">)</span>
+
+    <span class="c1"># Set a simple string output parser</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">StrOutputParser</span><span class="p">()</span>
+    <span class="n">experiment</span><span class="o">.</span><span class="n">set_parser</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+
+    <span class="c1"># Return the configured experiment</span>
+    <span class="k">return</span> <span class="n">experiment</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

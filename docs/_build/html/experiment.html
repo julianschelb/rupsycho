@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Define Experiments &mdash; RUPsycho 0.10 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=ac14934e"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Running an Experiment" href="run.html" />
+    <link rel="prev" title="Load Experiments" href="reader.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            RUPsycho
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="init.html">Get Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reader.html">Load Experiments</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Define Experiments</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-rupsycho.experiment">Experiment</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.experiment.ExperimentDocument"><code class="docutils literal notranslate"><span class="pre">ExperimentDocument</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.experiment.ExperimentDocument.name"><code class="docutils literal notranslate"><span class="pre">ExperimentDocument.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.experiment.ExperimentDocument.description"><code class="docutils literal notranslate"><span class="pre">ExperimentDocument.description</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.experiment.ExperimentDocument.parameters"><code class="docutils literal notranslate"><span class="pre">ExperimentDocument.parameters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.experiment.ExperimentDocument.prompt_template"><code class="docutils literal notranslate"><span class="pre">ExperimentDocument.prompt_template</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.experiment.ExperimentDocument.models"><code class="docutils literal notranslate"><span class="pre">ExperimentDocument.models</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.experiment.ExperimentDocument.demographic_profiles"><code class="docutils literal notranslate"><span class="pre">ExperimentDocument.demographic_profiles</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.experiment.ExperimentDocument.questionnaire"><code class="docutils literal notranslate"><span class="pre">ExperimentDocument.questionnaire</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.experiment.ExperimentDocument.metadata"><code class="docutils literal notranslate"><span class="pre">ExperimentDocument.metadata</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.experiment.ExperimentDocument.type"><code class="docutils literal notranslate"><span class="pre">ExperimentDocument.type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.experiment.ExperimentDocument.runnable_prompt"><code class="docutils literal notranslate"><span class="pre">ExperimentDocument.runnable_prompt</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.experiment.ExperimentDocument.runnable_models"><code class="docutils literal notranslate"><span class="pre">ExperimentDocument.runnable_models</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.experiment.ExperimentDocument.runnable_parser"><code class="docutils literal notranslate"><span class="pre">ExperimentDocument.runnable_parser</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.experiment.ExperimentDocument.Config"><code class="docutils literal notranslate"><span class="pre">ExperimentDocument.Config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.experiment.ExperimentDocument.set_questionnaire"><code class="docutils literal notranslate"><span class="pre">ExperimentDocument.set_questionnaire()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.experiment.ExperimentDocument.set_parser"><code class="docutils literal notranslate"><span class="pre">ExperimentDocument.set_parser()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-rupsycho.mixins.experiment_processing">Experiment Processing Mixin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.mixins.experiment_processing.get_default_model"><code class="docutils literal notranslate"><span class="pre">get_default_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin"><code class="docutils literal notranslate"><span class="pre">ExperimentProcessingMixin</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.create_chain"><code class="docutils literal notranslate"><span class="pre">ExperimentProcessingMixin.create_chain()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.create_all_chains"><code class="docutils literal notranslate"><span class="pre">ExperimentProcessingMixin.create_all_chains()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.initialize_answers_if_needed"><code class="docutils literal notranslate"><span class="pre">ExperimentProcessingMixin.initialize_answers_if_needed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.create_input_dict"><code class="docutils literal notranslate"><span class="pre">ExperimentProcessingMixin.create_input_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.process_single_experiment"><code class="docutils literal notranslate"><span class="pre">ExperimentProcessingMixin.process_single_experiment()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.run"><code class="docutils literal notranslate"><span class="pre">ExperimentProcessingMixin.run()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-rupsycho.mixins.experiment_exporting">Experiment Exporting Mixin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.mixins.experiment_exporting.ExperimentExportMixin"><code class="docutils literal notranslate"><span class="pre">ExperimentExportMixin</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.experiment_exporting.ExperimentExportMixin.model_dump"><code class="docutils literal notranslate"><span class="pre">ExperimentExportMixin.model_dump()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.experiment_exporting.ExperimentExportMixin.export_to_file"><code class="docutils literal notranslate"><span class="pre">ExperimentExportMixin.export_to_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.experiment_exporting.ExperimentExportMixin.get_answers"><code class="docutils literal notranslate"><span class="pre">ExperimentExportMixin.get_answers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.experiment_exporting.ExperimentExportMixin.get_answers_as_dataframe"><code class="docutils literal notranslate"><span class="pre">ExperimentExportMixin.get_answers_as_dataframe()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-rupsycho.mixins.model_managing">Model Management Mixin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.mixins.model_managing.ModelManagementMixin"><code class="docutils literal notranslate"><span class="pre">ModelManagementMixin</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.model_managing.ModelManagementMixin.load_model"><code class="docutils literal notranslate"><span class="pre">ModelManagementMixin.load_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.model_managing.ModelManagementMixin.add_model"><code class="docutils literal notranslate"><span class="pre">ModelManagementMixin.add_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.model_managing.ModelManagementMixin.set_runnable_models"><code class="docutils literal notranslate"><span class="pre">ModelManagementMixin.set_runnable_models()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.model_managing.ModelManagementMixin.get_model"><code class="docutils literal notranslate"><span class="pre">ModelManagementMixin.get_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.model_managing.ModelManagementMixin.remove_model"><code class="docutils literal notranslate"><span class="pre">ModelManagementMixin.remove_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.model_managing.ModelManagementMixin.list_models"><code class="docutils literal notranslate"><span class="pre">ModelManagementMixin.list_models()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.model_managing.ModelManagementMixin.has_model"><code class="docutils literal notranslate"><span class="pre">ModelManagementMixin.has_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.model_managing.ModelManagementMixin.replace_model"><code class="docutils literal notranslate"><span class="pre">ModelManagementMixin.replace_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.model_managing.ModelManagementMixin.clear_models"><code class="docutils literal notranslate"><span class="pre">ModelManagementMixin.clear_models()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.model_managing.ModelManagementMixin.count_models"><code class="docutils literal notranslate"><span class="pre">ModelManagementMixin.count_models()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.model_managing.ModelManagementMixin.get_all_runnable_models"><code class="docutils literal notranslate"><span class="pre">ModelManagementMixin.get_all_runnable_models()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-rupsycho.mixins.persona_managing">Persona Management Mixin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.mixins.persona_managing.PersonaManagementMixin"><code class="docutils literal notranslate"><span class="pre">PersonaManagementMixin</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.persona_managing.PersonaManagementMixin.add_persona"><code class="docutils literal notranslate"><span class="pre">PersonaManagementMixin.add_persona()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.persona_managing.PersonaManagementMixin.get_persona"><code class="docutils literal notranslate"><span class="pre">PersonaManagementMixin.get_persona()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.persona_managing.PersonaManagementMixin.remove_persona"><code class="docutils literal notranslate"><span class="pre">PersonaManagementMixin.remove_persona()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.persona_managing.PersonaManagementMixin.list_personas"><code class="docutils literal notranslate"><span class="pre">PersonaManagementMixin.list_personas()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.persona_managing.PersonaManagementMixin.clear_personas"><code class="docutils literal notranslate"><span class="pre">PersonaManagementMixin.clear_personas()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-rupsycho.mixins.prompt_managing">Prompt Management Mixin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.mixins.prompt_managing.PromptTemplateMixin"><code class="docutils literal notranslate"><span class="pre">PromptTemplateMixin</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.prompt_managing.PromptTemplateMixin.load_prompt"><code class="docutils literal notranslate"><span class="pre">PromptTemplateMixin.load_prompt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.prompt_managing.PromptTemplateMixin.set_prompt"><code class="docutils literal notranslate"><span class="pre">PromptTemplateMixin.set_prompt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.prompt_managing.PromptTemplateMixin.get_prompt"><code class="docutils literal notranslate"><span class="pre">PromptTemplateMixin.get_prompt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.prompt_managing.PromptTemplateMixin.get_prompt_config"><code class="docutils literal notranslate"><span class="pre">PromptTemplateMixin.get_prompt_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.prompt_managing.PromptTemplateMixin.set_prompt_config"><code class="docutils literal notranslate"><span class="pre">PromptTemplateMixin.set_prompt_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.prompt_managing.PromptTemplateMixin.reset_prompt"><code class="docutils literal notranslate"><span class="pre">PromptTemplateMixin.reset_prompt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.prompt_managing.PromptTemplateMixin.has_prompt"><code class="docutils literal notranslate"><span class="pre">PromptTemplateMixin.has_prompt()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-rupsycho.experiment_collection">Experiment Collection</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.experiment_collection.ExperimentCollection"><code class="docutils literal notranslate"><span class="pre">ExperimentCollection</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.experiment_collection.ExperimentCollection.experiments"><code class="docutils literal notranslate"><span class="pre">ExperimentCollection.experiments</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.experiment_collection.ExperimentCollection.type"><code class="docutils literal notranslate"><span class="pre">ExperimentCollection.type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.experiment_collection.ExperimentCollection.Config"><code class="docutils literal notranslate"><span class="pre">ExperimentCollection.Config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.experiment_collection.ExperimentCollection.is_lc_serializable"><code class="docutils literal notranslate"><span class="pre">ExperimentCollection.is_lc_serializable()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.experiment_collection.ExperimentCollection.get_lc_namespace"><code class="docutils literal notranslate"><span class="pre">ExperimentCollection.get_lc_namespace()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rupsycho.experiment_collection.ExperimentCollection.run_all"><code class="docutils literal notranslate"><span class="pre">ExperimentCollection.run_all()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="run.html">Running an Experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parser.html">Parse Answers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parsers.html">Parsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Data Models</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">RUPsycho</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Define Experiments</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/experiment.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="define-experiments">
+<h1>Define Experiments<a class="headerlink" href="#define-experiments" title="Link to this heading"></a></h1>
+<section id="module-rupsycho.experiment">
+<span id="experiment"></span><h2>Experiment<a class="headerlink" href="#module-rupsycho.experiment" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.experiment.ExperimentDocument">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rupsycho.experiment.</span></span><span class="sig-name descname"><span class="pre">ExperimentDocument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prompt_template</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">demographic_profiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">questionnaire</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ExperimentDocument'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runnable_prompt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runnable_models</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runnable_parser</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/experiment.html#ExperimentDocument"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.experiment.ExperimentDocument" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseMedia</span></code>, <a class="reference internal" href="#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin" title="rupsycho.mixins.experiment_processing.ExperimentProcessingMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExperimentProcessingMixin</span></code></a>, <a class="reference internal" href="#rupsycho.mixins.experiment_exporting.ExperimentExportMixin" title="rupsycho.mixins.experiment_exporting.ExperimentExportMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExperimentExportMixin</span></code></a>, <a class="reference internal" href="#rupsycho.mixins.model_managing.ModelManagementMixin" title="rupsycho.mixins.model_managing.ModelManagementMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelManagementMixin</span></code></a>, <a class="reference internal" href="#rupsycho.mixins.prompt_managing.PromptTemplateMixin" title="rupsycho.mixins.prompt_managing.PromptTemplateMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">PromptTemplateMixin</span></code></a>, <a class="reference internal" href="#rupsycho.mixins.persona_managing.PersonaManagementMixin" title="rupsycho.mixins.persona_managing.PersonaManagementMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">PersonaManagementMixin</span></code></a></p>
+<p>Class for storing an experiment and associated questionnaires along with metadata.</p>
+<p>Extends LangChain’s BaseMedia and Pydantic’s BaseModel, integrating data validation
+and serialization capabilities with document handling features.</p>
+<p class="rubric">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">my_module</span> <span class="kn">import</span> <span class="n">ExperimentDocument</span>
+
+<span class="n">experiment_doc</span> <span class="o">=</span> <span class="n">ExperimentDocument</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Experiment 1&quot;</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Test Experiment&quot;</span><span class="p">,</span>
+    <span class="n">demographic_profiles</span><span class="o">=</span><span class="p">{</span><span class="o">...</span><span class="p">},</span>
+    <span class="n">models</span><span class="o">=</span><span class="p">{</span><span class="o">...</span><span class="p">},</span>
+    <span class="n">questionnaire</span><span class="o">=...</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;Lab A&quot;</span><span class="p">}</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>metadata</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>)</p></li>
+<li><p><strong>name</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>description</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>parameters</strong> (<em>Parameters</em>)</p></li>
+<li><p><strong>prompt_template</strong> (<em>NormalPromptTemplateConfig</em><em> | </em><em>ChatPromptTemplateConfig</em><em> | </em><em>LangchainPromptTemplateConfig</em>)</p></li>
+<li><p><strong>models</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><a class="reference internal" href="models.html#rupsycho.models.model.LangChainModelConfig" title="rupsycho.models.model.LangChainModelConfig"><em>LangChainModelConfig</em></a><em> | </em><a class="reference internal" href="models.html#rupsycho.models.model.LocalHuggingFaceModelConfig" title="rupsycho.models.model.LocalHuggingFaceModelConfig"><em>LocalHuggingFaceModelConfig</em></a><em> | </em><a class="reference internal" href="models.html#rupsycho.models.model.RemoteHuggingFaceModelConfig" title="rupsycho.models.model.RemoteHuggingFaceModelConfig"><em>RemoteHuggingFaceModelConfig</em></a><em> | </em><a class="reference internal" href="models.html#rupsycho.models.model.OllamaModelConfig" title="rupsycho.models.model.OllamaModelConfig"><em>OllamaModelConfig</em></a><em> | </em><a class="reference internal" href="models.html#rupsycho.models.model.OpenAIModelConfig" title="rupsycho.models.model.OpenAIModelConfig"><em>OpenAIModelConfig</em></a><em>]</em>)</p></li>
+<li><p><strong>demographic_profiles</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><a class="reference internal" href="models.html#rupsycho.models.questionnaire.DemographicProfile" title="rupsycho.models.questionnaire.DemographicProfile"><em>DemographicProfile</em></a><em>]</em>)</p></li>
+<li><p><strong>questionnaire</strong> (<a class="reference internal" href="models.html#rupsycho.models.questionnaire.Questionnaire" title="rupsycho.models.questionnaire.Questionnaire"><em>Questionnaire</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>type</strong> (<em>Literal</em><em>[</em><em>'ExperimentDocument'</em><em>]</em>)</p></li>
+<li><p><strong>runnable_prompt</strong> (<em>Any</em>)</p></li>
+<li><p><strong>runnable_models</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>)</p></li>
+<li><p><strong>runnable_parser</strong> (<em>Any</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.experiment.ExperimentDocument.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#rupsycho.experiment.ExperimentDocument.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.experiment.ExperimentDocument.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#rupsycho.experiment.ExperimentDocument.description" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.experiment.ExperimentDocument.parameters">
+<span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Parameters</span></em><a class="headerlink" href="#rupsycho.experiment.ExperimentDocument.parameters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.experiment.ExperimentDocument.prompt_template">
+<span class="sig-name descname"><span class="pre">prompt_template</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">NormalPromptTemplateConfig</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ChatPromptTemplateConfig</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">LangchainPromptTemplateConfig</span></em><a class="headerlink" href="#rupsycho.experiment.ExperimentDocument.prompt_template" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.experiment.ExperimentDocument.models">
+<span class="sig-name descname"><span class="pre">models</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="models.html#rupsycho.models.model.LangChainModelConfig" title="rupsycho.models.model.LangChainModelConfig"><span class="pre">LangChainModelConfig</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="models.html#rupsycho.models.model.LocalHuggingFaceModelConfig" title="rupsycho.models.model.LocalHuggingFaceModelConfig"><span class="pre">LocalHuggingFaceModelConfig</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="models.html#rupsycho.models.model.RemoteHuggingFaceModelConfig" title="rupsycho.models.model.RemoteHuggingFaceModelConfig"><span class="pre">RemoteHuggingFaceModelConfig</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="models.html#rupsycho.models.model.OllamaModelConfig" title="rupsycho.models.model.OllamaModelConfig"><span class="pre">OllamaModelConfig</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="models.html#rupsycho.models.model.OpenAIModelConfig" title="rupsycho.models.model.OpenAIModelConfig"><span class="pre">OpenAIModelConfig</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#rupsycho.experiment.ExperimentDocument.models" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.experiment.ExperimentDocument.demographic_profiles">
+<span class="sig-name descname"><span class="pre">demographic_profiles</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="models.html#rupsycho.models.questionnaire.DemographicProfile" title="rupsycho.models.questionnaire.DemographicProfile"><span class="pre">DemographicProfile</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#rupsycho.experiment.ExperimentDocument.demographic_profiles" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.experiment.ExperimentDocument.questionnaire">
+<span class="sig-name descname"><span class="pre">questionnaire</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="models.html#rupsycho.models.questionnaire.Questionnaire" title="rupsycho.models.questionnaire.Questionnaire"><span class="pre">Questionnaire</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#rupsycho.experiment.ExperimentDocument.questionnaire" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.experiment.ExperimentDocument.metadata">
+<span class="sig-name descname"><span class="pre">metadata</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#rupsycho.experiment.ExperimentDocument.metadata" title="Link to this definition"></a></dt>
+<dd><p>Arbitrary metadata associated with the content.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.experiment.ExperimentDocument.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'ExperimentDocument'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#rupsycho.experiment.ExperimentDocument.type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.experiment.ExperimentDocument.runnable_prompt">
+<span class="sig-name descname"><span class="pre">runnable_prompt</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Any</span></em><a class="headerlink" href="#rupsycho.experiment.ExperimentDocument.runnable_prompt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.experiment.ExperimentDocument.runnable_models">
+<span class="sig-name descname"><span class="pre">runnable_models</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#rupsycho.experiment.ExperimentDocument.runnable_models" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.experiment.ExperimentDocument.runnable_parser">
+<span class="sig-name descname"><span class="pre">runnable_parser</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Any</span></em><a class="headerlink" href="#rupsycho.experiment.ExperimentDocument.runnable_parser" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.experiment.ExperimentDocument.Config">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Config</span></span><a class="reference internal" href="_modules/rupsycho/experiment.html#ExperimentDocument.Config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.experiment.ExperimentDocument.Config" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.experiment.ExperimentDocument.Config.arbitrary_types_allowed">
+<span class="sig-name descname"><span class="pre">arbitrary_types_allowed</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#rupsycho.experiment.ExperimentDocument.Config.arbitrary_types_allowed" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.experiment.ExperimentDocument.set_questionnaire">
+<span class="sig-name descname"><span class="pre">set_questionnaire</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">questionnaire</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/experiment.html#ExperimentDocument.set_questionnaire"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.experiment.ExperimentDocument.set_questionnaire" title="Link to this definition"></a></dt>
+<dd><p>Sets the questionnaire for the experiment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>questionnaire</strong> (<a class="reference internal" href="models.html#rupsycho.models.questionnaire.Questionnaire" title="rupsycho.models.questionnaire.Questionnaire"><em>Questionnaire</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.experiment.ExperimentDocument.set_parser">
+<span class="sig-name descname"><span class="pre">set_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/experiment.html#ExperimentDocument.set_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.experiment.ExperimentDocument.set_parser" title="Link to this definition"></a></dt>
+<dd><p>Adds a parser to the experiment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>parser</strong> (<em>Any</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-rupsycho.mixins.experiment_processing">
+<span id="experiment-processing-mixin"></span><h2>Experiment Processing Mixin<a class="headerlink" href="#module-rupsycho.mixins.experiment_processing" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="rupsycho.mixins.experiment_processing.get_default_model">
+<span class="sig-prename descclassname"><span class="pre">rupsycho.mixins.experiment_processing.</span></span><span class="sig-name descname"><span class="pre">get_default_model</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/experiment_processing.html#get_default_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.experiment_processing.get_default_model" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>HuggingFacePipeline</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.mixins.experiment_processing.ExperimentProcessingMixin">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rupsycho.mixins.experiment_processing.</span></span><span class="sig-name descname"><span class="pre">ExperimentProcessingMixin</span></span><a class="reference internal" href="_modules/rupsycho/mixins/experiment_processing.html#ExperimentProcessingMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A mixin that provides methods for processing experiments with various models,
+profiles, and instructions. This class is designed to facilitate the creation
+and execution of experiment chains, manage errors, track progress, and store results.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.create_chain">
+<span class="sig-name descname"><span class="pre">create_chain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/experiment_processing.html#ExperimentProcessingMixin.create_chain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.create_chain" title="Link to this definition"></a></dt>
+<dd><p>Create a chain for running the experiment using the model identified by model_key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_key</strong> (<em>str</em>)</p></li>
+<li><p><strong>seed</strong> (<em>int</em>)</p></li>
+<li><p><strong>params</strong> (<em>dict</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Any</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.create_all_chains">
+<span class="sig-name descname"><span class="pre">create_all_chains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/experiment_processing.html#ExperimentProcessingMixin.create_all_chains"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.create_all_chains" title="Link to this definition"></a></dt>
+<dd><p>Create chains for running the experiment with all models.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seed</strong> (<em>int</em>)</p></li>
+<li><p><strong>params</strong> (<em>dict</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Dict</em>[str, <em>Any</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.initialize_answers_if_needed">
+<span class="sig-name descname"><span class="pre">initialize_answers_if_needed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instruction_item</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/experiment_processing.html#ExperimentProcessingMixin.initialize_answers_if_needed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.initialize_answers_if_needed" title="Link to this definition"></a></dt>
+<dd><p>Initialize the ‘answers’ attribute as a nested defaultdict if it doesn’t exist.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>instruction_item</strong> (<em>Any</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.create_input_dict">
+<span class="sig-name descname"><span class="pre">create_input_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">profile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instruction_item</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/experiment_processing.html#ExperimentProcessingMixin.create_input_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.create_input_dict" title="Link to this definition"></a></dt>
+<dd><p>Create the input dictionary required for invoking the chain.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>profile</strong> (<em>Any</em>)</p></li>
+<li><p><strong>instruction_item</strong> (<em>Any</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Dict</em>[str, <em>Any</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.process_single_experiment">
+<span class="sig-name descname"><span class="pre">process_single_experiment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pbar</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/experiment_processing.html#ExperimentProcessingMixin.process_single_experiment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.process_single_experiment" title="Link to this definition"></a></dt>
+<dd><p>Process the experiment, iterating through models, profiles, and instruction items.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/experiment_processing.html#ExperimentProcessingMixin.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.run" title="Link to this definition"></a></dt>
+<dd><p>Run the experiment processing with a progress bar.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-rupsycho.mixins.experiment_exporting">
+<span id="experiment-exporting-mixin"></span><h2>Experiment Exporting Mixin<a class="headerlink" href="#module-rupsycho.mixins.experiment_exporting" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.mixins.experiment_exporting.ExperimentExportMixin">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rupsycho.mixins.experiment_exporting.</span></span><span class="sig-name descname"><span class="pre">ExperimentExportMixin</span></span><a class="reference internal" href="_modules/rupsycho/mixins/experiment_exporting.html#ExperimentExportMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.experiment_exporting.ExperimentExportMixin" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Mixin providing methods to export the experiment results to a file or return the answers.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.experiment_exporting.ExperimentExportMixin.model_dump">
+<span class="sig-name descname"><span class="pre">model_dump</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">include</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_unset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_none</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/experiment_exporting.html#ExperimentExportMixin.model_dump"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.experiment_exporting.ExperimentExportMixin.model_dump" title="Link to this definition"></a></dt>
+<dd><p>Convert the ExperimentDocument instance to a dictionary, allowing for inclusion or exclusion of specific fields.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>include</strong> (<em>Set</em><em>[</em><em>str</em><em>] </em><em>| </em><em>None</em>) – A set of field names to include in the output.</p></li>
+<li><p><strong>exclude</strong> (<em>Set</em><em>[</em><em>str</em><em>] </em><em>| </em><em>None</em>) – A set of field names to exclude from the output.</p></li>
+<li><p><strong>exclude_unset</strong> (<em>bool</em>) – Exclude fields that were not explicitly set.</p></li>
+<li><p><strong>exclude_none</strong> (<em>bool</em>) – Exclude fields that are set to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Dict</em>[str, <em>Any</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.experiment_exporting.ExperimentExportMixin.export_to_file">
+<span class="sig-name descname"><span class="pre">export_to_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/experiment_exporting.html#ExperimentExportMixin.export_to_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.experiment_exporting.ExperimentExportMixin.export_to_file" title="Link to this definition"></a></dt>
+<dd><p>Exports the experiment data to a file in JSON format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> (<em>str</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.experiment_exporting.ExperimentExportMixin.get_answers">
+<span class="sig-name descname"><span class="pre">get_answers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/experiment_exporting.html#ExperimentExportMixin.get_answers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.experiment_exporting.ExperimentExportMixin.get_answers" title="Link to this definition"></a></dt>
+<dd><p>Extracts and returns the answers from the experiment in a list holding the nested answer structure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A list of dictionaries representing the answers for each instruction item.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>List</em>[<em>Dict</em>[str, <em>Any</em>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.experiment_exporting.ExperimentExportMixin.get_answers_as_dataframe">
+<span class="sig-name descname"><span class="pre">get_answers_as_dataframe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/experiment_exporting.html#ExperimentExportMixin.get_answers_as_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.experiment_exporting.ExperimentExportMixin.get_answers_as_dataframe" title="Link to this definition"></a></dt>
+<dd><p>Returns a flat pandas DataFrame with the experiment’s answers.</p>
+<p>Columns include:
+- “Instruction ID”
+- “Instruction Question”
+- “Model ID”
+- “Persona ID”
+- “Run Seed”
+- “Answer”</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A pandas DataFrame containing the flattened answers.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>DataFrame</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-rupsycho.mixins.model_managing">
+<span id="model-management-mixin"></span><h2>Model Management Mixin<a class="headerlink" href="#module-rupsycho.mixins.model_managing" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.mixins.model_managing.ModelManagementMixin">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rupsycho.mixins.model_managing.</span></span><span class="sig-name descname"><span class="pre">ModelManagementMixin</span></span><a class="reference internal" href="_modules/rupsycho/mixins/model_managing.html#ModelManagementMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.model_managing.ModelManagementMixin" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Mixin providing methods to manage models in the experiment.</p>
+<p>This includes adding models, setting models, and handling the conversion
+of model definitions into runnable models.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.model_managing.ModelManagementMixin.load_model">
+<span class="sig-name descname"><span class="pre">load_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_definition</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/model_managing.html#ModelManagementMixin.load_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.model_managing.ModelManagementMixin.load_model" title="Link to this definition"></a></dt>
+<dd><p>Load the model from its serialized definition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>model_definition</strong> – Serialized model definition</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Loaded model, or None if an error occurs.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.model_managing.ModelManagementMixin.add_model">
+<span class="sig-name descname"><span class="pre">add_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/model_managing.html#ModelManagementMixin.add_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.model_managing.ModelManagementMixin.add_model" title="Link to this definition"></a></dt>
+<dd><p>Adds a model to the experiment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>Any</em>) – The model to be added.</p></li>
+<li><p><strong>identifier</strong> (<em>str</em><em> | </em><em>None</em>) – Optional identifier for the model.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.model_managing.ModelManagementMixin.set_runnable_models">
+<span class="sig-name descname"><span class="pre">set_runnable_models</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/model_managing.html#ModelManagementMixin.set_runnable_models"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.model_managing.ModelManagementMixin.set_runnable_models" title="Link to this definition"></a></dt>
+<dd><p>Converts model definitions into runnable models, updating the runnable_models dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.model_managing.ModelManagementMixin.get_model">
+<span class="sig-name descname"><span class="pre">get_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">identifier</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/model_managing.html#ModelManagementMixin.get_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.model_managing.ModelManagementMixin.get_model" title="Link to this definition"></a></dt>
+<dd><p>Retrieves a model by its identifier.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>identifier</strong> (<em>str</em>) – The identifier of the model.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The model if found, otherwise None.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Any</em> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.model_managing.ModelManagementMixin.remove_model">
+<span class="sig-name descname"><span class="pre">remove_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">identifier</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/model_managing.html#ModelManagementMixin.remove_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.model_managing.ModelManagementMixin.remove_model" title="Link to this definition"></a></dt>
+<dd><p>Removes a model from the experiment by its identifier.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>identifier</strong> (<em>str</em>) – The identifier of the model to be removed.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.model_managing.ModelManagementMixin.list_models">
+<span class="sig-name descname"><span class="pre">list_models</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/model_managing.html#ModelManagementMixin.list_models"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.model_managing.ModelManagementMixin.list_models" title="Link to this definition"></a></dt>
+<dd><p>Lists all model identifiers in the experiment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A list of model identifiers.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>List</em>[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.model_managing.ModelManagementMixin.has_model">
+<span class="sig-name descname"><span class="pre">has_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">identifier</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/model_managing.html#ModelManagementMixin.has_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.model_managing.ModelManagementMixin.has_model" title="Link to this definition"></a></dt>
+<dd><p>Checks if a model exists in the experiment by its identifier.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>identifier</strong> (<em>str</em>) – The identifier of the model to check.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the model exists, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.model_managing.ModelManagementMixin.replace_model">
+<span class="sig-name descname"><span class="pre">replace_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">identifier</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/model_managing.html#ModelManagementMixin.replace_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.model_managing.ModelManagementMixin.replace_model" title="Link to this definition"></a></dt>
+<dd><p>Replaces an existing model in the experiment with a new one.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>identifier</strong> (<em>str</em>) – The identifier of the model to replace.</p></li>
+<li><p><strong>new_model</strong> (<em>Any</em>) – The new model to replace the old one.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.model_managing.ModelManagementMixin.clear_models">
+<span class="sig-name descname"><span class="pre">clear_models</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/model_managing.html#ModelManagementMixin.clear_models"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.model_managing.ModelManagementMixin.clear_models" title="Link to this definition"></a></dt>
+<dd><p>Removes all models from the experiment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.model_managing.ModelManagementMixin.count_models">
+<span class="sig-name descname"><span class="pre">count_models</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/model_managing.html#ModelManagementMixin.count_models"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.model_managing.ModelManagementMixin.count_models" title="Link to this definition"></a></dt>
+<dd><p>Returns the number of models in the experiment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The number of models.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.model_managing.ModelManagementMixin.get_all_runnable_models">
+<span class="sig-name descname"><span class="pre">get_all_runnable_models</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/model_managing.html#ModelManagementMixin.get_all_runnable_models"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.model_managing.ModelManagementMixin.get_all_runnable_models" title="Link to this definition"></a></dt>
+<dd><p>Retrieves a dictionary of all runnable models.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dictionary of runnable models with identifiers as keys.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Dict</em>[str, <em>Any</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-rupsycho.mixins.persona_managing">
+<span id="persona-management-mixin"></span><h2>Persona Management Mixin<a class="headerlink" href="#module-rupsycho.mixins.persona_managing" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.mixins.persona_managing.PersonaManagementMixin">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rupsycho.mixins.persona_managing.</span></span><span class="sig-name descname"><span class="pre">PersonaManagementMixin</span></span><a class="reference internal" href="_modules/rupsycho/mixins/persona_managing.html#PersonaManagementMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.persona_managing.PersonaManagementMixin" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Mixin providing methods to manage personas in the experiment.</p>
+<p>This includes adding personas (demographic profiles) and ensuring they are
+stored in a dictionary with unique identifiers.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.persona_managing.PersonaManagementMixin.add_persona">
+<span class="sig-name descname"><span class="pre">add_persona</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">persona</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/persona_managing.html#PersonaManagementMixin.add_persona"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.persona_managing.PersonaManagementMixin.add_persona" title="Link to this definition"></a></dt>
+<dd><p>Adds a demographic profile (persona) to the experiment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>persona</strong> (<a class="reference internal" href="models.html#rupsycho.models.questionnaire.DemographicProfile" title="rupsycho.models.questionnaire.DemographicProfile"><em>DemographicProfile</em></a>) – The DemographicProfile instance to be added.</p></li>
+<li><p><strong>identifier</strong> (<em>str</em><em> | </em><em>None</em>) – Optional identifier for the persona. If not provided,
+a unique identifier is generated based on the persona’s id.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.persona_managing.PersonaManagementMixin.get_persona">
+<span class="sig-name descname"><span class="pre">get_persona</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">identifier</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/persona_managing.html#PersonaManagementMixin.get_persona"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.persona_managing.PersonaManagementMixin.get_persona" title="Link to this definition"></a></dt>
+<dd><p>Retrieves a persona by its identifier.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>identifier</strong> (<em>str</em>) – The identifier of the persona.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The DemographicProfile instance if found, otherwise None.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="models.html#rupsycho.models.questionnaire.DemographicProfile" title="rupsycho.models.questionnaire.DemographicProfile"><em>DemographicProfile</em></a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.persona_managing.PersonaManagementMixin.remove_persona">
+<span class="sig-name descname"><span class="pre">remove_persona</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">identifier</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/persona_managing.html#PersonaManagementMixin.remove_persona"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.persona_managing.PersonaManagementMixin.remove_persona" title="Link to this definition"></a></dt>
+<dd><p>Removes a persona from the experiment by its identifier.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>identifier</strong> (<em>str</em>) – The identifier of the persona to be removed.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.persona_managing.PersonaManagementMixin.list_personas">
+<span class="sig-name descname"><span class="pre">list_personas</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/persona_managing.html#PersonaManagementMixin.list_personas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.persona_managing.PersonaManagementMixin.list_personas" title="Link to this definition"></a></dt>
+<dd><p>Lists all persona identifiers in the experiment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A list of persona identifiers.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.persona_managing.PersonaManagementMixin.clear_personas">
+<span class="sig-name descname"><span class="pre">clear_personas</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/persona_managing.html#PersonaManagementMixin.clear_personas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.persona_managing.PersonaManagementMixin.clear_personas" title="Link to this definition"></a></dt>
+<dd><p>Removes all personas from the experiment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-rupsycho.mixins.prompt_managing">
+<span id="prompt-management-mixin"></span><h2>Prompt Management Mixin<a class="headerlink" href="#module-rupsycho.mixins.prompt_managing" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.mixins.prompt_managing.PromptTemplateMixin">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rupsycho.mixins.prompt_managing.</span></span><span class="sig-name descname"><span class="pre">PromptTemplateMixin</span></span><a class="reference internal" href="_modules/rupsycho/mixins/prompt_managing.html#PromptTemplateMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.prompt_managing.PromptTemplateMixin" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Mixin providing methods to manage the prompt template in the experiment.</p>
+<p>This includes setting the prompt template, loading it, and converting it
+into a runnable form.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.prompt_managing.PromptTemplateMixin.load_prompt">
+<span class="sig-name descname"><span class="pre">load_prompt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prompt_template</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/prompt_managing.html#PromptTemplateMixin.load_prompt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.prompt_managing.PromptTemplateMixin.load_prompt" title="Link to this definition"></a></dt>
+<dd><p>Load the prompt template from its serialized definition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>prompt_template</strong> (<em>str</em>) – Serialized prompt template.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Loaded prompt, or None if an error occurs.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Any</em> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.prompt_managing.PromptTemplateMixin.set_prompt">
+<span class="sig-name descname"><span class="pre">set_prompt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prompt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/prompt_managing.html#PromptTemplateMixin.set_prompt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.prompt_managing.PromptTemplateMixin.set_prompt" title="Link to this definition"></a></dt>
+<dd><p>Adds a prompt to the experiment and converts it into its runnable form.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>prompt</strong> (<em>Any</em>) – The prompt to be set.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.prompt_managing.PromptTemplateMixin.get_prompt">
+<span class="sig-name descname"><span class="pre">get_prompt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/prompt_managing.html#PromptTemplateMixin.get_prompt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.prompt_managing.PromptTemplateMixin.get_prompt" title="Link to this definition"></a></dt>
+<dd><p>Retrieve the current runnable prompt template if available.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The current runnable prompt, or None if not set.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Any</em> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.prompt_managing.PromptTemplateMixin.get_prompt_config">
+<span class="sig-name descname"><span class="pre">get_prompt_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/prompt_managing.html#PromptTemplateMixin.get_prompt_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.prompt_managing.PromptTemplateMixin.get_prompt_config" title="Link to this definition"></a></dt>
+<dd><p>Retrieve the serialized prompt template configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Serialized prompt template or None if not set.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.prompt_managing.PromptTemplateMixin.set_prompt_config">
+<span class="sig-name descname"><span class="pre">set_prompt_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prompt_template</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/prompt_managing.html#PromptTemplateMixin.set_prompt_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.prompt_managing.PromptTemplateMixin.set_prompt_config" title="Link to this definition"></a></dt>
+<dd><p>Set the prompt template configuration by loading its serialized form.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>prompt_template</strong> (<em>str</em>) – Serialized prompt template configuration.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.prompt_managing.PromptTemplateMixin.reset_prompt">
+<span class="sig-name descname"><span class="pre">reset_prompt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/prompt_managing.html#PromptTemplateMixin.reset_prompt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.prompt_managing.PromptTemplateMixin.reset_prompt" title="Link to this definition"></a></dt>
+<dd><p>Resets the current prompt template and runnable form to None.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.mixins.prompt_managing.PromptTemplateMixin.has_prompt">
+<span class="sig-name descname"><span class="pre">has_prompt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/prompt_managing.html#PromptTemplateMixin.has_prompt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.prompt_managing.PromptTemplateMixin.has_prompt" title="Link to this definition"></a></dt>
+<dd><p>Check whether a runnable prompt is set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if a runnable prompt is set, False otherwise.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-rupsycho.experiment_collection">
+<span id="experiment-collection"></span><h2>Experiment Collection<a class="headerlink" href="#module-rupsycho.experiment_collection" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.experiment_collection.ExperimentCollection">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rupsycho.experiment_collection.</span></span><span class="sig-name descname"><span class="pre">ExperimentCollection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiments</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ExperimentCollection'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/experiment_collection.html#ExperimentCollection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.experiment_collection.ExperimentCollection" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseMedia</span></code></p>
+<p>Class for storing a collection of ExperimentDocument objects along with metadata.</p>
+<p class="rubric">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">my_module</span> <span class="kn">import</span> <span class="n">ExperimentCollection</span><span class="p">,</span> <span class="n">ExperimentDocument</span>
+
+<span class="n">experiment_doc1</span> <span class="o">=</span> <span class="n">ExperimentDocument</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Experiment 1&quot;</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Test Experiment&quot;</span><span class="p">,</span>
+    <span class="n">demographic_profiles</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">],</span>
+    <span class="n">models</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">],</span>
+    <span class="n">questionnaire</span><span class="o">=...</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;Lab A&quot;</span><span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">experiment_doc2</span> <span class="o">=</span> <span class="n">ExperimentDocument</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Experiment 2&quot;</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Another Test&quot;</span><span class="p">,</span>
+    <span class="n">demographic_profiles</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">],</span>
+    <span class="n">models</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">],</span>
+    <span class="n">questionnaire</span><span class="o">=...</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;Lab B&quot;</span><span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">experiment_collection</span> <span class="o">=</span> <span class="n">ExperimentCollection</span><span class="p">(</span>
+    <span class="n">experiments</span><span class="o">=</span><span class="p">[</span><span class="n">experiment_doc1</span><span class="p">,</span> <span class="n">experiment_doc2</span><span class="p">],</span>
+    <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;Lab Collection&quot;</span><span class="p">}</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>experiments</strong> (<em>List</em><em>[</em><a class="reference internal" href="#rupsycho.experiment.ExperimentDocument" title="rupsycho.experiment.ExperimentDocument"><em>ExperimentDocument</em></a><em>]</em>)</p></li>
+<li><p><strong>id</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>metadata</strong> (<em>dict</em>)</p></li>
+<li><p><strong>type</strong> (<em>Literal</em><em>[</em><em>'ExperimentCollection'</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.experiment_collection.ExperimentCollection.experiments">
+<span class="sig-name descname"><span class="pre">experiments</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#rupsycho.experiment.ExperimentDocument" title="rupsycho.experiment.ExperimentDocument"><span class="pre">ExperimentDocument</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#rupsycho.experiment_collection.ExperimentCollection.experiments" title="Link to this definition"></a></dt>
+<dd><p>List of ExperimentDocument objects representing the experiments.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.experiment_collection.ExperimentCollection.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'ExperimentCollection'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#rupsycho.experiment_collection.ExperimentCollection.type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rupsycho.experiment_collection.ExperimentCollection.Config">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Config</span></span><a class="reference internal" href="_modules/rupsycho/experiment_collection.html#ExperimentCollection.Config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.experiment_collection.ExperimentCollection.Config" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.experiment_collection.ExperimentCollection.Config.arbitrary_types_allowed">
+<span class="sig-name descname"><span class="pre">arbitrary_types_allowed</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#rupsycho.experiment_collection.ExperimentCollection.Config.arbitrary_types_allowed" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.experiment_collection.ExperimentCollection.is_lc_serializable">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_lc_serializable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/experiment_collection.html#ExperimentCollection.is_lc_serializable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.experiment_collection.ExperimentCollection.is_lc_serializable" title="Link to this definition"></a></dt>
+<dd><p>Return whether this class is serializable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.experiment_collection.ExperimentCollection.get_lc_namespace">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_lc_namespace</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/experiment_collection.html#ExperimentCollection.get_lc_namespace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.experiment_collection.ExperimentCollection.get_lc_namespace" title="Link to this definition"></a></dt>
+<dd><p>Get the namespace of the LangChain object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>List</em>[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rupsycho.experiment_collection.ExperimentCollection.run_all">
+<span class="sig-name descname"><span class="pre">run_all</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/experiment_collection.html#ExperimentCollection.run_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.experiment_collection.ExperimentCollection.run_all" title="Link to this definition"></a></dt>
+<dd><p>Run the experiment processing for all ExperimentDocuments in the collection.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

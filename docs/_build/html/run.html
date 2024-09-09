@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Running an Experiment &mdash; RUPsycho 0.10 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=ac14934e"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Parse Answers" href="parser.html" />
+    <link rel="prev" title="Define Experiments" href="experiment.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            RUPsycho
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="init.html">Get Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reader.html">Load Experiments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiment.html">Define Experiments</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Running an Experiment</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#steps-to-run-the-experiment">Steps to Run the Experiment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#conclusion">Conclusion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="parser.html">Parse Answers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parsers.html">Parsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Data Models</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">RUPsycho</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Running an Experiment</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/run.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="running-an-experiment">
+<h1>Running an Experiment<a class="headerlink" href="#running-an-experiment" title="Link to this heading"></a></h1>
+<p>This guide will walk you through running an experiment using the LLaMA2 chat-based model in combination with a simplified prompt template. The experiment setup leverages the <cite>rupsycho</cite> library along with the HuggingFace <cite>transformers</cite> pipeline.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The experiment involves loading a pre-trained LLaMA2 model, setting up a prompt template, and running the experiment to generate responses. Finally, the results are exported to a file for further analysis.</p>
+</section>
+<section id="steps-to-run-the-experiment">
+<h2>Steps to Run the Experiment<a class="headerlink" href="#steps-to-run-the-experiment" title="Link to this heading"></a></h2>
+<ol class="arabic">
+<li><p><strong>Create an Experiment</strong></p>
+<p>First, create an experiment using the <cite>rup.example_experiment_bfi()</cite> function, which sets up a Big Five Inventory (BFI) questionnaire.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">rupsycho</span> <span class="k">as</span> <span class="nn">rup</span>
+
+<span class="c1"># Step 1: Create an experiment from a dictionary or using an existing method</span>
+<span class="n">experiment</span> <span class="o">=</span> <span class="n">rup</span><span class="o">.</span><span class="n">example_experiment_bfi</span><span class="p">()</span>  <span class="c1"># Example setup for BFI questionnaire</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Load the LLaMA2 Chat-Based Model</strong></p>
+<p>Load the LLaMA2 model using the HuggingFace <cite>pipeline</cite>. This model will be used for generating responses based on the prompt.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">pipeline</span>
+<span class="kn">from</span> <span class="nn">langchain.chains</span> <span class="kn">import</span> <span class="n">HuggingFacePipeline</span>
+
+<span class="c1"># Step 2: Load the LLaMA2 chat-based model</span>
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span><span class="s2">&quot;text-generation&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;meta-llama/Meta-Llama-3-8B-Instruct&quot;</span><span class="p">)</span>
+<span class="n">model_local</span> <span class="o">=</span> <span class="n">HuggingFacePipeline</span><span class="p">(</span><span class="n">pipeline</span><span class="o">=</span><span class="n">pipe</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Add the Model to the Experiment</strong></p>
+<p>Add the loaded LLaMA2 model to the experiment.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Step 3: Add the local LLaMA2-based model to the experiment</span>
+<span class="n">experiment</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="n">model_local</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Define the Prompt Template</strong></p>
+<p>Create a simplified prompt template that will be used by the model to generate answers.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">langchain_core.prompts</span> <span class="kn">import</span> <span class="n">ChatPromptTemplate</span>
+
+<span class="c1"># Step 4: Define the simplified prompt template</span>
+<span class="n">user_message_template</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{general_instruction}</span><span class="s2"> </span><span class="si">{persona_description}</span><span class="s2"> was asked: </span><span class="si">{question}</span><span class="s2"> Options: </span><span class="si">{answer_options}</span><span class="s2"> Answer:&quot;</span>
+<span class="n">chat_prompt</span> <span class="o">=</span> <span class="n">ChatPromptTemplate</span><span class="o">.</span><span class="n">from_messages</span><span class="p">([</span>
+    <span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="n">user_message_template</span><span class="p">)</span>
+<span class="p">])</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Set the Prompt in the Experiment</strong></p>
+<p>Set the defined prompt in the experiment.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Step 5: Set the prompt in the experiment</span>
+<span class="n">experiment</span><span class="o">.</span><span class="n">set_prompt</span><span class="p">(</span><span class="n">chat_prompt</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Set a Parser (Optional)</strong></p>
+<p>Optionally, set a parser to process the output. If no parser is set, a default string parser will be used.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">rupsycho.parser</span> <span class="kn">import</span> <span class="n">BasicParser</span>
+
+<span class="c1"># Step 6: Optionally set a parser (if not set, a default will be used)</span>
+<span class="n">basic_parser</span> <span class="o">=</span> <span class="n">BasicParser</span><span class="p">()</span>
+<span class="n">experiment</span><span class="o">.</span><span class="n">set_parser</span><span class="p">(</span><span class="n">basic_parser</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Run the Experiment</strong></p>
+<p>Run the experiment to generate responses based on the prompt and model.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Step 7: Run the experiment</span>
+<span class="n">experiment</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Export the Results</strong></p>
+<p>After running the experiment, export the results to a file in JSON format for further analysis.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Step 8: Export the results to a file</span>
+<span class="n">experiment</span><span class="o">.</span><span class="n">export_to_file</span><span class="p">(</span><span class="s2">&quot;experiment_results.json&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="conclusion">
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Link to this heading"></a></h2>
+<p>By following these steps, you can easily set up and run an experiment using a LLaMA2 chat-based model. The experiment involves defining a prompt template, processing the input with a model, and exporting the generated responses for further analysis.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

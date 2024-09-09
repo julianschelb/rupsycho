@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rupsycho.mixins.model_managing &mdash; RUPsycho 0.10 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=ac14934e"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            RUPsycho
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../init.html">Get Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reader.html">Load Experiments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../experiment.html">Define Experiments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../run.html">Running an Experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../parser.html">Parse Answers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../parsers.html">Parsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../models.html">Data Models</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">RUPsycho</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../../rupsycho.html">rupsycho</a></li>
+      <li class="breadcrumb-item active">rupsycho.mixins.model_managing</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for rupsycho.mixins.model_managing</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ===========================================================================</span>
+<span class="c1">#                           Model Management Mixin</span>
+<span class="c1"># ===========================================================================</span>
+<span class="c1"># This module defines a mixin class for managing models within an experiment.</span>
+<span class="c1"># The mixin provides methods to add, remove, replace, and manage models,</span>
+<span class="c1"># as well as convert model definitions into runnable models.</span>
+
+
+<span class="kn">from</span> <span class="nn">langchain_core.load</span> <span class="kn">import</span> <span class="n">dumpd</span><span class="p">,</span> <span class="n">load</span>
+<span class="kn">from</span> <span class="nn">rupsycho.models.model</span> <span class="kn">import</span> <span class="n">LangChainModelConfig</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+
+<div class="viewcode-block" id="ModelManagementMixin">
+<a class="viewcode-back" href="../../../experiment.html#rupsycho.mixins.model_managing.ModelManagementMixin">[docs]</a>
+<span class="k">class</span> <span class="nc">ModelManagementMixin</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Mixin providing methods to manage models in the experiment.</span>
+
+<span class="sd">    This includes adding models, setting models, and handling the conversion</span>
+<span class="sd">    of model definitions into runnable models.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ModelManagementMixin.load_model">
+<a class="viewcode-back" href="../../../experiment.html#rupsycho.mixins.model_managing.ModelManagementMixin.load_model">[docs]</a>
+    <span class="k">def</span> <span class="nf">load_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_definition</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load the model from its serialized definition.</span>
+
+<span class="sd">        :param model_definition: Serialized model definition</span>
+<span class="sd">        :return: Loaded model, or None if an error occurs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="n">model_definition</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">model</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to load model: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="ne">UserWarning</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="ModelManagementMixin.add_model">
+<a class="viewcode-back" href="../../../experiment.html#rupsycho.mixins.model_managing.ModelManagementMixin.add_model">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">identifier</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a model to the experiment.</span>
+
+<span class="sd">        :param model: The model to be added.</span>
+<span class="sd">        :param identifier: Optional identifier for the model.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">identifier</span> <span class="k">if</span> <span class="n">identifier</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">model</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;A model with the identifier &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39; already exists.&quot;</span><span class="p">,</span> <span class="ne">UserWarning</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">LangChainModelConfig</span><span class="p">(</span><span class="n">definition</span><span class="o">=</span><span class="n">dumpd</span><span class="p">(</span><span class="n">model</span><span class="p">))</span>
+
+        <span class="c1"># Ensure the model is added to runnable_models</span>
+        <span class="c1"># runnable_model = self.load_model(self.models[key].definition)</span>
+        <span class="c1"># if runnable_model:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runnable_models</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span></div>
+
+
+<div class="viewcode-block" id="ModelManagementMixin.set_runnable_models">
+<a class="viewcode-back" href="../../../experiment.html#rupsycho.mixins.model_managing.ModelManagementMixin.set_runnable_models">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_runnable_models</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Converts model definitions into runnable models, updating the runnable_models dictionary.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runnable_models</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">runnable_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_model</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">definition</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">runnable_model</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">runnable_models</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">runnable_model</span></div>
+
+
+<div class="viewcode-block" id="ModelManagementMixin.get_model">
+<a class="viewcode-back" href="../../../experiment.html#rupsycho.mixins.model_managing.ModelManagementMixin.get_model">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieves a model by its identifier.</span>
+
+<span class="sd">        :param identifier: The identifier of the model.</span>
+<span class="sd">        :return: The model if found, otherwise None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">runnable_models</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ModelManagementMixin.remove_model">
+<a class="viewcode-back" href="../../../experiment.html#rupsycho.mixins.model_managing.ModelManagementMixin.remove_model">[docs]</a>
+    <span class="k">def</span> <span class="nf">remove_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Removes a model from the experiment by its identifier.</span>
+
+<span class="sd">        :param identifier: The identifier of the model to be removed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">identifier</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">identifier</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">runnable_models</span><span class="p">:</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">runnable_models</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;No model found with the identifier &#39;</span><span class="si">{</span><span class="n">identifier</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">,</span> <span class="ne">UserWarning</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ModelManagementMixin.list_models">
+<a class="viewcode-back" href="../../../experiment.html#rupsycho.mixins.model_managing.ModelManagementMixin.list_models">[docs]</a>
+    <span class="k">def</span> <span class="nf">list_models</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Lists all model identifiers in the experiment.</span>
+
+<span class="sd">        :return: A list of model identifiers.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="ModelManagementMixin.has_model">
+<a class="viewcode-back" href="../../../experiment.html#rupsycho.mixins.model_managing.ModelManagementMixin.has_model">[docs]</a>
+    <span class="k">def</span> <span class="nf">has_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks if a model exists in the experiment by its identifier.</span>
+
+<span class="sd">        :param identifier: The identifier of the model to check.</span>
+<span class="sd">        :return: True if the model exists, False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">identifier</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span></div>
+
+
+<div class="viewcode-block" id="ModelManagementMixin.replace_model">
+<a class="viewcode-back" href="../../../experiment.html#rupsycho.mixins.model_managing.ModelManagementMixin.replace_model">[docs]</a>
+    <span class="k">def</span> <span class="nf">replace_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">new_model</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Replaces an existing model in the experiment with a new one.</span>
+
+<span class="sd">        :param identifier: The identifier of the model to replace.</span>
+<span class="sd">        :param new_model: The new model to replace the old one.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">identifier</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span> <span class="o">=</span> <span class="n">LangChainModelConfig</span><span class="p">(</span>
+                <span class="n">definition</span><span class="o">=</span><span class="n">dumpd</span><span class="p">(</span><span class="n">new_model</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_runnable_models</span><span class="p">()</span>  <span class="c1"># Refresh the runnable models dictionary</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;No model found with the identifier &#39;</span><span class="si">{</span><span class="n">identifier</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">,</span> <span class="ne">UserWarning</span><span class="p">)</span></div>
+
+
+    <span class="c1"># def get_model_config(self, identifier: str) -&gt; Optional[Dict[str, Any]]:</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     Retrieves the configuration dictionary of a model by its identifier.</span>
+
+    <span class="c1">#     :param identifier: The identifier of the model.</span>
+    <span class="c1">#     :return: The configuration dictionary of the model, or None if not found.</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     model = self.get_model(identifier)</span>
+    <span class="c1">#     return model.definition if model else None</span>
+
+<div class="viewcode-block" id="ModelManagementMixin.clear_models">
+<a class="viewcode-back" href="../../../experiment.html#rupsycho.mixins.model_managing.ModelManagementMixin.clear_models">[docs]</a>
+    <span class="k">def</span> <span class="nf">clear_models</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Removes all models from the experiment.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runnable_models</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="ModelManagementMixin.count_models">
+<a class="viewcode-back" href="../../../experiment.html#rupsycho.mixins.model_managing.ModelManagementMixin.count_models">[docs]</a>
+    <span class="k">def</span> <span class="nf">count_models</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the number of models in the experiment.</span>
+
+<span class="sd">        :return: The number of models.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ModelManagementMixin.get_all_runnable_models">
+<a class="viewcode-back" href="../../../experiment.html#rupsycho.mixins.model_managing.ModelManagementMixin.get_all_runnable_models">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_all_runnable_models</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieves a dictionary of all runnable models.</span>
+
+<span class="sd">        :return: A dictionary of runnable models with identifiers as keys.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">runnable_models</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

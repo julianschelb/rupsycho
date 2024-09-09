@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rupsycho.parsers.cleaners &mdash; RUPsycho 0.10 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=ac14934e"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            RUPsycho
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../init.html">Get Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reader.html">Load Experiments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../experiment.html">Define Experiments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../run.html">Running an Experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../parser.html">Parse Answers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../parsers.html">Parsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../models.html">Data Models</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">RUPsycho</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../../rupsycho.html">rupsycho</a></li>
+      <li class="breadcrumb-item active">rupsycho.parsers.cleaners</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for rupsycho.parsers.cleaners</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ===========================================================================</span>
+<span class="c1">#                              Cleaner Parser Classes</span>
+<span class="c1"># ===========================================================================</span>
+<span class="c1"># This module defines a specialized parser class called Cleaner, designed to</span>
+<span class="c1"># process and clean textual answers by removing artifacts that may have been</span>
+<span class="c1"># introduced during the text generation process.</span>
+
+
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">langchain_core.exceptions</span> <span class="kn">import</span> <span class="n">OutputParserException</span>
+<span class="kn">from</span> <span class="nn">langchain_core.output_parsers</span> <span class="kn">import</span> <span class="n">BaseOutputParser</span>
+<span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">Field</span>
+<span class="kn">from</span> <span class="nn">rupsycho.parsers.parser_utils</span> <span class="kn">import</span> <span class="n">prompt_cleaner</span>
+
+
+<div class="viewcode-block" id="BasicCleaner">
+<a class="viewcode-back" href="../../../parsers.html#rupsycho.parsers.cleaners.BasicCleaner">[docs]</a>
+<span class="k">class</span> <span class="nc">BasicCleaner</span><span class="p">(</span><span class="n">BaseOutputParser</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A custom parser that processes and cleans text by removing line breaks</span>
+<span class="sd">    and non-ASCII Unicode characters.</span>
+
+<span class="sd">    This parser is designed to work with LangChain and can be integrated</span>
+<span class="sd">    into various chains or agents that require cleaned text output.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="BasicCleaner.parse">
+<a class="viewcode-back" href="../../../parsers.html#rupsycho.parsers.cleaners.BasicCleaner.parse">[docs]</a>
+    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parses the input text to remove line breaks and non-ASCII Unicode characters.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        text : str</span>
+<span class="sd">            The input string to be cleaned.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            The cleaned string with line breaks and non-ASCII Unicode characters removed.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        OutputParserException</span>
+<span class="sd">            If an error occurs during parsing, an OutputParserException is raised with a</span>
+<span class="sd">            descriptive error message.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Remove line breaks and replace with a space</span>
+            <span class="n">cleaned_text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
+
+            <span class="c1"># Remove non-ASCII Unicode characters</span>
+            <span class="n">cleaned_text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[^\x00-\x7F]+&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">cleaned_text</span><span class="p">)</span>
+
+            <span class="c1"># Trim extra whitespace</span>
+            <span class="n">cleaned_text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\s+&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">cleaned_text</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+            <span class="k">return</span> <span class="n">cleaned_text</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">OutputParserException</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;BasicParser encountered an error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the type of the parser as a string identifier.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            The string &quot;basic_parser&quot;, identifying the type of this parser.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;basic_parser&quot;</span></div>
+
+
+
+<span class="c1"># ================================= Prompt Removal ================================</span>
+
+
+<div class="viewcode-block" id="PromptRemovalCleaner">
+<a class="viewcode-back" href="../../../parsers.html#rupsycho.parsers.cleaners.PromptRemovalCleaner">[docs]</a>
+<span class="k">class</span> <span class="nc">PromptRemovalCleaner</span><span class="p">(</span><span class="n">BaseOutputParser</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A custom parser that removes prompt-related text from a completion.</span>
+<span class="sd">    It uses the prompt_cleaner function to process and clean the input text.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+    <span class="n">similarity_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">0.7</span><span class="p">)</span>
+    <span class="n">fast</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">similarity_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.7</span><span class="p">,</span> <span class="n">fast</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes the PromptRemovalCleanerParser with the specified prompt</span>
+<span class="sd">        and parameters for cleaning the completion.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        prompt : str</span>
+<span class="sd">            The prompt text that should be removed or considered for cleaning from the completion.</span>
+<span class="sd">        similarity_threshold : float, optional</span>
+<span class="sd">            The similarity threshold for the prompt_cleaner function (default is 0.7).</span>
+<span class="sd">        fast : bool, optional</span>
+<span class="sd">            A flag to indicate whether the cleaning process should be fast (default is True).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span> <span class="o">=</span> <span class="n">prompt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">similarity_threshold</span> <span class="o">=</span> <span class="n">similarity_threshold</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fast</span> <span class="o">=</span> <span class="n">fast</span>
+
+<div class="viewcode-block" id="PromptRemovalCleaner.parse">
+<a class="viewcode-back" href="../../../parsers.html#rupsycho.parsers.cleaners.PromptRemovalCleaner.parse">[docs]</a>
+    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completion</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cleans the input completion text by removing prompt-related content.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        completion : str</span>
+<span class="sd">            The input text (completion) that needs to be cleaned.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            The cleaned completion text.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        OutputParserException</span>
+<span class="sd">            If an error occurs during parsing, an OutputParserException is raised with a</span>
+<span class="sd">            descriptive error message.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Use the prompt_cleaner function to clean the completion text</span>
+            <span class="n">cleaned_completion</span> <span class="o">=</span> <span class="n">prompt_cleaner</span><span class="p">(</span>
+                <span class="n">prompt</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="p">,</span>
+                <span class="n">completion</span><span class="o">=</span><span class="n">completion</span><span class="p">,</span>
+                <span class="n">similarity_threshold</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">similarity_threshold</span><span class="p">,</span>
+                <span class="n">fast</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fast</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">cleaned_completion</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">OutputParserException</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;PromptRemovalCleanerParser encountered an error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the type of the parser as a string identifier.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            The string &quot;prompt_removal_cleaner_parser&quot;, identifying the type of this parser.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;prompt_removal_cleaner_parser&quot;</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="c1"># Example usage of the BasicParser class.</span>
+
+    <span class="c1"># Instantiate the custom parser</span>
+    <span class="n">basic_parser</span> <span class="o">=</span> <span class="n">BasicCleaner</span><span class="p">()</span>
+
+    <span class="c1"># Example text to parse</span>
+    <span class="n">raw_output</span> <span class="o">=</span> <span class="s2">&quot;Hello, world!</span><span class="se">\n</span><span class="s2">This is a test text with some emojis 😊 and line breaks.</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+    <span class="c1"># Parse the output</span>
+    <span class="n">parsed_output</span> <span class="o">=</span> <span class="n">basic_parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">raw_output</span><span class="p">)</span>
+
+    <span class="c1"># Print the cleaned output</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cleaned output:&quot;</span><span class="p">,</span> <span class="n">parsed_output</span><span class="p">)</span>
+
+    <span class="c1"># Example prompt and completion</span>
+    <span class="n">prompt_example</span> <span class="o">=</span> <span class="s2">&quot;Once upon a time, there was a brave knight.&quot;</span>
+    <span class="n">completion_example</span> <span class="o">=</span> <span class="s2">&quot;Once upon a time, there was a brave knight. He fought valiantly against the dragon.&quot;</span>
+
+    <span class="c1"># Instantiate the PromptRemovalCleanerParser</span>
+    <span class="n">prompt_cleaner_parser</span> <span class="o">=</span> <span class="n">PromptRemovalCleaner</span><span class="p">(</span><span class="n">prompt</span><span class="o">=</span><span class="n">prompt_example</span><span class="p">)</span>
+
+    <span class="c1"># Parse the completion to clean it from the prompt</span>
+    <span class="n">cleaned_completion</span> <span class="o">=</span> <span class="n">prompt_cleaner_parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">completion_example</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Cleaned completion: </span><span class="si">{</span><span class="n">cleaned_completion</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
