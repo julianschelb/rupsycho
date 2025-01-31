@@ -94,6 +94,10 @@ class AnswerOptions(BaseModel):
             return self.delimiter + self.delimiter.join(option_texts)
         else:
             return self.delimiter.join(option_texts)
+        
+    def get_options_as_list(self) -> List[str]:
+        """Return the list of answer options' text."""
+        return [option.text for option in self.options.values()]
 
 
 class InstructionItem(BaseModel):
@@ -141,6 +145,12 @@ class InstructionItem(BaseModel):
     def get_all_answers(self) -> Dict[str, Dict[str, Dict[int, Any]]]:
         """Retrieve all answers."""
         return self.answers
+
+    def get_answer_options_as_list(self) -> List[str]:
+        """Return the list of answer options' text."""
+        if self.answer_options:
+            return self.answer_options.get_options_as_list()
+        return []
 
 
 class Questionnaire(BaseModel):

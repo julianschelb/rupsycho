@@ -47,15 +47,20 @@ class MultipleChoiceJudge(BaseOutputParser[str]):
         object.__setattr__(self, 'possible_answers', possible_answers)
         object.__setattr__(self, 'ignore_case', ignore_case)
 
-    def parse(self, text: str) -> str:
+    def parse(self, text: str, possible_answers=None) -> str:
         """
         Parses the input text to determine the most likely answer from the
         possible answers.
         """
         try:
+            if possible_answers is None:
+                possible_answers = self.possible_answers
+                if not possible_answers:
+                    raise ValueError("No possible answers provided")
+
             # Use the check_multiple_choice_answers function to analyze the text
             results = check_multiple_choice_answers(
-                text, self.possible_answers, self.ignore_case)
+                text, possible_answers, self.ignore_case)
             max_value = max(results.values())
 
             if max_value == 0:
@@ -167,10 +172,17 @@ class ModelBasedAnswerJudge(BaseOutputParser[str]):
 
         return predicted_label, positive_probability
 
-    def predict_for_all_options(self, answer: str):
+    def predict_for_all_options(self, answer: str, possible_answers=None):
         """
         Iterates over all answer options and predicts for each.
         """
+
+        # Use the default possible answers if none are provided
+        if answer_options is None:
+            answer_options = self.possible_answers
+            if not answer_options:
+                raise ValueError("No possible answers provided")
+
         results = []
         for answer_option in self.possible_answers:
             predicted_label, positive_probability = self.predict_answer(
@@ -182,13 +194,13 @@ class ModelBasedAnswerJudge(BaseOutputParser[str]):
             })
         return results
 
-    def parse(self, text: str) -> str:
+    def parse(self, text: str, possible_answers=None) -> str:
         """
         Parses the input text to determine the most likely answer from
         the possible answers or returns "inconclusive" if the entropy is above the threshold.
         """
         try:
-            results = self.predict_for_all_options(text)
+            results = self.predict_for_all_options(text, possible_answers)
 
             # Calculate entropy based on the decision probabilities
             entropy = self.calculate_entropy(results)
