@@ -1,16 +1,16 @@
+**Welcome!**  
+Thanks for your time and effort in helping to test and improve the RUPsycho package!  
 
-> [!NOTE] Welcome! 
-> Thanks for your time and effort in helping to test and improve the RUPsycho package!
-> 
-> RUPsycho is a Python package designed for the application of large language models (LLMs) in social science research. It facilitates exploring humanlike behaviors through LLMs.
-> With RUPsycho, you can load experiments from files. Each experiment defines a list of questions to ask the language model. To perform these tasks, you will also need to specify:
-> - **What model** to use (e.g., a specific LLM).
-> - **What prompt template** to apply for asking questions.
-> - **What questions** to ask.
-> - **What answer options** are available.
-> - **What type of persona** the model should answer as, using demographic profiles.
->
->Good luck and enjoy exploring the RUPsycho package! 🚀
+RUPsycho is a Python package designed for the application of large language models (LLMs) in social science research. It facilitates exploring humanlike behaviors through LLMs.  
+
+With RUPsycho, you can load experiments from files. Each experiment defines a list of questions to ask the language model. To perform these tasks, you will also need to specify:  
+- **What model** to use (e.g., a specific LLM).  
+- **What prompt template** to apply for asking questions.  
+- **What questions** to ask.  
+- **What answer options** are available.  
+- **What type of persona** the model should answer as, using demographic profiles.  
+
+Good luck and enjoy exploring the RUPsycho package! 🚀
 
 
 ## Task 1: Setup the Package
@@ -22,8 +22,7 @@
 1. **Clone the Repository**:
    - Clone the RUPsycho package from the following URL:
      ```bash
-     git clone https://gitlab.inf.uni-konstanz.de/julian.schelb/rupsycho-dev/
-     git checkout user-testing
+     git clone git@github.com:julianschelb/rupsycho.git
      ```
 
 2. **Install Poetry**:
@@ -32,10 +31,10 @@
      pip install poetry
      ```
 
-3. **Install Dependencies**:
+3. **Install the Package**:
    - Navigate to the cloned repository directory and install all required dependencies using Poetry:
      ```bash
-     cd rupsycho-dev
+     cd rupsycho
      poetry install
      ```
 
