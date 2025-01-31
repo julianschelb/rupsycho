@@ -62,6 +62,13 @@ from transformers import pipeline
 from typing import List, Iterator
 from typing import Optional
 
+# ================================= Expose Sub Modules ================================
+
+from rupsycho import callbacks
+from rupsycho import models
+from rupsycho import parsers
+from rupsycho import postprocessing
+from rupsycho import parsers
 
 # ================================= Create Single Experiment ================================
 
