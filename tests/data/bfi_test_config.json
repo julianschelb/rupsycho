@@ -5,10 +5,35 @@
         "seeds": [
             "7"
         ],
-        "min_new_tokens": 8,
-        "max_new_tokens": 1024,
-        "temperature": 0.6,
-        "do_sample": true
+        "lazy_load_models": true
+    },
+    "models": {
+        "Qwen/Qwen2.5-0.5B-Instruct": {
+            "type": "local_huggingface",
+            "name_or_path": "HuggingFaceTB/SmolLM2-135M-Instruct",
+            "task": "text-generation",
+            "parameters": {
+                "max_new_tokens": 64,
+                "temperature": 1.0,
+                "do_sample": true,
+                "top_k": 50,
+                "top_p": 0.95,
+                "return_full_text": false
+            }
+        }
+    },
+    "prompt_template": {
+        "type": "chat",
+        "messages": [
+            {
+                "role": "system",
+                "content": "Objective: Act like you are {persona_description}, a survey participant answering a questionnaire.\n{general_instruction}\nInstructions: Choose from the list of answer options to answer the question. Answer the question using only the provided answer options. If none of the options are correct, choose the option that is closest to being correct. The solution must be provided in this format: {{answer: \"answer option\"}}"
+            },
+            {
+                "role": "user",
+                "content": "Question: {question}\nAnswer Options: {answer_options}\nAnswer:"
+            }
+        ]
     },
     "demographic_profiles": {
         "Optimistic Persona": {

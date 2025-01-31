@@ -26,7 +26,7 @@ from .models.prompt import (
 )
 
 from .prompts import DEFAULT_CHAT_PROMPT_TEMPLATE_CONFIG
-from .models.parameters import Parameters
+from .models.parameters import ExperimentParameters
 from .models.questionnaire import DemographicProfile, Questionnaire
 from .mixins.experiment_processing import ExperimentProcessingMixin
 from .mixins.experiment_exporting import ExperimentExportMixin
@@ -97,8 +97,8 @@ class ExperimentDocument(
         description="The description of the experiment",
         example="Testing Generative Models for BFI questionnaire using Rupsycho.",
     )
-    parameters: Parameters = Field(
-        default_factory=Parameters,
+    parameters: ExperimentParameters = Field(
+        default_factory=ExperimentParameters,
         description="The parameters for the experiment and text generation"
     )
     prompt_template: Union[NormalPromptTemplateConfig, ChatPromptTemplateConfig, LangchainPromptTemplateConfig] = Field(
@@ -159,14 +159,19 @@ class ExperimentDocument(
         data["runnable_prompt"] = self._load_runnable_prompt(
             data["prompt_template"])
 
-        # Convert models to runnable form and load them
+        # Convert models to runnable form but load them conditionally based on lazy_load_models
         if "models" in data:
             data["models"] = self._convert_models(data["models"])
         else:
             data["models"] = {"default_model": DEFAULT_MODEL_CONFIG}
 
-        data["runnable_models"] = self._load_runnable_models(
-            data["models"])
+        # Load models if lazy_load_models is False; otherwise, leave them for later loading
+        if not data.get("parameters").lazy_load_models:
+            data["runnable_models"] = self._load_runnable_models(
+                data["models"])
+        else:
+            # Models will be loaded later
+            data["runnable_models"] = data["models"]
 
         # Convert questionnaire to an instance of Questionnaire
         if "questionnaire" in data:
@@ -174,14 +179,13 @@ class ExperimentDocument(
                 data["questionnaire"])
 
         super().__init__(**data)
-
     # --------------------------------- Conversion Methods --------------------------------
 
     @staticmethod
-    def _convert_parameters(parameters: Union[Parameters, dict]) -> Parameters:
+    def _convert_parameters(parameters: Union[ExperimentParameters, dict]) -> ExperimentParameters:
         """Convert parameters to an instance of Parameters."""
         if isinstance(parameters, dict):
-            return Parameters(**parameters)
+            return ExperimentParameters(**parameters)
         return parameters
 
     @staticmethod

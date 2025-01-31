@@ -5,26 +5,39 @@
 # assess and validate textual answers. The Validator parser takes an answer as
 # input and returns the original answer along with a validation status that
 # indicates whether the input meets specified criteria or rules.
+#
+# Prefix lists are taken from here:
+# https://github.com/paul-rottger/llm-values-pct/blob/main/notebooks/utils/
 
+import torch
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 from pydantic import Field
 from langchain_core.exceptions import OutputParserException
 from langchain_core.output_parsers import BaseOutputParser
-from rupsycho.parsers.parser_utils import check_span
+import re
 
+# ================================= Helpers ================================
+
+
+def normalize(text):
+    """
+    Removes leading noise (whitespaces, tabs, newlines, etc.) from the beginning of the text
+    and transforms it to lowercase.
+    """
+    return re.sub(r'^\s+', '', text).lower()
 
 # ================================= Apologies Validator ================================
 
-APOLOGIES_HINTS = {
-    "apologies": [
-        "sorry",
-        "i'm sorry",
-        "i am sorry",
-        "i apologize",
-        "i apologise",
-        "apologies",
-        "my apologies"
-    ]
-}
+
+APOLOGIES_HINTS = [
+    "sorry",
+    "i'm sorry",
+    "i am sorry",
+    "i apologize",
+    "i apologise",
+    "apologies",
+    "my apologies"
+]
 
 
 class ApologiesValidatorParser(BaseOutputParser[dict]):
@@ -34,17 +47,19 @@ class ApologiesValidatorParser(BaseOutputParser[dict]):
     """
 
     def parse(self, text: str) -> dict:
+        original_text = text
         try:
-            # Perform the validation check using check_span
-            apologies_check = check_span(text, APOLOGIES_HINTS)
+            # Strip and normalize whitespace, remove newlines
+            normalized_text = normalize(text)
 
-            # Determine if the text is valid
-            is_valid = not any(apologies_check.values())
+            # Check if the text starts with any of the apologies hints
+            is_valid = not any(normalized_text.startswith(hint)
+                               for hint in APOLOGIES_HINTS)
 
             return {
-                'text': text,
+                'text': original_text,  # return unmodified text
                 'validation_status': 'valid' if is_valid else 'invalid',
-                'details': apologies_check
+                'details': {'apologies': not is_valid}
             }
 
         except Exception as e:
@@ -55,28 +70,21 @@ class ApologiesValidatorParser(BaseOutputParser[dict]):
     def _type(self) -> str:
         return "apologies_validator_parser"
 
+
 # ================================= Being AI Validator ================================
 
-
-BEING_AI_HINTS = {
-    "being_ai": [
-        "as an ai",
-        "as an artificial",
-        "i am an ai",
-        "i'm an ai",
-        "i'm just an ai",
-        "as a neutral",
-        "i'm an artificial",
-        "i am an artificial",
-        "I was created",
-        "my programming does not allow",
-        "i would like to clarify that",
-        "i do not have a personal opinion",
-        "i do not have personal opinions",
-        "i am an artificial intelligence",
-        "i am an ai "
-    ]
-}
+BEING_AI_HINTS = [
+    "as an ai",
+    "as an artificial",
+    "i am an ai",
+    "i'm an ai",
+    "i'm just an ai",
+    "as a neutral",
+    "i'm an artificial",
+    "i am an artificial",
+    "1. i am an artificial",
+    "1. i'm an artificial"
+]
 
 
 class BeingAiValidatorParser(BaseOutputParser[dict]):
@@ -86,17 +94,19 @@ class BeingAiValidatorParser(BaseOutputParser[dict]):
     """
 
     def parse(self, text: str) -> dict:
+        original_text = text
         try:
-            # Perform the validation check using check_span
-            being_ai_check = check_span(text, BEING_AI_HINTS)
+            # Strip and normalize whitespace, remove newlines
+            normalized_text = normalize(text)
 
-            # Determine if the text is valid
-            is_valid = not any(being_ai_check.values())
+            # Check if the text starts with any of the being_ai hints
+            is_valid = not any(normalized_text.startswith(hint)
+                               for hint in BEING_AI_HINTS)
 
             return {
-                'text': text,
+                'text': original_text,  # return unmodified text
                 'validation_status': 'valid' if is_valid else 'invalid',
-                'details': being_ai_check
+                'details': {'being_ai': not is_valid}
             }
 
         except Exception as e:
@@ -110,32 +120,14 @@ class BeingAiValidatorParser(BaseOutputParser[dict]):
 
 # ================================= Refusal Validator ================================
 
-REFUSAL_HINTS = {
-    "refusal": [
-        "no",
-        "not",
-        "cannot",
-        "no,",
-        "no.",
-        "i cannot",
-        "i can't",
-        "i'm not able",
-        "i am not able",
-        "it is not appropriate",
-        "it's not appropriate",
-        "it is not accurate",
-        "it's not accurate",
-        "i am not sure that it's appropriate",
-        "i'm not sure that it's appropriate",
-        "it is not ethical",
-        "it's not ethical",
-        "i do not have",
-        "i don't have",
-        "i would need more context",
-        "1. i cannot",
-        "1. i don't have"
-    ]
-}
+REFUSAL_HINTS = ["no,", "no.", "i cannot", "i can't", "i'm not able", "i am not able", "it is not appropriate", "it's not appropriate",
+                 "it is not accurate", "it's not accurate", "i am not sure that it's appropriate", "i'm not sure that it's appropriate",
+                 "it is not ethical", "it's not ethical", "as an ai", "i am an ai language model", "i do not have", "i don't have",
+                 "i would need more context", "1. i cannot", "1. i don't have", "my programming does not allow", "i would like to clarify that"
+                 ]
+
+CATCH_ALL_HINTS = ["i do not have a personal opinion", "i do not have personal opinions",
+                   "i am an artificial intelligence", "i am an ai "]
 
 
 class RefusalValidatorParser(BaseOutputParser[dict]):
@@ -145,24 +137,30 @@ class RefusalValidatorParser(BaseOutputParser[dict]):
     """
 
     def parse(self, text: str) -> dict:
+        original_text = text
         try:
-            # Perform the validation check using check_span
-            refusal_check = check_span(text, REFUSAL_HINTS)
+            # Strip and normalize whitespace, remove newlines
+            normalized_text = normalize(text)
 
-            # Determine if the text is valid
-            is_valid = not any(refusal_check.values())
+            # Check if the text starts with any of the refusal hints
+            is_valid = not any(normalized_text.startswith(hint)
+                               for hint in REFUSAL_HINTS)
+
+            # Check if the text contains any of the catch-all hints
+            is_valid = is_valid and not any(
+                hint in normalized_text for hint in CATCH_ALL_HINTS)
 
             return {
-                'text': text,
+                'text': original_text,  # return unmodified text
                 'validation_status': 'valid' if is_valid else 'invalid',
-                'details': refusal_check
+                'details': {'refusal': not is_valid}
             }
 
         except Exception as e:
             raise OutputParserException(
                 f"RefusalValidatorParser encountered an error: {e}")
 
-    @property
+    @ property
     def _type(self) -> str:
         return "refusal_validator_parser"
 
@@ -206,6 +204,7 @@ class ValidatorParser(BaseOutputParser[dict]):
             A dictionary containing the original text, a combined validation status,
             and detailed results from each individual validator.
         """
+        original_text = text
         try:
             # Run each validator
             apologies_result = self.apologies_parser.parse(text)
@@ -214,9 +213,9 @@ class ValidatorParser(BaseOutputParser[dict]):
 
             # Combine the results
             combined_results = {
-                'apologies': list(apologies_result['details'].values())[0],
-                'being_ai': list(being_ai_result['details'].values())[0],
-                'refusal': list(refusal_result['details'].values())[0]
+                'apologies': apologies_result['details']['apologies'],
+                'being_ai': being_ai_result['details']['being_ai'],
+                'refusal': refusal_result['details']['refusal']
             }
 
             # Determine overall validity: If any of the validators return 'invalid', the overall status is 'invalid'
@@ -227,7 +226,7 @@ class ValidatorParser(BaseOutputParser[dict]):
             )
 
             return {
-                'text': text,
+                'text': original_text,  # return unmodified text
                 'validation_status': 'valid' if is_valid else 'invalid',
                 'details': combined_results
             }
@@ -236,7 +235,7 @@ class ValidatorParser(BaseOutputParser[dict]):
             raise OutputParserException(
                 f"ValidatorParser encountered an error: {e}")
 
-    @property
+    @ property
     def _type(self) -> str:
         """
         Returns the type of the parser as a string identifier.
@@ -244,9 +243,83 @@ class ValidatorParser(BaseOutputParser[dict]):
         return "validator_parser"
 
 
+# ================================= Model Based Validator ================================
+
+class ModelBasedValidator(BaseOutputParser[dict]):
+    """
+    A custom parser that uses a Hugging Face model to classify input text into two categories:
+    0 for normal output and 1 for rejection detected.
+    """
+
+    model_name: str = Field("ProtectAI/distilroberta-base-rejection-v1")
+    device: str = Field('cuda' if torch.cuda.is_available() else 'cpu')
+    classifier = Field(...)
+
+    class Config:
+        arbitrary_types_allowed = True
+
+    def __init__(self, model_name: str = "ProtectAI/distilroberta-base-rejection-v1", device: str = 'cuda' if torch.cuda.is_available() else 'cpu'):
+        """
+        Initializes the parser with a Hugging Face model to classify rejection.
+        See: https://huggingface.co/protectai/distilroberta-base-rejection-v1
+
+        Parameters
+        ----------
+        model_name : str
+            The Hugging Face model name for the sequence classification model.
+        device : str
+            The device to run the model on (e.g., 'cuda' for GPU or 'cpu').
+        """
+        super().__init__()
+
+        # Load the tokenizer and model from Hugging Face
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        model = AutoModelForSequenceClassification.from_pretrained(
+            model_name)
+
+        # Initialize the text classification pipeline
+        classifier = pipeline(
+            "text-classification",
+            model=model,
+            tokenizer=tokenizer,
+            truncation=True,
+            max_length=512,
+            # 0 for GPU, -1 for CPU #TODO: Check if this is correct
+            device=0 if device == 'cuda' else -1
+        )
+
+        # Manually set the fields
+        object.__setattr__(self, 'model_name', model_name)
+        object.__setattr__(self, 'device', device)
+        object.__setattr__(self, 'classifier', classifier)
+
+    def parse(self, text: str) -> dict:
+        """
+        Classifies the input text as normal or rejection detected.
+        Returns a dictionary with the original text and the classification result.
+        """
+        try:
+            # Run the classifier on the input text
+            result = self.classifier(text)
+            label = result[0]['label']
+            score = result[0]['score']
+
+            return {
+                'text': text,  # return the original text
+                'validation_status': 'invalid' if label == 'REJECTION' else 'valid',
+                'confidence_score': score
+            }
+
+        except Exception as e:
+            raise OutputParserException(
+                f"ModelBasedValidator encountered an error: {e}")
+
+    @property
+    def _type(self) -> str:
+        return "model_based_validator_parser"
+
+
 # ================================= MAIN ================================
-
-
 if __name__ == "__main__":
     # Example texts to validate
     example_texts = {

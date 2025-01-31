@@ -4,11 +4,14 @@
 # This file contains the data model for the language models configs.
 
 
+# from langchain.llms import HuggingFacePipeline
+import bitsandbytes as bnb  # Ensure this is installed for quantized loading
+import torch
 import warnings
 from pydantic import BaseModel, Field
 from typing import Dict, Any, Optional, Union
 from langchain_core.load import load
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline, BitsAndBytesConfig
 
 from langchain_huggingface import HuggingFaceEndpoint
 from langchain_huggingface import HuggingFacePipeline
@@ -90,13 +93,16 @@ class LangChainModelConfig(BaseModel):
             warnings.warn(f"Failed to load LangChain model: {e}", UserWarning)
             return None
 
-
 # ------------------------------------------------
 #                Local HF Config
 # ------------------------------------------------
 
+
 class LocalHuggingFaceModelConfig(BaseModel):
     """Configuration for a local Hugging Face model."""
+
+    type: str = Field("local_huggingface",
+                      description="The type of the model configuration.")
 
     name_or_path: str = Field(
         ..., description="The path to the local directory or the name of the Hugging Face model."
@@ -114,12 +120,12 @@ class LocalHuggingFaceModelConfig(BaseModel):
         None, description="Path to the directory where the downloaded model and tokenizer files will be cached."
     )
 
-    use_auth_token: Optional[bool] = Field(
-        False, description="Whether to use the token generated when running `huggingface-cli login` for private models."
+    huggingfacehub_api_token:  Optional[str] = Field(
+        None, description="The API token for accessing Hugging Face endpoints."
     )
 
-    device: Optional[int] = Field(
-        -1, description="The device to load the model onto ('cpu' or 'cuda')."
+    device_map: Optional[Any] = Field(
+        "auto", description="The device map to load the model onto ('cpu', 'cuda', or custom device map). See https://huggingface.co/docs/accelerate/concept_guides/big_model_inference#designing-a-device-map"
     )
 
     task: Optional[str] = Field(
@@ -135,13 +141,21 @@ class LocalHuggingFaceModelConfig(BaseModel):
         None, description="The prompt template used by the model, if applicable."
     )
 
+    bitsandbytes_config: Optional[Dict] = Field(
+        None, description="Optional dictionary for bitsandbytes quantization configuration."
+    )
+
     class Config:
         """Pydantic model configuration."""
         arbitrary_types_allowed = True
 
     def load_model(self):
         """
-        Loads and returns a Hugging Face model pipeline wrapped in a LangChain HuggingFacePipeline.
+        Loads and returns a quantized Hugging Face model pipeline wrapped in a LangChain HuggingFacePipeline.
+
+        Parameters
+        ----------
+        None
 
         Returns
         -------
@@ -149,27 +163,48 @@ class LocalHuggingFaceModelConfig(BaseModel):
             The LangChain HuggingFacePipeline ready for integration into LangChain workflows.
         """
         try:
-            # Create the Hugging Face pipeline using the `from_model_id` method
-            llm = HuggingFacePipeline.from_model_id(
-                model_id=self.name_or_path,
-                task=self.task,
-                pipeline_kwargs=dict(
-                    **self.parameters  # Pass the text generation parameters from the config
-                ),
-                device=self.device  # TODO: Add device parameter
-            )
+            # Load the tokenizer
+            tokenizer = AutoTokenizer.from_pretrained(
+                self.tokenizer_name_or_path or self.name_or_path)
+
+            # Load the model, with quantization if bitsandbytes_config is provided
+            if self.bitsandbytes_config:
+                quant_config = BitsAndBytesConfig(
+                    **self.bitsandbytes_config)
+                model = AutoModelForCausalLM.from_pretrained(
+                    self.name_or_path,
+                    device_map=self.device_map,  # Use the updated device_map
+                    quantization_config=quant_config,
+                )
+            else:
+                model = AutoModelForCausalLM.from_pretrained(
+                    self.name_or_path,
+                    device_map=self.device_map  # Use the updated device_map
+                )
+
+            # Ensure parameters are passed as keyword arguments correctly
+            pipeline_kwargs = {
+                "task": self.task,
+                "model": model,
+                "tokenizer": tokenizer,
+                **self.parameters  # Pass additional pipeline parameters
+            }
+
+            # Create the pipeline
+            llm_pipeline = pipeline(**pipeline_kwargs)
 
             # Wrap the HuggingFacePipeline in a ChatHuggingFace object for LangChain integration
-            return ChatHuggingFace(llm=llm)
+            return ChatHuggingFace(llm=HuggingFacePipeline(pipeline=llm_pipeline, model_id=self.name_or_path))
 
         except Exception as e:
             raise ValueError(
-                f"Failed to load the Hugging Face model: {str(e)}")
-
+                f"Failed to load the Hugging Face model '{self.name_or_path}' with task '{self.task}': {str(e)}"
+            )
 
 # ------------------------------------------------
 #                Remote HF Config
 # ------------------------------------------------
+
 
 class RemoteHuggingFaceModelConfig(BaseModel):
     """Configuration for a remote Hugging Face model using the Inference Endpoint API."""
@@ -185,9 +220,9 @@ class RemoteHuggingFaceModelConfig(BaseModel):
         ..., description="The task for the Hugging Face pipeline (e.g., 'text-generation', 'text-classification')."
     )
 
-    huggingfacehub_api_token: str = Field(
-        ..., description="The API token for accessing Hugging Face endpoints."
-    )
+    # huggingfacehub_api_token: Optional[str] = Field(
+    #     ..., description="The API token for accessing Hugging Face endpoints."
+    # )
 
     parameters: Dict = Field(
         {},
@@ -213,7 +248,7 @@ class RemoteHuggingFaceModelConfig(BaseModel):
             endpoint = HuggingFaceEndpoint(
                 repo_id=self.repo_id,
                 task=self.task,
-                huggingfacehub_api_token=self.huggingfacehub_api_token,
+                # huggingfacehub_api_token=self.huggingfacehub_api_token,
                 **self.parameters  # Pass the generation parameters
             )
 
@@ -353,18 +388,17 @@ class OpenAIModelConfig(BaseModel):
 
 DEFAULT_MODEL_CONFIG_DICT = {
     "type": "local_huggingface",
-            "name_or_path": "HuggingFaceTB/SmolLM-1.7b-Instruct",
-            "task": "text-generation",
-            "generation_kwargs": {
-                "min_new_tokens": 2,
-                "max_new_tokens": 128,
-                "max_length": 1024,
-                "do_sample": True,
-                "repetition_penalty": 1.03,
-                "temperature": 0.8,
-                "top_k": 50,
-                "top_p": 0.95
-            }
+    "name_or_path": "HuggingFaceTB/SmolLM-1.7b-Instruct",
+    "task": "text-generation",
+    "device_map": "cpu",
+    "pipeline_kwargs": {
+        "max_new_tokens": 64,
+        "temperature": 1.0,
+        "do_sample": True,
+        "top_k": 50,
+        "top_p": 0.95,
+        "return_full_text": False,
+    }
 }
 
 DEFAULT_MODEL_CONFIG = LocalHuggingFaceModelConfig(**DEFAULT_MODEL_CONFIG_DICT)

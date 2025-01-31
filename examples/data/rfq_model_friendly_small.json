@@ -1,0 +1,2683 @@
+{
+    "name": "Experiment 1: Choice of Prompt Format - RFQ [Generative Models for Regulatory Focus Questionnaire]",
+    "description": "Investigate the effectiveness of different prompt formats: testing generative models for RFQ questionnaire using Rupsycho.",
+    "parameters": {
+        "seeds": [
+            "7"
+        ]
+    },
+    "prompt_template": {
+        "type": "chat",
+        "messages": [
+            {
+                "role": "system",
+                "content": "Objective: Act like you are {persona_description}, a survey participant answering a questionnaire.\n{general_instruction}\nInstructions: Choose from the list of answer options to answer the question. Answer the question using only the provided answer options. If none of the options are correct, choose the option that is closest to being correct."
+            },
+            {
+                "role": "user",
+                "content": "Question: {question}\nAnswer Options: {answer_options}\nAnswer:"
+            }
+        ]
+    },
+    "models": {
+        "Qwen/Qwen2.5-0.5B-Instruct": {
+            "type": "local_huggingface",
+            "name_or_path": "Qwen/Qwen2.5-0.5B-Instruct",
+            "device_map": {
+                "": "cuda:1"
+            },
+            "task": "text-generation",
+            "parameters": {
+                "max_new_tokens": 64,
+                "temperature": 1.0,
+                "do_sample": true,
+                "top_k": 50,
+                "top_p": 0.95,
+                "return_full_text": false
+            },
+            "bitsandbytes_config": {
+                "load_in_4bit": true,
+                "bnb_4bit_quant_type": "nf4",
+                "bnb_4bit_use_double_quant": true
+            }
+        }
+    },
+    "demographic_profiles": {
+        "6-Mr. Tsosie": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Tsosie",
+                "id": 6,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "7-Ms. Tsosie": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Tsosie",
+                "id": 7,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "9-Ms. Nez": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Nez",
+                "id": 9,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "14-Mr. Becenti": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Becenti",
+                "id": 14,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "15-Ms. Becenti": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Becenti",
+                "id": 15,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "31-Ms. Peshlakai": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Peshlakai",
+                "id": 31,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "32-Mr. Claw": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Claw",
+                "id": 32,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "36-Mr. Goldtooth": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Goldtooth",
+                "id": 36,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "37-Ms. Goldtooth": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Goldtooth",
+                "id": 37,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "40-Mr. Tsinnijinnie": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Tsinnijinnie",
+                "id": 40,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "41-Ms. Tsinnijinnie": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Tsinnijinnie",
+                "id": 41,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "42-Mr. Notah": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Notah",
+                "id": 42,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "45-Ms. Clah": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Clah",
+                "id": 45,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "49-Ms. Twobulls": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Twobulls",
+                "id": 49,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "52-Mr. Hosteen": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Hosteen",
+                "id": 52,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "53-Ms. Hosteen": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Hosteen",
+                "id": 53,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "54-Mr. Yellowman": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Yellowman",
+                "id": 54,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "58-Mr. Bitsui": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Bitsui",
+                "id": 58,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "63-Ms. Henio": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Henio",
+                "id": 63,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "68-Mr. Secatero": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Secatero",
+                "id": 68,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "74-Mr. Beyale": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Beyale",
+                "id": 74,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "83-Ms. Ethelbah": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Ethelbah",
+                "id": 83,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "85-Ms. Tsinnie": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Tsinnie",
+                "id": 85,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "86-Mr. Walkingeagle": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Walkingeagle",
+                "id": 86,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "94-Mr. Benallie": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Benallie",
+                "id": 94,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "96-Mr. Smallcanyon": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Smallcanyon",
+                "id": 96,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "99-Ms. Littledog": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Littledog",
+                "id": 99,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "100-Mr. Cosay": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Cosay",
+                "id": 100,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "101-Ms. Cosay": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Cosay",
+                "id": 101,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "106-Mr. Secody": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Secody",
+                "id": 106,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "109-Ms. Bigcrow": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Bigcrow",
+                "id": 109,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "111-Ms. Tabaha": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Tabaha",
+                "id": 111,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "116-Mr. Olanna": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Olanna",
+                "id": 116,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "120-Mr. Cowboy": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Cowboy",
+                "id": 120,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "121-Ms. Cowboy": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Cowboy",
+                "id": 121,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "126-Mr. Gishie": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Gishie",
+                "id": 126,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "133-Ms. Whitehat": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Whitehat",
+                "id": 133,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "136-Mr. Runningcrane": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Runningcrane",
+                "id": 136,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "149-Ms. Dayzie": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Dayzie",
+                "id": 149,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "150-Mr. Spottedeagle": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Spottedeagle",
+                "id": 150,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "159-Ms. Ganadonegro": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Ganadonegro",
+                "id": 159,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "163-Ms. Whiteface": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Whiteface",
+                "id": 163,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "170-Mr. Bitsuie": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Bitsuie",
+                "id": 170,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "173-Ms. Tsethlikai": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Tsethlikai",
+                "id": 173,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "180-Mr. Todacheenie": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Todacheenie",
+                "id": 180,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "181-Ms. Todacheenie": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Todacheenie",
+                "id": 181,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "189-Ms. Lasiloo": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Lasiloo",
+                "id": 189,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "190-Mr. Keyonnie": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Keyonnie",
+                "id": 190,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "194-Mr. Colelay": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Colelay",
+                "id": 194,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "197-Ms. Kallestewa": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Kallestewa",
+                "id": 197,
+                "ethnicity": "Native"
+            },
+            "template": "{title} {name}"
+        },
+        "202-Mr. Kim": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Kim",
+                "id": 202,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "203-Ms. Kim": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Kim",
+                "id": 203,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "204-Mr. Patel": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Patel",
+                "id": 204,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "213-Ms. Le": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Le",
+                "id": 213,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "215-Ms. Wang": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Wang",
+                "id": 215,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "219-Ms. Pham": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Pham",
+                "id": 219,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "223-Ms. Liu": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Liu",
+                "id": 223,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "228-Mr. Zhang": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Zhang",
+                "id": 228,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "240-Mr. Kaur": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Kaur",
+                "id": 240,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "241-Ms. Kaur": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Kaur",
+                "id": 241,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "242-Mr. Vang": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Vang",
+                "id": 242,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "246-Mr. Truong": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Truong",
+                "id": 246,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "247-Ms. Truong": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Truong",
+                "id": 247,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "251-Ms. Xiong": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Xiong",
+                "id": 251,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "257-Ms. Vu": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Vu",
+                "id": 257,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "258-Mr. Lu": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Lu",
+                "id": 258,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "264-Mr. Ngo": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Ngo",
+                "id": 264,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "267-Ms. Cheng": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Cheng",
+                "id": 267,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "269-Ms. Kang": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Kang",
+                "id": 269,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "271-Ms. Tan": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Tan",
+                "id": 271,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "274-Mr. Dang": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Dang",
+                "id": 274,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "291-Ms. Ma": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Ma",
+                "id": 291,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "297-Ms. Song": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Song",
+                "id": 297,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "302-Mr. Sun": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Sun",
+                "id": 302,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "304-Mr. Zhou": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Zhou",
+                "id": 304,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "314-Mr. Leung": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Leung",
+                "id": 314,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "315-Ms. Leung": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Leung",
+                "id": 315,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "318-Mr. Jiang": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Jiang",
+                "id": 318,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "320-Mr. Lai": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Lai",
+                "id": 320,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "326-Mr. Desai": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Desai",
+                "id": 326,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "327-Ms. Desai": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Desai",
+                "id": 327,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "335-Ms. Yi": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Yi",
+                "id": 335,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "342-Mr. Hsu": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Hsu",
+                "id": 342,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "345-Ms. Chau": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Chau",
+                "id": 345,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "347-Ms. Yoon": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Yoon",
+                "id": 347,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "348-Mr. Luu": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Luu",
+                "id": 348,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "349-Ms. Luu": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Luu",
+                "id": 349,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "350-Mr. Trinh": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Trinh",
+                "id": 350,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "361-Ms. Moua": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Moua",
+                "id": 361,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "364-Mr. Ko": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Ko",
+                "id": 364,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "365-Ms. Ko": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Ko",
+                "id": 365,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "368-Mr. Yoo": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Yoo",
+                "id": 368,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "372-Mr. Su": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Su",
+                "id": 372,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "373-Ms. Su": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Su",
+                "id": 373,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "374-Mr. Shen": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Shen",
+                "id": 374,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "379-Ms. Dong": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Dong",
+                "id": 379,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "382-Mr. Gao": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Gao",
+                "id": 382,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "384-Mr. Guo": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Guo",
+                "id": 384,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "388-Mr. Vue": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Vue",
+                "id": 388,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "389-Ms. Vue": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Vue",
+                "id": 389,
+                "ethnicity": "Asian"
+            },
+            "template": "{title} {name}"
+        },
+        "400-Mr. Smalls": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Smalls",
+                "id": 400,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "401-Ms. Smalls": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Smalls",
+                "id": 401,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "404-Mr. Diallo": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Diallo",
+                "id": 404,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "407-Ms. Kamara": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Kamara",
+                "id": 407,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "408-Mr. Pierrelouis": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Pierrelouis",
+                "id": 408,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "412-Mr. Jeanlouis": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Jeanlouis",
+                "id": 412,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "414-Mr. Bah": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Bah",
+                "id": 414,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "422-Mr. Chery": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Chery",
+                "id": 422,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "425-Ms. Jeanpierre": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Jeanpierre",
+                "id": 425,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "433-Ms. Jalloh": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Jalloh",
+                "id": 433,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "437-Ms. Ndiaye": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Ndiaye",
+                "id": 437,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "439-Ms. Abdullahi": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Abdullahi",
+                "id": 439,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "444-Mr. Diop": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Diop",
+                "id": 444,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "454-Mr. Manigault": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Manigault",
+                "id": 454,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "461-Ms. Traore": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Traore",
+                "id": 461,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "464-Mr. Okafor": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Okafor",
+                "id": 464,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "466-Mr. Bangura": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Bangura",
+                "id": 466,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "468-Mr. Louissaint": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Louissaint",
+                "id": 468,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "471-Ms. Cisse": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Cisse",
+                "id": 471,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "472-Mr. Osei": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Osei",
+                "id": 472,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "477-Ms. Cephas": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Cephas",
+                "id": 477,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "480-Mr. Fofana": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Fofana",
+                "id": 480,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "486-Mr. Straughter": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Straughter",
+                "id": 486,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "489-Ms. Jeancharles": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Jeancharles",
+                "id": 489,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "492-Mr. Kebede": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Kebede",
+                "id": 492,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "494-Mr. Mohamud": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Mohamud",
+                "id": 494,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "507-Ms. Filsaime": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Filsaime",
+                "id": 507,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "515-Ms. Jeanfrancois": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Jeanfrancois",
+                "id": 515,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "521-Ms. Bekele": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Bekele",
+                "id": 521,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "522-Mr. Tadesse": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Tadesse",
+                "id": 522,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "528-Mr. Asare": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Asare",
+                "id": 528,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "533-Ms. Saintil": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Saintil",
+                "id": 533,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "539-Ms. Ojo": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Ojo",
+                "id": 539,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "541-Ms. Nwosu": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Nwosu",
+                "id": 541,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "542-Mr. Okoro": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Okoro",
+                "id": 542,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "543-Ms. Okoro": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Okoro",
+                "id": 543,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "544-Mr. Fobbs": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Fobbs",
+                "id": 544,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "547-Ms. Kidane": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Kidane",
+                "id": 547,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "554-Mr. Lawal": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Lawal",
+                "id": 554,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "560-Mr. Addo": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Addo",
+                "id": 560,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "569-Ms. Steur": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Steur",
+                "id": 569,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "571-Ms. Balogun": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Balogun",
+                "id": 571,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "575-Ms. Opoku": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Opoku",
+                "id": 575,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "577-Ms. Coaxum": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Coaxum",
+                "id": 577,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "579-Ms. Vassell": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Vassell",
+                "id": 579,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "581-Ms. Prophete": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Prophete",
+                "id": 581,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "590-Mr. Dorvil": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Dorvil",
+                "id": 590,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "591-Ms. Dorvil": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Dorvil",
+                "id": 591,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "592-Mr. Frimpong": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Frimpong",
+                "id": 592,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "594-Mr. Berhane": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Berhane",
+                "id": 594,
+                "ethnicity": "Black"
+            },
+            "template": "{title} {name}"
+        },
+        "600-Mr. Garcia": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Garcia",
+                "id": 600,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "601-Ms. Garcia": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Garcia",
+                "id": 601,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "602-Mr. Rodriguez": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Rodriguez",
+                "id": 602,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "605-Ms. Martinez": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Martinez",
+                "id": 605,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "609-Ms. Lopez": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Lopez",
+                "id": 609,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "611-Ms. Gonzalez": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Gonzalez",
+                "id": 611,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "620-Mr. Flores": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Flores",
+                "id": 620,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "621-Ms. Flores": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Flores",
+                "id": 621,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "630-Mr. Gutierrez": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Gutierrez",
+                "id": 630,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "632-Mr. Ortiz": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Ortiz",
+                "id": 632,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "635-Ms. Chavez": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Chavez",
+                "id": 635,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "636-Mr. Ruiz": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Ruiz",
+                "id": 636,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "641-Ms. Castillo": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Castillo",
+                "id": 641,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "646-Mr. Moreno": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Moreno",
+                "id": 646,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "651-Ms. Medina": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Medina",
+                "id": 651,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "653-Ms. Aguilar": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Aguilar",
+                "id": 653,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "662-Mr. Salazar": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Salazar",
+                "id": 662,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "665-Ms. Garza": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Garza",
+                "id": 665,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "674-Mr. Pena": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Pena",
+                "id": 674,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "686-Mr. Ortega": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Ortega",
+                "id": 686,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "697-Ms. Espinoza": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Espinoza",
+                "id": 697,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "704-Mr. Mejia": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Mejia",
+                "id": 704,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "705-Ms. Mejia": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Mejia",
+                "id": 705,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "708-Mr. Figueroa": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Figueroa",
+                "id": 708,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "709-Ms. Figueroa": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Figueroa",
+                "id": 709,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "710-Mr. Avila": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Avila",
+                "id": 710,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "716-Mr. Ayala": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Ayala",
+                "id": 716,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "717-Ms. Ayala": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Ayala",
+                "id": 717,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "725-Ms. Robles": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Robles",
+                "id": 725,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "729-Ms. Solis": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Solis",
+                "id": 729,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "734-Mr. Velasquez": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Velasquez",
+                "id": 734,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "736-Mr. Aguirre": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Aguirre",
+                "id": 736,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "737-Ms. Aguirre": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Aguirre",
+                "id": 737,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "738-Mr. Ochoa": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Ochoa",
+                "id": 738,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "744-Mr. Rivas": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Rivas",
+                "id": 744,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "748-Mr. Rosales": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Rosales",
+                "id": 748,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "753-Ms. Gallegos": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Gallegos",
+                "id": 753,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "760-Mr. Salas": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Salas",
+                "id": 760,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "769-Ms. Zamora": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Zamora",
+                "id": 769,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "771-Ms. Villarreal": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Villarreal",
+                "id": 771,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "777-Ms. Santana": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Santana",
+                "id": 777,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "778-Mr. Trevino": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Trevino",
+                "id": 778,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "780-Mr. Lozano": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Lozano",
+                "id": 780,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "782-Mr. Rangel": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Rangel",
+                "id": 782,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "789-Ms. Valenzuela": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Valenzuela",
+                "id": 789,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "790-Mr. Zuniga": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Zuniga",
+                "id": 790,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "791-Ms. Zuniga": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Zuniga",
+                "id": 791,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "792-Mr. Melendez": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Melendez",
+                "id": 792,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "797-Ms. Velez": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Velez",
+                "id": 797,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "799-Ms. Meza": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Meza",
+                "id": 799,
+                "ethnicity": "Hispanic"
+            },
+            "template": "{title} {name}"
+        },
+        "800-Mr. Olson": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Olson",
+                "id": 800,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "805-Ms. Wagner": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Wagner",
+                "id": 805,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "807-Ms. Meyer": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Meyer",
+                "id": 807,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "808-Mr. Schmidt": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Schmidt",
+                "id": 808,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "810-Mr. Ryan": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Ryan",
+                "id": 810,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "811-Ms. Ryan": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Ryan",
+                "id": 811,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "814-Mr. Hoffman": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Hoffman",
+                "id": 814,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "816-Mr. Johnston": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Johnston",
+                "id": 816,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "817-Ms. Johnston": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Johnston",
+                "id": 817,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "822-Mr. Obrien": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Obrien",
+                "id": 822,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "824-Mr. Jensen": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Jensen",
+                "id": 824,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "830-Mr. Walsh": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Walsh",
+                "id": 830,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "832-Mr. Schultz": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Schultz",
+                "id": 832,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "836-Mr. Keller": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Keller",
+                "id": 836,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "841-Ms. Schwartz": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Schwartz",
+                "id": 841,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "843-Ms. Becker": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Becker",
+                "id": 843,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "844-Mr. Wolfe": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Wolfe",
+                "id": 844,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "847-Ms. Zimmerman": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Zimmerman",
+                "id": 847,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "851-Ms. Erickson": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Erickson",
+                "id": 851,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "858-Mr. Christensen": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Christensen",
+                "id": 858,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "861-Ms. Fischer": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Fischer",
+                "id": 861,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "865-Ms. Gallagher": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Gallagher",
+                "id": 865,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "871-Ms. Bauer": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Bauer",
+                "id": 871,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "878-Mr. Flynn": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Flynn",
+                "id": 878,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "879-Ms. Flynn": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Flynn",
+                "id": 879,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "892-Mr. Hoover": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Hoover",
+                "id": 892,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "902-Mr. Sweeney": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Sweeney",
+                "id": 902,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "903-Ms. Sweeney": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Sweeney",
+                "id": 903,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "904-Mr. Foley": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Foley",
+                "id": 904,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "905-Ms. Foley": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Foley",
+                "id": 905,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "908-Mr. Huffman": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Huffman",
+                "id": 908,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "909-Ms. Huffman": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Huffman",
+                "id": 909,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "911-Ms. Cline": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Cline",
+                "id": 911,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "914-Mr. Koch": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Koch",
+                "id": 914,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "917-Ms. Brennan": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Brennan",
+                "id": 917,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "918-Mr. Berg": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Berg",
+                "id": 918,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "922-Mr. Macdonald": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Macdonald",
+                "id": 922,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "923-Ms. Macdonald": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Macdonald",
+                "id": 923,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "924-Mr. Kline": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Kline",
+                "id": 924,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "927-Ms. Jacobson": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Jacobson",
+                "id": 927,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "934-Mr. Odonnell": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Odonnell",
+                "id": 934,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "939-Ms. Stout": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Stout",
+                "id": 939,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "949-Ms. Knapp": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Knapp",
+                "id": 949,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "967-Ms. Hahn": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Hahn",
+                "id": 967,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "970-Mr. Boyle": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Boyle",
+                "id": 970,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "975-Ms. Mayer": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Mayer",
+                "id": 975,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "982-Mr. Friedman": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Friedman",
+                "id": 982,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "985-Ms. Fry": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Fry",
+                "id": 985,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "986-Mr. Dougherty": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Dougherty",
+                "id": 986,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        },
+        "991-Ms. Huber": {
+            "attributes": {
+                "title": "Ms.",
+                "name": "Huber",
+                "id": 991,
+                "ethnicity": "White"
+            },
+            "template": "{title} {name}"
+        }
+    },
+    "questionnaire": {
+        "name": "REGULATORY FOCUS QUESTIONNAIRE (HIGGINS ET AL., 2001) (Also described as the Event Reaction Questionnaire)",
+        "general_instruction": "This set of questions asks you HOW FREQUENTLY specific events actually occur or have occurred in your life. Please indicate your answer to the question by selecting the appropriate number.",
+        "attributes": {
+            "dimension": {
+                "1": "Promotion",
+                "2": "Prevention"
+            }
+        },
+        "instruction_items": [
+            {
+                "question": "Compared to most people, are you typically unable to get what you want out of life?",
+                "reversed": true,
+                "answer_options": {
+                    "1": {
+                        "text": "1. never or seldom",
+                        "weight": 1,
+                        "ignored_for_scale": false
+                    },
+                    "2": {
+                        "text": "2.",
+                        "weight": 2,
+                        "ignored_for_scale": false
+                    },
+                    "3": {
+                        "text": "3. sometimes",
+                        "weight": 3,
+                        "ignored_for_scale": false
+                    },
+                    "4": {
+                        "text": "4.",
+                        "weight": 4,
+                        "ignored_for_scale": false
+                    },
+                    "5": {
+                        "text": "5. very often",
+                        "weight": 5,
+                        "ignored_for_scale": false
+                    }
+                },
+                "attributes": {
+                    "dimension": 1
+                }
+            },
+            {
+                "question": "Growing up, would you ever \"cross the line\" by doing things that your parents would not tolerate?",
+                "reversed": true,
+                "answer_options": {
+                    "1": {
+                        "text": "1. never or seldom",
+                        "weight": 1,
+                        "ignored_for_scale": false
+                    },
+                    "2": {
+                        "text": "2.",
+                        "weight": 2,
+                        "ignored_for_scale": false
+                    },
+                    "3": {
+                        "text": "3. sometimes",
+                        "weight": 3,
+                        "ignored_for_scale": false
+                    },
+                    "4": {
+                        "text": "4.",
+                        "weight": 4,
+                        "ignored_for_scale": false
+                    },
+                    "5": {
+                        "text": "5. very often",
+                        "weight": 5,
+                        "ignored_for_scale": false
+                    }
+                },
+                "attributes": {
+                    "dimension": 2
+                }
+            },
+            {
+                "question": "How often have you accomplished things that got you 'psyched' to work even harder?",
+                "reversed": false,
+                "answer_options": {
+                    "1": {
+                        "text": "1. never or seldom",
+                        "weight": 1,
+                        "ignored_for_scale": false
+                    },
+                    "2": {
+                        "text": "2.",
+                        "weight": 2,
+                        "ignored_for_scale": false
+                    },
+                    "3": {
+                        "text": "3. sometimes",
+                        "weight": 3,
+                        "ignored_for_scale": false
+                    },
+                    "4": {
+                        "text": "4.",
+                        "weight": 4,
+                        "ignored_for_scale": false
+                    },
+                    "5": {
+                        "text": "5. many times",
+                        "weight": 5,
+                        "ignored_for_scale": false
+                    }
+                },
+                "attributes": {
+                    "dimension": 1
+                }
+            },
+            {
+                "question": "Did you get on your parents' nerves often when you were growing up?",
+                "reversed": true,
+                "answer_options": {
+                    "1": {
+                        "text": "1. never or seldom",
+                        "weight": 1,
+                        "ignored_for_scale": false
+                    },
+                    "2": {
+                        "text": "2.",
+                        "weight": 2,
+                        "ignored_for_scale": false
+                    },
+                    "3": {
+                        "text": "3. sometimes",
+                        "weight": 3,
+                        "ignored_for_scale": false
+                    },
+                    "4": {
+                        "text": "4.",
+                        "weight": 4,
+                        "ignored_for_scale": false
+                    },
+                    "5": {
+                        "text": "5. very often",
+                        "weight": 5,
+                        "ignored_for_scale": false
+                    }
+                },
+                "attributes": {
+                    "dimension": 2
+                }
+            },
+            {
+                "question": "How often did you obey rules and regulations that were established by your parents?",
+                "reversed": false,
+                "answer_options": {
+                    "1": {
+                        "text": "1. never or seldom",
+                        "weight": 1,
+                        "ignored_for_scale": false
+                    },
+                    "2": {
+                        "text": "2.",
+                        "weight": 2,
+                        "ignored_for_scale": false
+                    },
+                    "3": {
+                        "text": "3. sometimes",
+                        "weight": 3,
+                        "ignored_for_scale": false
+                    },
+                    "4": {
+                        "text": "4.",
+                        "weight": 4,
+                        "ignored_for_scale": false
+                    },
+                    "5": {
+                        "text": "5. always",
+                        "weight": 5,
+                        "ignored_for_scale": false
+                    }
+                },
+                "attributes": {
+                    "dimension": 2
+                }
+            },
+            {
+                "question": "Growing up, did you ever act in ways that your parents thought were objectionable?",
+                "reversed": true,
+                "answer_options": {
+                    "1": {
+                        "text": "1. never or seldom",
+                        "weight": 1,
+                        "ignored_for_scale": false
+                    },
+                    "2": {
+                        "text": "2.",
+                        "weight": 2,
+                        "ignored_for_scale": false
+                    },
+                    "3": {
+                        "text": "3. sometimes",
+                        "weight": 3,
+                        "ignored_for_scale": false
+                    },
+                    "4": {
+                        "text": "4.",
+                        "weight": 4,
+                        "ignored_for_scale": false
+                    },
+                    "5": {
+                        "text": "5. very often",
+                        "weight": 5,
+                        "ignored_for_scale": false
+                    }
+                },
+                "attributes": {
+                    "dimension": 2
+                }
+            },
+            {
+                "question": "Do you often do well at different things that you try?",
+                "reversed": false,
+                "answer_options": {
+                    "1": {
+                        "text": "1. never or seldom",
+                        "weight": 1,
+                        "ignored_for_scale": false
+                    },
+                    "2": {
+                        "text": "2.",
+                        "weight": 2,
+                        "ignored_for_scale": false
+                    },
+                    "3": {
+                        "text": "3. sometimes",
+                        "weight": 3,
+                        "ignored_for_scale": false
+                    },
+                    "4": {
+                        "text": "4.",
+                        "weight": 4,
+                        "ignored_for_scale": false
+                    },
+                    "5": {
+                        "text": "5. very often",
+                        "weight": 5,
+                        "ignored_for_scale": false
+                    }
+                },
+                "attributes": {
+                    "dimension": 1
+                }
+            },
+            {
+                "question": "Not being careful enough has gotten me into trouble at times.",
+                "reversed": true,
+                "answer_options": {
+                    "1": {
+                        "text": "1. never or seldom",
+                        "weight": 1,
+                        "ignored_for_scale": false
+                    },
+                    "2": {
+                        "text": "2.",
+                        "weight": 2,
+                        "ignored_for_scale": false
+                    },
+                    "3": {
+                        "text": "3. sometimes",
+                        "weight": 3,
+                        "ignored_for_scale": false
+                    },
+                    "4": {
+                        "text": "4.",
+                        "weight": 4,
+                        "ignored_for_scale": false
+                    },
+                    "5": {
+                        "text": "5. very often",
+                        "weight": 5,
+                        "ignored_for_scale": false
+                    }
+                },
+                "attributes": {
+                    "dimension": 2
+                }
+            },
+            {
+                "question": "When it comes to achieving things that are important to me, I find that I don't perform as well as I ideally would like to do.",
+                "reversed": true,
+                "answer_options": {
+                    "1": {
+                        "text": "1. never true",
+                        "weight": 1,
+                        "ignored_for_scale": false
+                    },
+                    "2": {
+                        "text": "2.",
+                        "weight": 2,
+                        "ignored_for_scale": false
+                    },
+                    "3": {
+                        "text": "3. sometimes true",
+                        "weight": 3,
+                        "ignored_for_scale": false
+                    },
+                    "4": {
+                        "text": "4.",
+                        "weight": 4,
+                        "ignored_for_scale": false
+                    },
+                    "5": {
+                        "text": "5. very often true",
+                        "weight": 5,
+                        "ignored_for_scale": false
+                    }
+                },
+                "attributes": {
+                    "dimension": 1
+                }
+            },
+            {
+                "question": "I feel like I have made progress toward being successful in my life.",
+                "reversed": false,
+                "answer_options": {
+                    "1": {
+                        "text": "1. certainly false",
+                        "weight": 1,
+                        "ignored_for_scale": false
+                    },
+                    "2": {
+                        "text": "2.",
+                        "weight": 2,
+                        "ignored_for_scale": false
+                    },
+                    "3": {
+                        "text": "3.",
+                        "weight": 3,
+                        "ignored_for_scale": false
+                    },
+                    "4": {
+                        "text": "4.",
+                        "weight": 4,
+                        "ignored_for_scale": false
+                    },
+                    "5": {
+                        "text": "5. certainly true",
+                        "weight": 5,
+                        "ignored_for_scale": false
+                    }
+                },
+                "attributes": {
+                    "dimension": 1
+                }
+            },
+            {
+                "question": "I have found very few hobbies or activities in my life that capture my interest or motivate me to put effort into them.",
+                "reversed": true,
+                "answer_options": {
+                    "1": {
+                        "text": "1. certainly false",
+                        "weight": 1,
+                        "ignored_for_scale": false
+                    },
+                    "2": {
+                        "text": "2.",
+                        "weight": 2,
+                        "ignored_for_scale": false
+                    },
+                    "3": {
+                        "text": "3.",
+                        "weight": 3,
+                        "ignored_for_scale": false
+                    },
+                    "4": {
+                        "text": "4.",
+                        "weight": 4,
+                        "ignored_for_scale": false
+                    },
+                    "5": {
+                        "text": "5. certainly true",
+                        "weight": 5,
+                        "ignored_for_scale": false
+                    }
+                },
+                "attributes": {
+                    "dimension": 1
+                }
+            }
+        ]
+    }
+}

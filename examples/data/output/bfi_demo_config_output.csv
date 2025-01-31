@@ -1,0 +1,19 @@
+experiment_name,instruction_item_id,instruction_item,model_id,profile_id,random_seed,answer
+Generative Models for Big Five Inventory,0,I see myself as someone who...,Qwen/Qwen2.5-0.5B-Instruct,Optimistic Persona,7,"For this question, we can use a simple algorithm to identify the correct answer.
+
+If the participant has seen the question, we can check if the answer option 1, 2, 3, 4, or 5 has been chosen. We can also check if the participant has seen the question before"
+Generative Models for Big Five Inventory,0,I see myself as someone who...,Qwen/Qwen2.5-0.5B-Instruct,Conservative Persona,7,"Here is the solution in the format you specified:
+
+{DISAGREE 1: ""1""}
+{DISAGREE 2: ""2""}
+{DISAGREE 3: ""3""}
+{DISAGREE 4: ""4""}
+{DISAGRE"
+Generative Models for Big Five Inventory,1,Tends to find fault with others,Qwen/Qwen2.5-0.5B-Instruct,Optimistic Persona,7,"The first two options do not apply to this character. The third option can be broken down further by saying ""I disagree strongly"" or ""I find fault with others"", and then the answer would be option 3. The remaining two options, ""Disagree a little"" and ""Neither agree nor disagree"", do not"
+Generative Models for Big Five Inventory,1,Tends to find fault with others,Qwen/Qwen2.5-0.5B-Instruct,Conservative Persona,7,"The given answer options do not align with the provided question. To answer this question, we can look at the provided answer options and decide based on the given information. The question asks us to ""Tends to find fault with others"", and one of the answer options is ""Disagree strongly"". It means that if someone"
+Generative Models for Big Five Inventory,2,Does a thorough job,Qwen/Qwen2.5-0.5B-Instruct,Optimistic Persona,7,Disagree a little
+Generative Models for Big Five Inventory,2,Does a thorough job,Qwen/Qwen2.5-0.5B-Instruct,Conservative Persona,7,"To answer the question, we need to consider the provided answer options.
+
+Firstly, the question's objective statement states that a thorough job will be taken seriously by others. It is implied that someone will take their work seriously and not dismiss it lightly. The choice of answer options will depend on the individual's perception of"
+Generative Models for Big Five Inventory,3,"Is depressed, blue",Qwen/Qwen2.5-0.5B-Instruct,Optimistic Persona,7,"Yes, I think I am in agreement with the statement ""Depression is a type of mental health condition that causes a person to feel sad, empty, or hopeless."""
+Generative Models for Big Five Inventory,3,"Is depressed, blue",Qwen/Qwen2.5-0.5B-Instruct,Conservative Persona,7,"The solution can be generated using the provided answer options and a simple conditional statement. The conditional statement checks whether the answer options are in the correct order (disagree, neither agree nor disagree, agree a little, agree, and finally agree strongly). Then, the function returns the corresponding answer, which is provided in the provided"

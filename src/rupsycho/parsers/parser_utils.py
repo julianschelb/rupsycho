@@ -10,6 +10,7 @@ import re
 import json
 import warnings
 import os
+from rupsycho.utils.files import json_loader
 
 
 def check_span(text: str, filter_dictionary: dict[str, list[str]], span: tuple[int, int] = None, ratio: float = None) -> dict[str, int]:
@@ -25,6 +26,7 @@ def check_span(text: str, filter_dictionary: dict[str, list[str]], span: tuple[i
     Returns:
         dict[str, bool]: A dictionary where keys are the categories and values are booleans indicating if any answers were found in the specified span or ratio of the text.
     """
+    text = str(text)
     if span:
         start, end = span
         sub_text = text[start:end]
@@ -148,10 +150,39 @@ def process_completion(text, pattern_name=None, regex_dict_path=None, user_input
     return [item.strip() for match in re.findall(pattern, text) for item in match]
 
 
-def check_multiple_choice_answers(text: str, possible_answers: list[str]) -> dict:
+# def check_multiple_choice_answers(text: str, possible_answers: list[str]) -> dict:
+#     """
+#     Checks for the presence of possible multiple-choice answers in the given text.
+#     It counts occurrences of parts of each answer as valid detections.
+
+#     Args:
+#         text (str): The input text to search within.
+#         possible_answers (list[str]): A list of possible answer strings to check for.
+
+#     Returns:
+#         dict: A dictionary where keys are the possible answers and values are the count of detections in the text.
+#     """
+
+#     text = text.lower()
+
+#     answer_counts = {answer: 0 for answer in possible_answers}
+
+#     split_pattern = r'(\d+|[a-zA-Z]+|[^a-zA-Z0-9\s])'
+
+#     for answer in possible_answers:
+#         normalized_answer = answer.lower()
+#         components = [component.strip() for component in re.findall(
+#             split_pattern, normalized_answer) if component.strip()]
+#         for component in components:
+#             match_pattern = fr"\b{re.escape(component)}\b"
+#             matches = re.findall(match_pattern, text)
+#             answer_counts[answer] += len(matches)
+#     return dict(answer_counts)
+
+def check_multiple_choice_answers(text: str, possible_answers: list[str], ignore_case: bool = True) -> dict:
     """
     Checks for the presence of possible multiple-choice answers in the given text.
-    It counts occurrences of parts of each answer as valid detections.
+    Separates the number from the rest of the answer option and removes punctuation.
 
     Args:
         text (str): The input text to search within.
@@ -161,21 +192,30 @@ def check_multiple_choice_answers(text: str, possible_answers: list[str]) -> dic
         dict: A dictionary where keys are the possible answers and values are the count of detections in the text.
     """
 
-    text = text.lower()
-
+    text = text.lower() if ignore_case else text
     answer_counts = {answer: 0 for answer in possible_answers}
 
-    split_pattern = r'(\d+|[a-zA-Z]+|[^a-zA-Z0-9\s])'
+    # Pattern to split number and remove punctuation
+    number_pattern = r'^(\d+)\.'  # Matches number at start followed by period
+    punctuation_pattern = r'[^\w\s]'  # Matches punctuation
 
     for answer in possible_answers:
-        normalized_answer = answer.lower()
-        components = [component.strip() for component in re.findall(
-            split_pattern, normalized_answer) if component.strip()]
+        normalized_answer = answer.lower() if ignore_case else answer
+        number_match = re.match(number_pattern, normalized_answer)
+
+        # If a number is found, split it from the rest of the text and remove punctuation
+        number = number_match.group(1) if number_match else None
+        answer_text = re.sub(number_pattern, '', normalized_answer).strip()
+        answer_text = re.sub(punctuation_pattern, '', answer_text)
+        components = [number, answer_text] if number else [answer_text]
+
+        # Refine matching logic: only match numbers exactly and ensure full word matching for text
         for component in components:
-            match_pattern = fr"\b{re.escape(component)}\b"
-            matches = re.findall(match_pattern, text)
-            answer_counts[answer] += len(matches)
-    return dict(answer_counts)
+            if component:
+                match_pattern = fr"\b{re.escape(component)}\b"
+                answer_counts[answer] += len(re.findall(match_pattern, text))
+
+    return answer_counts
 
 
 def split_on_symbols(text: str) -> list[str]:
