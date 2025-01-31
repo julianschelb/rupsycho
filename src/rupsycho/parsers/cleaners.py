@@ -150,6 +150,78 @@ class PromptRemovalCleaner(BaseOutputParser[str]):
         return "prompt_removal_cleaner_parser"
 
 
+class RegexExtractorCleaner(BaseOutputParser[str]):
+    """
+    A custom parser that extracts values from the input text based on a given regex pattern.
+    If the extraction fails, it simply returns the original input text.
+    """
+
+    pattern: str = Field(...)
+
+    def __init__(self, pattern: str):
+        """
+        Initializes the RegexExtractorCleaner with the specified regex pattern.
+
+        Parameters
+        ----------
+        pattern : str
+            The regex pattern used to extract values from the input text.
+        """
+        super().__init__()
+        self.pattern = pattern
+
+    def parse(self, text: str) -> str:
+        """
+        Parses the input text to extract values based on the regex pattern.
+
+        If the regex match fails, returns the original input text.
+
+        Parameters
+        ----------
+        text : str
+            The input string to be processed.
+
+        Returns
+        -------
+        str
+            The extracted value based on the regex pattern, or the original input text
+            if extraction fails.
+
+        Raises
+        ------
+        OutputParserException
+            If an error occurs during parsing, an OutputParserException is raised with a
+            descriptive error message.
+        """
+        try:
+            # Search for the regex pattern in the input text
+            match = re.search(self.pattern, text)
+
+            # If a match is found, return the extracted value
+            if match:
+                return match.group(1)
+            else:
+                # If no match, return the original input text
+                return text
+
+        except Exception as e:
+            raise OutputParserException(
+                f"RegexExtractorCleaner encountered an error: {e}"
+            )
+
+    @property
+    def _type(self) -> str:
+        """
+        Returns the type of the parser as a string identifier.
+
+        Returns
+        -------
+        str
+            The string "regex_extractor_cleaner", identifying the type of this parser.
+        """
+        return "regex_extractor_cleaner"
+
+
 if __name__ == "__main__":
     # Example usage of the BasicParser class.
 

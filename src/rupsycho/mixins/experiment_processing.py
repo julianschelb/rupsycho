@@ -5,10 +5,13 @@
 #  executing chains with different models, profiles, and instructions. It
 #  includes error handling, progress tracking, and result storage.
 
+
+import gc
+import torch
 import warnings
 from collections import defaultdict
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough
+from langchain_core.runnables import Runnable, RunnablePassthrough
 from langchain_huggingface.llms import HuggingFacePipeline
 from rupsycho.utils import import_tqdm
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
@@ -43,120 +46,68 @@ class ExperimentProcessingMixin:
     and execution of experiment chains, manage errors, track progress, and store results.
     """
 
-    def create_chain(self, model_key: str, seed: int = 42, params: dict = {}) -> Any:
+    def _create_input_dict(self, profile: Any, instruction_item: Any) -> Dict[str, Any]:
+        """Create the input dictionary required for invoking the chain."""
+
+        # Get the answer options for the instruction item, or use the default options if none are provided
+        if instruction_item.answer_options:
+            answer_options = instruction_item.answer_options.join_options()
+        else:
+            answer_options = self.questionnaire.default_answer_options.join_options()
+
+        # Return the input dictionary
+        return {
+            "general_instruction": self.questionnaire.general_instruction,
+            "persona_description": profile.get_profile_desc(),
+            "question": instruction_item.question,
+            "answer_options": answer_options  # Joined options with the specified delimiter
+        }
+
+    def _get_chain(self, prompt_template: Runnable, model: Runnable, parser: Runnable, name: str, seed: int = 42, params: dict = {}) -> Any:
         """Create a chain for running the experiment using the model identified by model_key."""
-        self._ensure_models_and_prompt()
 
-        parser = self.runnable_parser or self._default_parser()
+        # Check if the prompt template, model, and parser are set
+        if not prompt_template:
+            raise ValueError("Prompt template not set.")
+        if not model:
+            raise ValueError("Model not set.")
+        if not parser:
+            parser = StrOutputParser()
 
+        # Create the chain
         return (
             RunnablePassthrough()
-            | self.runnable_prompt
-            | self.runnable_models[model_key]  # .bind(seed=seed, **params)
+            | prompt_template
+            | model.bind(seed=int(seed))  # TODO: Add params
             | parser
-        ).with_config(run_name=f"experiment_chain_{model_key}")
+        ).with_config(run_name=name)
 
-    def create_all_chains(self, seed: int = 42, params: dict = {}) -> Dict[str, Any]:
-        """Create chains for running the experiment with all models."""
-        return {model_key: self.create_chain(model_key, seed, params) for model_key in self.runnable_models}
+    def _generate_answer(self, chain, input_values):
+        """Invoke the chain to generate an answer."""
+        try:
+            answer = chain.invoke(input_values)
+        except Exception as e:
+            print(f"Error invoking chain for run: {e}")
+            answer = None
+        return answer
 
-    def _default_parser(self) -> Any:
-        """Provide a default parser if none is set."""
-        warnings.warn(
-            "No parser set. Using StrOutputParser as default.", UserWarning)
-        return StrOutputParser()
-
-    def _ensure_models_and_prompt(self) -> None:
+    def _ensure_requirements_to_run(self) -> None:
         """Ensure that at least one model and a prompt are set."""
+
         if not self.runnable_models:
             raise ValueError("No models have been set in runnable_models.")
         if self.runnable_prompt is None:
             raise ValueError("runnable_prompt has not been set.")
+        if self.questionnaire is None:
+            raise ValueError("questionnaire has not been set.")
+        if self.demographic_profiles is None:
+            raise ValueError("demographic_profiles has not been set.")
 
-    def initialize_answers_if_needed(self, instruction_item: Any) -> None:
-        """Initialize the 'answers' attribute as a nested defaultdict if it doesn't exist."""
-        if not hasattr(instruction_item, "answers"):
-            instruction_item.answers = defaultdict(
-                lambda: defaultdict(lambda: defaultdict(dict))
-            )
-
-    def create_input_dict(self, profile: Any, instruction_item: Any) -> Dict[str, Any]:
-        """Create the input dictionary required for invoking the chain."""
-
-        if instruction_item.answer_options:
-            answer_options = instruction_item.answer_options.values()
-        else:
-            answer_options = self.questionnaire.default_answer_options.values()
-
-        return {
-            "general_instruction": self.questionnaire.general_instruction,
-            "persona_description": profile,
-            "question": instruction_item.question,
-            "answer_options": " ".join(
-                option.text for option in answer_options
-            )
-        }
-
-    def process_single_experiment(self, pbar) -> None:
-        """Process the experiment, iterating through models, profiles, and instruction items."""
-
-        # Ensure at least one model is available
-        if not self.runnable_models:
-            self.add_model(get_default_model(), "default_model")
-            warnings.warn(
-                "No models added to the experiment. Using default model.", UserWarning)
-
-        # Iterate through instruction items, models, profiles, and seeds
-        for instruction_item in self.questionnaire.instruction_items:
-            self.initialize_answers_if_needed(instruction_item)
-
-            # Iterate over the seed values for reproducibility
-            for run_idx in self._get_seed_values():
-
-                # Create chains for each model using the current seed
-
-                all_chains = self.create_all_chains(
-                    seed=run_idx, params=self.parameters.model_dump())
-                for model_key, chain in all_chains.items():
-
-                    # Iterate over all demographic profiles
-                    for profile_key, profile in self.demographic_profiles.items():
-
-                        # Create input dictionary for the model based on the profile and instruction item
-                        input_dict = self.create_input_dict(
-                            profile, instruction_item)
-
-                        # Invoke the model chain and get the generated answer
-                        answer = self._invoke_chain(chain, input_dict, run_idx)
-
-                        # Store the answer in the appropriate location
-                        self._store_answer(
-                            instruction_item, model_key, profile_key, run_idx, answer)
-
-                        # Update the progress bar after processing each answer
-                        pbar.update(1)
+        return True
 
     def _get_seed_values(self) -> list:
         """Return the seed values to be used in the experiment."""
         return self.parameters.seeds if self.parameters.seeds else [42]
-
-    def _invoke_chain(self, chain: Any, input_dict: Dict[str, Any], run_idx: int) -> Optional[Any]:
-        """Invoke the chain and handle any errors."""
-        try:
-            return chain.invoke(input_dict)
-        except Exception as e:
-            print(f"Error invoking chain for run {run_idx}: {e}")
-            return None
-
-    def _store_answer(self, instruction_item: Any, model_key: str, profile_key: str, run_idx: int, answer: Any) -> None:
-        """Store the answer in the appropriate location."""
-        if answer is not None:
-            instruction_item.answers[model_key][profile_key][run_idx] = answer
-
-    def run(self) -> None:
-        """Run the experiment processing with a progress bar."""
-        with tqdm(total=self._calculate_total_iterations(), desc=self.name or "Experiment", unit=" prompts") as pbar:
-            self.process_single_experiment(pbar)
 
     def _calculate_total_iterations(self) -> int:
         """Calculate the total number of iterations for the progress bar."""
@@ -166,3 +117,114 @@ class ExperimentProcessingMixin:
             * len(self.demographic_profiles)
             * len(self._get_seed_values())
         )
+
+    def _is_runnable(self, model):
+        """Check if the model is a runnable LangChain model."""
+        return isinstance(model, Runnable)
+
+    def _cleanup_memory(self):
+        """Cleanup memory by running garbage collection and emptying the cache."""
+        gc.collect()
+        torch.cuda.empty_cache()
+
+    def _load_model(self, model):
+        """Lazy load the model if it's not runnable."""
+        if not self._is_runnable(model):
+            return model.load_model()
+        return model
+
+    def _generate_and_process_answers(self, model, model_id, seed_values, params, questionnaire, demographic_profiles, callbacks, pbar):
+        """Generate answers for each instruction item, random seed, and demographic profile."""
+        # Iterate over random seeds
+        for random_seed in seed_values:
+
+            # Generate the chain for the current model and seed combination.
+            chain = self._get_chain(self.runnable_prompt, model, self.runnable_parser,
+                                    model_id, seed=int(random_seed), params=params)
+
+            # Iterate over each instruction item in the questionnaire
+            for instruction_item_id, instruction_item in enumerate(questionnaire.instruction_items):
+
+                # Iterate over each demographic profile
+                for profile_id, profile in demographic_profiles.items():
+
+                    # Create an input dictionary based on the profile and instruction item
+                    input_values = self._create_input_dict(
+                        profile, instruction_item)
+
+                    # Generate an answer using the chain
+                    answer = self._generate_answer(chain, input_values)
+
+                    # Update the instruction item with the generated answer.
+                    instruction_item.update_answer(
+                        model_id, profile_id, random_seed, answer)
+
+                    # Trigger all callbacks to save the answer
+                    self._trigger_callbacks(
+                        callbacks, instruction_item_id, instruction_item, model_id, profile_id, random_seed, answer)
+
+                    # Update the progress bar
+                    pbar.update(1)
+
+    def _trigger_callbacks(self, callbacks, instruction_item_id, instruction_item, model_id, profile_id, random_seed, answer):
+        """Trigger all the callbacks to save the generated answer."""
+        for callback in callbacks:
+            try:
+                callback.save_answer(
+                    self, instruction_item_id, instruction_item, model_id, profile_id, random_seed, answer)
+            except Exception as e:
+                warnings.warn(f"Error while saving answer: {e}")
+
+    def process_single_experiment(self, pbar=None, callbacks=[]) -> None:
+        """Process the experiment, iterating through models, profiles, and instruction items."""
+
+        # ------------------- Validation -------------------
+        self._ensure_requirements_to_run()
+
+        # Create a progress bar for tracking the experiment progress if not provided
+        if pbar is None:
+            pbar = tqdm(total=self._calculate_total_iterations(),
+                        desc=self.name or "Experiment", unit=" prompts")
+
+        # Precompute default parameters once as they do not change per model
+        default_params = self.parameters.model_dump(
+            exclude_none=True, exclude=['seeds'])
+
+        # Pre-fetch reusable properties
+        seed_values = self._get_seed_values()
+        demographic_profiles = self.demographic_profiles
+        runnable_models = self.runnable_models
+        questionnaire = self.questionnaire
+
+        # ------------------- Model Processing -------------------
+        for model_id, model in runnable_models.items():
+
+            # Load the model (lazy loading if required)
+            model = self._load_model(model)
+            # Update the model reference
+            self.runnable_models[model_id] = model
+
+            # Retrieve model-specific parameters if available, and merge them with the default parameters.
+            model_config = self.models.get(model_id)
+            model_params = model_config.parameters if model_config else {}
+            params = {**default_params, **model_params}
+
+            # Generate answers for the current model
+            self._generate_and_process_answers(
+                model, model_id, seed_values, params, questionnaire, demographic_profiles, callbacks, pbar)
+
+            # Cleanup memory after processing the model
+            del model
+            self.runnable_models[model_id] = None  # Remove from the dictionary
+            gc.collect()  # Cleanup CPU memory
+            torch.cuda.empty_cache()  # Cleanup GPU memory
+
+    def run(self, callbacks=[]) -> None:
+        """Run the experiment processing with a progress bar and callbacks."""
+
+        # Ensure that the required attributes are set
+        self._ensure_requirements_to_run()
+
+        # Create a progress bar for tracking the experiment progress
+        with tqdm(total=self._calculate_total_iterations(), desc=self.name or "Experiment", unit=" prompts") as pbar:
+            self.process_single_experiment(pbar, callbacks=callbacks)

@@ -7,15 +7,20 @@
 # final prediction or verdict.
 
 from pydantic import Field
+from typing import Any
 from langchain_core.exceptions import OutputParserException
 from langchain_core.output_parsers import BaseOutputParser
 from rupsycho.parsers.parser_utils import check_multiple_choice_answers
+from transformers import RobertaTokenizer, RobertaForSequenceClassification
+from scipy.stats import entropy
+import numpy as np
+import torch
 
 
 # ========================== Multiple Choice Parser ========================
 
 
-class MultipleChoiceParser(BaseOutputParser[str]):
+class MultipleChoiceJudge(BaseOutputParser[str]):
     """
     A custom parser that processes a text input and returns the most likely
     answer from a set of possible multiple-choice answers using the
@@ -27,8 +32,9 @@ class MultipleChoiceParser(BaseOutputParser[str]):
     """
 
     possible_answers: list[str] = Field(...)
+    ignore_case: bool = Field(True)
 
-    def __init__(self, possible_answers: list[str]):
+    def __init__(self, possible_answers: list[str], ignore_case: bool = True):
         """
         Initializes the parser with a list of possible answers.
 
@@ -38,8 +44,8 @@ class MultipleChoiceParser(BaseOutputParser[str]):
             A list of possible answers to be considered in the parsing process.
         """
         super().__init__()
-        # Manually set the field
         object.__setattr__(self, 'possible_answers', possible_answers)
+        object.__setattr__(self, 'ignore_case', ignore_case)
 
     def parse(self, text: str) -> str:
         """
@@ -49,16 +55,23 @@ class MultipleChoiceParser(BaseOutputParser[str]):
         try:
             # Use the check_multiple_choice_answers function to analyze the text
             results = check_multiple_choice_answers(
-                text, self.possible_answers)
+                text, self.possible_answers, self.ignore_case)
+            max_value = max(results.values())
 
-            # Find the answer with the highest count
-            most_likely_answer = max(results, key=results.get)
-
-            return most_likely_answer
+            if max_value == 0:
+                return "not present"
+            else:
+                # Find all options with the max_value
+                max_keys = [key for key, value in results.items()
+                            if value == max_value]
+                if len(max_keys) > 1:
+                    return "inconclusive"
+                else:
+                    return max_keys[0]
 
         except Exception as e:
             raise OutputParserException(
-                f"MultipleChoiceParser encountered an error: {e}")
+                f"MultipleChoiceJudge encountered an error: {e}")
 
     @property
     def _type(self) -> str:
@@ -66,6 +79,132 @@ class MultipleChoiceParser(BaseOutputParser[str]):
         Returns the type of the parser as a string identifier.
         """
         return "multiple_choice_parser"
+
+
+# ---------------------- Model-Based Answer Judge ---------------------
+
+class ModelBasedAnswerJudge(BaseOutputParser[str]):
+    """
+    A custom parser that processes a text input and returns the most likely
+    answer from a set of possible answers using a Hugging Face model.
+    If the entropy of the decision probabilities is greater than a threshold, it returns "inconclusive".
+    """
+
+    model_name: str = Field(...)
+    possible_answers: list[str] = Field(...)
+    device: str = Field('cuda:0')
+    model: Any = Field(...)
+    tokenizer: Any = Field(...)
+    entropy_threshold: float = Field(0.359)  # Default entropy threshold
+
+    class Config:
+        arbitrary_types_allowed = True
+
+    def __init__(self, model_name: str, possible_answers: list[str], device: str = 'cuda:0', entropy_threshold: float = 0.359):
+        """
+        Initializes the parser with a Hugging Face model and a list of possible answers.
+
+        Parameters
+        ----------
+        model_name : str
+            The Hugging Face model name or path for the sequence classification model.
+        possible_answers : list[str]
+            A list of possible answers to be considered during prediction.
+        device : str
+            The device to run the model on (e.g., 'cuda:0' for GPU or 'cpu').
+        entropy_threshold : float
+            The threshold for entropy above which the result is considered inconclusive.
+        """
+        super().__init__()
+
+        # Load the tokenizer and model from Hugging Face
+        tokenizer = RobertaTokenizer.from_pretrained(model_name)
+        model = RobertaForSequenceClassification.from_pretrained(
+            model_name, num_labels=2)
+
+        # Move model to the specified device
+        model.to(device)
+
+        # Manually set the field
+        object.__setattr__(self, 'model_name', model_name)
+        object.__setattr__(self, 'possible_answers', possible_answers)
+        object.__setattr__(self, 'device', device)
+        object.__setattr__(self, 'model', model)
+        object.__setattr__(self, 'tokenizer', tokenizer)
+        object.__setattr__(self, 'entropy_threshold', entropy_threshold)
+
+    def calculate_entropy(self, decision_list):
+        """
+        Calculates entropy from a list of decision probabilities.
+        """
+        probabilities = np.array(
+            [item.get('positive_probability', 0.0) for item in decision_list])
+        probabilities /= np.sum(probabilities) if np.sum(
+            probabilities) > 0 else 1e-12
+        return entropy(probabilities, base=2)
+
+    def predict_answer(self, answer_option: str, answer: str):
+        """
+        Predicts the probability and label for a given answer option.
+        """
+        self.model.eval()
+        inputs = self.tokenizer(
+            answer_option,
+            answer,
+            return_tensors="pt",
+            padding=True,
+            truncation=True
+        )
+        inputs = inputs.to(self.device)
+
+        with torch.no_grad():
+            outputs = self.model(**inputs)
+            logits = outputs.logits
+
+        probabilities = torch.softmax(logits, dim=-1)
+        predicted_label = torch.argmax(probabilities, dim=1).item()
+        positive_probability = probabilities[0][1].item()
+
+        return predicted_label, positive_probability
+
+    def predict_for_all_options(self, answer: str):
+        """
+        Iterates over all answer options and predicts for each.
+        """
+        results = []
+        for answer_option in self.possible_answers:
+            predicted_label, positive_probability = self.predict_answer(
+                answer_option, answer)
+            results.append({
+                'answer_option': answer_option,
+                'predicted_label': predicted_label,
+                'positive_probability': positive_probability
+            })
+        return results
+
+    def parse(self, text: str) -> str:
+        """
+        Parses the input text to determine the most likely answer from
+        the possible answers or returns "inconclusive" if the entropy is above the threshold.
+        """
+        try:
+            results = self.predict_for_all_options(text)
+
+            # Calculate entropy based on the decision probabilities
+            entropy = self.calculate_entropy(results)
+            if entropy is not None and entropy > self.entropy_threshold:
+                return "inconclusive"
+
+            # Sort results by probability of the positive class
+            best_option = max(results, key=lambda x: x['positive_probability'])
+            return best_option['answer_option']
+        except Exception as e:
+            raise OutputParserException(
+                f"ModelBasedAnswerJudge encountered an error: {e}")
+
+    @property
+    def _type(self) -> str:
+        return "model_based_answer_parser"
 
 
 if __name__ == "__main__":
@@ -77,8 +216,8 @@ if __name__ == "__main__":
                           "B. somewhat agree", "C. agree"]
 
     # Instantiate the custom parser
-    parser_1 = MultipleChoiceParser(possible_answers_1)
-    parser_2 = MultipleChoiceParser(possible_answers_2)
+    parser_1 = MultipleChoiceJudge(possible_answers_1)
+    parser_2 = MultipleChoiceJudge(possible_answers_2)
 
     # Example text to parse
     text = "I think I would choose option 1 because it seems the best. Also, I somewhat disagree with option 2."
