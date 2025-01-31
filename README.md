@@ -20,18 +20,14 @@ After installation, import RUPsycho in your Python script or Jupyter notebook to
 import rupsycho as rup
 
 # Load experiment data
-experiment = rup.experiment_from_file("bfi.json")
-
-# Load model
-model = rup.LocalModel(
-    model_name="google/flan-t5-base", device_map=None, params={"max_new_tokens": 100}
-)
+config_file_path = "./data/bfi_demo_config.json"
+experiment = rup.experiment_from_file(config_file_path)
 
 # Run the experiment
 experiment.run()
 
 # Save the results
-experiment.export_to_file("results.json")
+answers = experiment.get_answers_as_dataframe()
 ```
 
 ## For Devs
