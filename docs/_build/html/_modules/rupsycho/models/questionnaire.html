@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
@@ -5,21 +7,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>rupsycho.models.questionnaire &mdash; RUPsycho 0.10 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=ac14934e"></script>
-        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
-        <script src="../../../_static/copybutton.js?v=f281be69"></script>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=ac14934e"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -49,7 +47,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../init.html">Get Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../reader.html">Load Experiments</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../experiment.html">Define Experiments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../run.html">Running an Experiment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../parser.html">Parse Answers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../parsers.html">Parsers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../models.html">Data Models</a></li>
@@ -87,8 +84,9 @@
 <span class="c1"># This file contains the data model for a psychological questionnaire.</span>
 
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
-<span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span><span class="p">,</span> <span class="n">validator</span>
+<span class="kn">from</span> <span class="nn">tabulate</span> <span class="kn">import</span> <span class="n">tabulate</span>
 
 
 <div class="viewcode-block" id="DemographicAttributes">
@@ -107,9 +105,9 @@
 <span class="sd">    The model is flexible to accept additional fields beyond the ones specified.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">age</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">title</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">age</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">title</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="DemographicAttributes.Config">
 <a class="viewcode-back" href="../../../models.html#rupsycho.models.questionnaire.DemographicAttributes.Config">[docs]</a>
@@ -140,6 +138,13 @@
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">model_dump</span><span class="p">())</span>
 
+<div class="viewcode-block" id="DemographicProfile.get_profile_desc">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.questionnaire.DemographicProfile.get_profile_desc">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_profile_desc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Returns a string representation of the profile. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span></div>
+
+
 <div class="viewcode-block" id="DemographicProfile.Config">
 <a class="viewcode-back" href="../../../models.html#rupsycho.models.questionnaire.DemographicProfile.Config">[docs]</a>
     <span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
@@ -153,18 +158,52 @@
 <span class="k">class</span> <span class="nc">AnswerOption</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Represents an answer option in a psychological test.</span>
-
-<span class="sd">    Attributes:</span>
-<span class="sd">        text (str): The text of the answer option. This should describe the option in a way that is clear to the participant.</span>
-<span class="sd">        ignored_for_scale (bool): Indicates whether this answer option should be ignored when calculating scores on a scale. This can be useful for neutral options or non-applicable responses.</span>
-<span class="sd">        weight (int): The numerical weight assigned to this answer option. This is typically used in scoring the test, where different options have different point values.</span>
-
-<span class="sd">    The default values are set to represent a common scenario in psychological testing. Adjust as necessary for specific test requirements.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="n">text</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Choose an option&quot;</span>
     <span class="n">ignored_for_scale</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">weight</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+
+
+<div class="viewcode-block" id="AnswerOptions">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.questionnaire.AnswerOptions">[docs]</a>
+<span class="k">class</span> <span class="nc">AnswerOptions</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents a collection of answer options in a psychological test along with a delimiter for joining them.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">options</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">AnswerOption</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;A dictionary of answer options.&quot;</span>
+    <span class="p">)</span>
+    <span class="n">delimiter</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;, &quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The delimiter used to join the answer options when displayed as a string. Default is &#39;, &#39;. Insert a line break &#39;</span><span class="se">\\</span><span class="s2">n&#39; for a new line.&quot;</span>
+    <span class="p">)</span>
+    <span class="n">prepend_delimiter</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;If True, the delimiter will be added before the first answer option as well.&quot;</span>
+    <span class="p">)</span>
+
+<div class="viewcode-block" id="AnswerOptions.join_options">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.questionnaire.AnswerOptions.join_options">[docs]</a>
+    <span class="k">def</span> <span class="nf">join_options</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Join the answer options&#39; text using the specified delimiter.&quot;&quot;&quot;</span>
+        <span class="n">option_texts</span> <span class="o">=</span> <span class="p">[</span><span class="n">option</span><span class="o">.</span><span class="n">text</span> <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+
+        <span class="c1"># If prepend_delimiter is True, add the delimiter before the first option</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepend_delimiter</span> <span class="ow">and</span> <span class="n">option_texts</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">delimiter</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">delimiter</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">option_texts</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">delimiter</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">option_texts</span><span class="p">)</span></div>
+
+        
+<div class="viewcode-block" id="AnswerOptions.get_options_as_list">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.questionnaire.AnswerOptions.get_options_as_list">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_options_as_list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the list of answer options&#39; text.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">option</span><span class="o">.</span><span class="n">text</span> <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span></div>
+</div>
 
 
 
@@ -173,28 +212,69 @@
 <span class="k">class</span> <span class="nc">InstructionItem</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Represents a single question item in a psychological test, along with its answer options and specific attributes.</span>
-
-<span class="sd">    Attributes:</span>
-<span class="sd">        question (str): The text of the question presented to the participant.</span>
-<span class="sd">        reversed (bool): A flag indicating whether the scoring for this question should be reversed. In some psychological tests, certain questions are scored in the opposite direction for certain scales.</span>
-<span class="sd">        answer_options (Optional[List[AnswerOption]]): A list of possible answer options that a participant can choose from in response to the question. This field is optional and can be None if the question does not have predefined answer options.</span>
-<span class="sd">        attributes (InstructionItemAttribute): Additional attributes related to the question, such as its dimension in a multi-dimensional test structure.</span>
-
-<span class="sd">    The default values and structure are designed to be flexible and can be adjusted to suit different types of psychological tests.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">question</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Enter question text here&quot;</span>
     <span class="nb">reversed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="n">answer_options</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">AnswerOption</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">answer_options</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">AnswerOptions</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">attributes</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">,</span>
         <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Additional attributes related to the question, such as its dimension in a multi-dimensional test structure.&quot;</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">answers</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]]]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+    <span class="n">answers</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]]]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">defaultdict</span><span class="p">(</span>
             <span class="k">lambda</span><span class="p">:</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">))),</span>
         <span class="n">description</span><span class="o">=</span><span class="s2">&quot;A nested dictionary storing answers indexed by model, profile, and run.&quot;</span><span class="p">,</span>
-    <span class="p">)</span></div>
+    <span class="p">)</span>
+
+<div class="viewcode-block" id="InstructionItem.ensure_answer_options_is_proper_model">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.questionnaire.InstructionItem.ensure_answer_options_is_proper_model">[docs]</a>
+    <span class="nd">@validator</span><span class="p">(</span><span class="s1">&#39;answer_options&#39;</span><span class="p">,</span> <span class="n">pre</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">always</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">ensure_answer_options_is_proper_model</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert a dictionary to an AnswerOptions model if necessary.&quot;&quot;&quot;</span>
+        <span class="c1"># If the input `v` is a dictionary and contains keys that indicate it might be nested</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">if</span> <span class="s1">&#39;options&#39;</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span>
+                <span class="c1"># If the key &#39;options&#39; is found, handle it as a full AnswerOptions structure</span>
+                <span class="n">options</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">AnswerOption</span><span class="p">(</span><span class="o">**</span><span class="n">option</span><span class="p">)</span>
+                           <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">v</span><span class="p">[</span><span class="s1">&#39;options&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+                <span class="k">return</span> <span class="n">AnswerOptions</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;delimiter&#39;</span><span class="p">,</span> <span class="s1">&#39;, &#39;</span><span class="p">),</span> <span class="n">prepend_delimiter</span><span class="o">=</span><span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;prepend_delimiter&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Otherwise, assume it&#39;s just the dictionary of options</span>
+                <span class="k">return</span> <span class="n">AnswerOptions</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">AnswerOption</span><span class="p">(</span><span class="o">**</span><span class="n">option</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">v</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
+        <span class="k">return</span> <span class="n">v</span></div>
+
+
+<div class="viewcode-block" id="InstructionItem.update_answer">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.questionnaire.InstructionItem.update_answer">[docs]</a>
+    <span class="k">def</span> <span class="nf">update_answer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">profile_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">run_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">answer</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Store the answer in the appropriate location.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">answer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">answers</span><span class="p">[</span><span class="n">model_key</span><span class="p">][</span><span class="n">profile_key</span><span class="p">][</span><span class="n">run_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">answer</span></div>
+
+
+<div class="viewcode-block" id="InstructionItem.get_answer">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.questionnaire.InstructionItem.get_answer">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_answer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">profile_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">run_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Retrieve the answer from the appropriate location.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">answers</span><span class="p">[</span><span class="n">model_key</span><span class="p">][</span><span class="n">profile_key</span><span class="p">][</span><span class="n">run_idx</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="InstructionItem.get_all_answers">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.questionnaire.InstructionItem.get_all_answers">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_all_answers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Retrieve all answers.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">answers</span></div>
+
+
+<div class="viewcode-block" id="InstructionItem.get_answer_options_as_list">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.questionnaire.InstructionItem.get_answer_options_as_list">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_answer_options_as_list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the list of answer options&#39; text.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">answer_options</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">answer_options</span><span class="o">.</span><span class="n">get_options_as_list</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">[]</span></div>
+</div>
 
 
 
@@ -222,8 +302,26 @@
         <span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">,</span>
         <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Additional attributes related to the question, such as its dimension in a multi-dimensional test structure.&quot;</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">default_answer_options</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">AnswerOption</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># Dict[str, AnswerOption]</span>
+    <span class="n">default_answer_options</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">AnswerOptions</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">instruction_items</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">InstructionItem</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Questionnaire.ensure_default_answer_options_is_proper_model">
+<a class="viewcode-back" href="../../../models.html#rupsycho.models.questionnaire.Questionnaire.ensure_default_answer_options_is_proper_model">[docs]</a>
+    <span class="nd">@validator</span><span class="p">(</span><span class="s1">&#39;default_answer_options&#39;</span><span class="p">,</span> <span class="n">pre</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">always</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">ensure_default_answer_options_is_proper_model</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert a dictionary to an AnswerOptions model if necessary.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">if</span> <span class="s1">&#39;options&#39;</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span>
+                <span class="c1"># If the dictionary already has &#39;options&#39;, convert the inner dictionary properly</span>
+                <span class="n">options</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">AnswerOption</span><span class="p">(</span><span class="o">**</span><span class="n">option</span><span class="p">)</span>
+                           <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">v</span><span class="p">[</span><span class="s1">&#39;options&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+                <span class="k">return</span> <span class="n">AnswerOptions</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;delimiter&#39;</span><span class="p">,</span> <span class="s1">&#39;, &#39;</span><span class="p">),</span> <span class="n">prepend_delimiter</span><span class="o">=</span><span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;prepend_delimiter&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># If it&#39;s just a flat dictionary, convert it directly</span>
+                <span class="k">return</span> <span class="n">AnswerOptions</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">AnswerOption</span><span class="p">(</span><span class="o">**</span><span class="n">option</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">v</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
+        <span class="k">return</span> <span class="n">v</span></div>
+
 
 <div class="viewcode-block" id="Questionnaire.get_number_of_questions">
 <a class="viewcode-back" href="../../../models.html#rupsycho.models.questionnaire.Questionnaire.get_number_of_questions">[docs]</a>
@@ -247,40 +345,39 @@
             <span class="k">for</span> <span class="n">profile</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">demographic_profiles</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- </span><span class="si">{</span><span class="n">profile</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="c1"># if self.default_answer_options:</span>
-        <span class="c1">#     print(&quot;\nDefault Answer Options:&quot;)</span>
-        <span class="c1">#     answer_options_table = [</span>
-        <span class="c1">#         [key, opt.text, opt.ignored_for_scale, opt.weight]</span>
-        <span class="c1">#         for key, opt in self.default_answer_options.items()</span>
-        <span class="c1">#     ]</span>
-        <span class="c1">#     print(</span>
-        <span class="c1">#         tabulate(</span>
-        <span class="c1">#             answer_options_table,</span>
-        <span class="c1">#             headers=[&quot;ID&quot;, &quot;Text&quot;, &quot;Ignored for Scale&quot;, &quot;Weight&quot;],</span>
-        <span class="c1">#         )</span>
-        <span class="c1">#     )</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_answer_options</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Default Answer Options:&quot;</span><span class="p">)</span>
+            <span class="n">answer_options_table</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">[</span><span class="n">key</span><span class="p">,</span> <span class="n">opt</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">opt</span><span class="o">.</span><span class="n">ignored_for_scale</span><span class="p">,</span> <span class="n">opt</span><span class="o">.</span><span class="n">weight</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">opt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_answer_options</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="p">]</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="n">tabulate</span><span class="p">(</span>
+                    <span class="n">answer_options_table</span><span class="p">,</span>
+                    <span class="n">headers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;ID&quot;</span><span class="p">,</span> <span class="s2">&quot;Text&quot;</span><span class="p">,</span> <span class="s2">&quot;Ignored for Scale&quot;</span><span class="p">,</span> <span class="s2">&quot;Weight&quot;</span><span class="p">],</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instruction_items</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Instruction Items:&quot;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">instruction_items</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- Question: </span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">question</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
-</div>
-
-                <span class="c1"># print(&quot;  Answer Options:&quot;)</span>
-                <span class="c1"># if item.answer_options:</span>
-                <span class="c1">#     answer_options_table = [</span>
-                <span class="c1">#         [opt.text, opt.ignored_for_scale, opt.weight]</span>
-                <span class="c1">#         for opt in item.answer_options</span>
-                <span class="c1">#     ]</span>
-                <span class="c1">#     print(</span>
-                <span class="c1">#         tabulate(</span>
-                <span class="c1">#             answer_options_table,</span>
-                <span class="c1">#             headers=[&quot;Text&quot;, &quot;Ignored for Scale&quot;, &quot;Weight&quot;],</span>
-                <span class="c1">#         )</span>
-                <span class="c1">#     )</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- Question: </span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">question</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  Answer Options:&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">answer_options</span><span class="p">:</span>
+                    <span class="n">answer_options_table</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="p">[</span><span class="n">opt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">opt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">ignored_for_scale</span><span class="p">,</span> <span class="n">opt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">weight</span><span class="p">]</span> <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">item</span><span class="o">.</span><span class="n">answer_options</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                    <span class="p">]</span>
+                    <span class="nb">print</span><span class="p">(</span>
+                        <span class="n">tabulate</span><span class="p">(</span>
+                            <span class="n">answer_options_table</span><span class="p">,</span>
+                            <span class="n">headers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Text&quot;</span><span class="p">,</span> <span class="s2">&quot;Ignored for Scale&quot;</span><span class="p">,</span> <span class="s2">&quot;Weight&quot;</span><span class="p">],</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
                 <span class="c1"># print(&quot;  Attributes:&quot;)</span>
                 <span class="c1"># print(f&quot;    {item.attributes}&quot;)</span>
-                <span class="c1"># print()</span>
+                <span class="nb">print</span><span class="p">()</span></div>
+</div>
+
 </pre></div>
 
            </div>

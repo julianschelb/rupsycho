@@ -17,9 +17,9 @@ RUPsycho is a Python package designed for the application of large language mode
    init
    reader
    experiment
-   run
    parser
    parsers
+   post
    models
 
 
@@ -30,7 +30,7 @@ To install RUPsycho, run the following command in your Python environment:
 
 .. code-block:: bash
 
-    pip install rupsycho # not yet working
+    pip install git+https://github.com/julianschelb/rupsycho.git
 
 Example Usage
 =============
@@ -39,13 +39,14 @@ After installation, import RUPsycho in your Python script or Jupyter notebook to
 
 .. code-block:: python
 
-    import rupsycho as rup
+   import rupsycho as rup
 
-    # Load experiment data
-    experiment = rup.experiment_from_file("bfi.json")
+   # Load experiment data
+   config_file_path = "./data/bfi_demo_config.json"
+   experiment = rup.experiment_from_file(config_file_path)
 
-    # Run the experiment
-    experiment.run()
+   # Run the experiment
+   experiment.run()
 
-    # Save the results
-    experiment.export_to_file("results.json")
+   # Save the results
+   answers = experiment.get_answers_as_dataframe()

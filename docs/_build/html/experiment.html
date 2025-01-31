@@ -22,7 +22,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Running an Experiment" href="run.html" />
+    <link rel="next" title="Parse Answers" href="parser.html" />
     <link rel="prev" title="Load Experiments" href="reader.html" /> 
 </head>
 
@@ -74,10 +74,6 @@
 <li class="toctree-l2"><a class="reference internal" href="#module-rupsycho.mixins.experiment_processing">Experiment Processing Mixin</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#rupsycho.mixins.experiment_processing.get_default_model"><code class="docutils literal notranslate"><span class="pre">get_default_model()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin"><code class="docutils literal notranslate"><span class="pre">ExperimentProcessingMixin</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.create_chain"><code class="docutils literal notranslate"><span class="pre">ExperimentProcessingMixin.create_chain()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.create_all_chains"><code class="docutils literal notranslate"><span class="pre">ExperimentProcessingMixin.create_all_chains()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.initialize_answers_if_needed"><code class="docutils literal notranslate"><span class="pre">ExperimentProcessingMixin.initialize_answers_if_needed()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.create_input_dict"><code class="docutils literal notranslate"><span class="pre">ExperimentProcessingMixin.create_input_dict()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.process_single_experiment"><code class="docutils literal notranslate"><span class="pre">ExperimentProcessingMixin.process_single_experiment()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.run"><code class="docutils literal notranslate"><span class="pre">ExperimentProcessingMixin.run()</span></code></a></li>
 </ul>
@@ -149,7 +145,6 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="run.html">Running an Experiment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="parser.html">Parse Answers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="parsers.html">Parsers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="models.html">Data Models</a></li>
@@ -210,7 +205,7 @@ and serialization capabilities with document handling features.</p>
 <li><p><strong>metadata</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>)</p></li>
 <li><p><strong>name</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
 <li><p><strong>description</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
-<li><p><strong>parameters</strong> (<em>Parameters</em>)</p></li>
+<li><p><strong>parameters</strong> (<em>ExperimentParameters</em>)</p></li>
 <li><p><strong>prompt_template</strong> (<em>NormalPromptTemplateConfig</em><em> | </em><em>ChatPromptTemplateConfig</em><em> | </em><em>LangchainPromptTemplateConfig</em>)</p></li>
 <li><p><strong>models</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><a class="reference internal" href="models.html#rupsycho.models.model.LangChainModelConfig" title="rupsycho.models.model.LangChainModelConfig"><em>LangChainModelConfig</em></a><em> | </em><a class="reference internal" href="models.html#rupsycho.models.model.LocalHuggingFaceModelConfig" title="rupsycho.models.model.LocalHuggingFaceModelConfig"><em>LocalHuggingFaceModelConfig</em></a><em> | </em><a class="reference internal" href="models.html#rupsycho.models.model.RemoteHuggingFaceModelConfig" title="rupsycho.models.model.RemoteHuggingFaceModelConfig"><em>RemoteHuggingFaceModelConfig</em></a><em> | </em><a class="reference internal" href="models.html#rupsycho.models.model.OllamaModelConfig" title="rupsycho.models.model.OllamaModelConfig"><em>OllamaModelConfig</em></a><em> | </em><a class="reference internal" href="models.html#rupsycho.models.model.OpenAIModelConfig" title="rupsycho.models.model.OpenAIModelConfig"><em>OpenAIModelConfig</em></a><em>]</em>)</p></li>
 <li><p><strong>demographic_profiles</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><a class="reference internal" href="models.html#rupsycho.models.questionnaire.DemographicProfile" title="rupsycho.models.questionnaire.DemographicProfile"><em>DemographicProfile</em></a><em>]</em>)</p></li>
@@ -234,7 +229,7 @@ and serialization capabilities with document handling features.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="rupsycho.experiment.ExperimentDocument.parameters">
-<span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Parameters</span></em><a class="headerlink" href="#rupsycho.experiment.ExperimentDocument.parameters" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ExperimentParameters</span></em><a class="headerlink" href="#rupsycho.experiment.ExperimentDocument.parameters" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -345,74 +340,8 @@ and serialization capabilities with document handling features.</p>
 profiles, and instructions. This class is designed to facilitate the creation
 and execution of experiment chains, manage errors, track progress, and store results.</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.create_chain">
-<span class="sig-name descname"><span class="pre">create_chain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/experiment_processing.html#ExperimentProcessingMixin.create_chain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.create_chain" title="Link to this definition"></a></dt>
-<dd><p>Create a chain for running the experiment using the model identified by model_key.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>model_key</strong> (<em>str</em>)</p></li>
-<li><p><strong>seed</strong> (<em>int</em>)</p></li>
-<li><p><strong>params</strong> (<em>dict</em>)</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><em>Any</em></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.create_all_chains">
-<span class="sig-name descname"><span class="pre">create_all_chains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/experiment_processing.html#ExperimentProcessingMixin.create_all_chains"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.create_all_chains" title="Link to this definition"></a></dt>
-<dd><p>Create chains for running the experiment with all models.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>seed</strong> (<em>int</em>)</p></li>
-<li><p><strong>params</strong> (<em>dict</em>)</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><em>Dict</em>[str, <em>Any</em>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.initialize_answers_if_needed">
-<span class="sig-name descname"><span class="pre">initialize_answers_if_needed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instruction_item</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/experiment_processing.html#ExperimentProcessingMixin.initialize_answers_if_needed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.initialize_answers_if_needed" title="Link to this definition"></a></dt>
-<dd><p>Initialize the ‘answers’ attribute as a nested defaultdict if it doesn’t exist.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>instruction_item</strong> (<em>Any</em>)</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.create_input_dict">
-<span class="sig-name descname"><span class="pre">create_input_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">profile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instruction_item</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/experiment_processing.html#ExperimentProcessingMixin.create_input_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.create_input_dict" title="Link to this definition"></a></dt>
-<dd><p>Create the input dictionary required for invoking the chain.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>profile</strong> (<em>Any</em>)</p></li>
-<li><p><strong>instruction_item</strong> (<em>Any</em>)</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><em>Dict</em>[str, <em>Any</em>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.process_single_experiment">
-<span class="sig-name descname"><span class="pre">process_single_experiment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pbar</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/experiment_processing.html#ExperimentProcessingMixin.process_single_experiment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.process_single_experiment" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">process_single_experiment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callbacks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/experiment_processing.html#ExperimentProcessingMixin.process_single_experiment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.process_single_experiment" title="Link to this definition"></a></dt>
 <dd><p>Process the experiment, iterating through models, profiles, and instruction items.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -423,8 +352,8 @@ and execution of experiment chains, manage errors, track progress, and store res
 
 <dl class="py method">
 <dt class="sig sig-object py" id="rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/experiment_processing.html#ExperimentProcessingMixin.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.run" title="Link to this definition"></a></dt>
-<dd><p>Run the experiment processing with a progress bar.</p>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callbacks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/mixins/experiment_processing.html#ExperimentProcessingMixin.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.run" title="Link to this definition"></a></dt>
+<dd><p>Run the experiment processing with a progress bar and callbacks.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>

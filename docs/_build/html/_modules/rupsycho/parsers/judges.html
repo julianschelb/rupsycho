@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
@@ -5,21 +7,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>rupsycho.parsers.judges &mdash; RUPsycho 0.10 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=ac14934e"></script>
-        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
-        <script src="../../../_static/copybutton.js?v=f281be69"></script>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=ac14934e"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -49,7 +47,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../init.html">Get Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../reader.html">Load Experiments</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../experiment.html">Define Experiments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../run.html">Running an Experiment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../parser.html">Parse Answers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../parsers.html">Parsers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../models.html">Data Models</a></li>
@@ -90,17 +87,22 @@
 <span class="c1"># final prediction or verdict.</span>
 
 <span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">Field</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
 <span class="kn">from</span> <span class="nn">langchain_core.exceptions</span> <span class="kn">import</span> <span class="n">OutputParserException</span>
 <span class="kn">from</span> <span class="nn">langchain_core.output_parsers</span> <span class="kn">import</span> <span class="n">BaseOutputParser</span>
 <span class="kn">from</span> <span class="nn">rupsycho.parsers.parser_utils</span> <span class="kn">import</span> <span class="n">check_multiple_choice_answers</span>
+<span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">RobertaTokenizer</span><span class="p">,</span> <span class="n">RobertaForSequenceClassification</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">entropy</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">torch</span>
 
 
 <span class="c1"># ========================== Multiple Choice Parser ========================</span>
 
 
-<div class="viewcode-block" id="MultipleChoiceParser">
-<a class="viewcode-back" href="../../../parsers.html#rupsycho.parsers.judges.MultipleChoiceParser">[docs]</a>
-<span class="k">class</span> <span class="nc">MultipleChoiceParser</span><span class="p">(</span><span class="n">BaseOutputParser</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<div class="viewcode-block" id="MultipleChoiceJudge">
+<a class="viewcode-back" href="../../../parsers.html#rupsycho.parsers.judges.MultipleChoiceJudge">[docs]</a>
+<span class="k">class</span> <span class="nc">MultipleChoiceJudge</span><span class="p">(</span><span class="n">BaseOutputParser</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A custom parser that processes a text input and returns the most likely</span>
 <span class="sd">    answer from a set of possible multiple-choice answers using the</span>
@@ -112,8 +114,9 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">possible_answers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+    <span class="n">ignore_case</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">possible_answers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">possible_answers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">ignore_case</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes the parser with a list of possible answers.</span>
 
@@ -123,29 +126,41 @@
 <span class="sd">            A list of possible answers to be considered in the parsing process.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="c1"># Manually set the field</span>
         <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;possible_answers&#39;</span><span class="p">,</span> <span class="n">possible_answers</span><span class="p">)</span>
+        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;ignore_case&#39;</span><span class="p">,</span> <span class="n">ignore_case</span><span class="p">)</span>
 
-<div class="viewcode-block" id="MultipleChoiceParser.parse">
-<a class="viewcode-back" href="../../../parsers.html#rupsycho.parsers.judges.MultipleChoiceParser.parse">[docs]</a>
-    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="MultipleChoiceJudge.parse">
+<a class="viewcode-back" href="../../../parsers.html#rupsycho.parsers.judges.MultipleChoiceJudge.parse">[docs]</a>
+    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">possible_answers</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parses the input text to determine the most likely answer from the</span>
 <span class="sd">        possible answers.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">possible_answers</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">possible_answers</span><span class="p">:</span>
+                <span class="n">possible_answers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">possible_answers</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">possible_answers</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No possible answers provided&quot;</span><span class="p">)</span>
+
             <span class="c1"># Use the check_multiple_choice_answers function to analyze the text</span>
             <span class="n">results</span> <span class="o">=</span> <span class="n">check_multiple_choice_answers</span><span class="p">(</span>
-                <span class="n">text</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">possible_answers</span><span class="p">)</span>
+                <span class="n">text</span><span class="p">,</span> <span class="n">possible_answers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ignore_case</span><span class="p">)</span>
+            <span class="n">max_value</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
-            <span class="c1"># Find the answer with the highest count</span>
-            <span class="n">most_likely_answer</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">)</span>
-
-            <span class="k">return</span> <span class="n">most_likely_answer</span>
+            <span class="k">if</span> <span class="n">max_value</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s2">&quot;not present&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Find all options with the max_value</span>
+                <span class="n">max_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                            <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="n">max_value</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">max_keys</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="s2">&quot;inconclusive&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">max_keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">OutputParserException</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;MultipleChoiceParser encountered an error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+                <span class="sa">f</span><span class="s2">&quot;MultipleChoiceJudge encountered an error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 
     <span class="nd">@property</span>
@@ -154,6 +169,157 @@
 <span class="sd">        Returns the type of the parser as a string identifier.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;multiple_choice_parser&quot;</span></div>
+
+
+
+<span class="c1"># ---------------------- Model-Based Answer Judge ---------------------</span>
+
+<div class="viewcode-block" id="ModelBasedAnswerJudge">
+<a class="viewcode-back" href="../../../parsers.html#rupsycho.parsers.judges.ModelBasedAnswerJudge">[docs]</a>
+<span class="k">class</span> <span class="nc">ModelBasedAnswerJudge</span><span class="p">(</span><span class="n">BaseOutputParser</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A custom parser that processes a text input and returns the most likely</span>
+<span class="sd">    answer from a set of possible answers using a Hugging Face model.</span>
+<span class="sd">    If the entropy of the decision probabilities is greater than a threshold, it returns &quot;inconclusive&quot;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+    <span class="n">possible_answers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+    <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="s1">&#39;cuda:0&#39;</span><span class="p">)</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+    <span class="n">tokenizer</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+    <span class="n">entropy_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">0.359</span><span class="p">)</span>  <span class="c1"># Default entropy threshold</span>
+
+<div class="viewcode-block" id="ModelBasedAnswerJudge.Config">
+<a class="viewcode-back" href="../../../parsers.html#rupsycho.parsers.judges.ModelBasedAnswerJudge.Config">[docs]</a>
+    <span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
+        <span class="n">arbitrary_types_allowed</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">possible_answers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;cuda:0&#39;</span><span class="p">,</span> <span class="n">entropy_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.359</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes the parser with a Hugging Face model and a list of possible answers.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model_name : str</span>
+<span class="sd">            The Hugging Face model name or path for the sequence classification model.</span>
+<span class="sd">        possible_answers : list[str]</span>
+<span class="sd">            A list of possible answers to be considered during prediction.</span>
+<span class="sd">        device : str</span>
+<span class="sd">            The device to run the model on (e.g., &#39;cuda:0&#39; for GPU or &#39;cpu&#39;).</span>
+<span class="sd">        entropy_threshold : float</span>
+<span class="sd">            The threshold for entropy above which the result is considered inconclusive.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="c1"># Load the tokenizer and model from Hugging Face</span>
+        <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">RobertaTokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">RobertaForSequenceClassification</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span>
+            <span class="n">model_name</span><span class="p">,</span> <span class="n">num_labels</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="c1"># Move model to the specified device</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+        <span class="c1"># Manually set the field</span>
+        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;model_name&#39;</span><span class="p">,</span> <span class="n">model_name</span><span class="p">)</span>
+        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;possible_answers&#39;</span><span class="p">,</span> <span class="n">possible_answers</span><span class="p">)</span>
+        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;device&#39;</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
+        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;tokenizer&#39;</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">)</span>
+        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;entropy_threshold&#39;</span><span class="p">,</span> <span class="n">entropy_threshold</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ModelBasedAnswerJudge.calculate_entropy">
+<a class="viewcode-back" href="../../../parsers.html#rupsycho.parsers.judges.ModelBasedAnswerJudge.calculate_entropy">[docs]</a>
+    <span class="k">def</span> <span class="nf">calculate_entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decision_list</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates entropy from a list of decision probabilities.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">probabilities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;positive_probability&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">decision_list</span><span class="p">])</span>
+        <span class="n">probabilities</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">probabilities</span><span class="p">)</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+            <span class="n">probabilities</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">1e-12</span>
+        <span class="k">return</span> <span class="n">entropy</span><span class="p">(</span><span class="n">probabilities</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ModelBasedAnswerJudge.predict_answer">
+<a class="viewcode-back" href="../../../parsers.html#rupsycho.parsers.judges.ModelBasedAnswerJudge.predict_answer">[docs]</a>
+    <span class="k">def</span> <span class="nf">predict_answer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">answer_option</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">answer</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Predicts the probability and label for a given answer option.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">(</span>
+            <span class="n">answer_option</span><span class="p">,</span>
+            <span class="n">answer</span><span class="p">,</span>
+            <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;pt&quot;</span><span class="p">,</span>
+            <span class="n">padding</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">truncation</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
+            <span class="n">logits</span> <span class="o">=</span> <span class="n">outputs</span><span class="o">.</span><span class="n">logits</span>
+
+        <span class="n">probabilities</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">predicted_label</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">probabilities</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+        <span class="n">positive_probability</span> <span class="o">=</span> <span class="n">probabilities</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">predicted_label</span><span class="p">,</span> <span class="n">positive_probability</span></div>
+
+
+<div class="viewcode-block" id="ModelBasedAnswerJudge.predict_for_all_options">
+<a class="viewcode-back" href="../../../parsers.html#rupsycho.parsers.judges.ModelBasedAnswerJudge.predict_for_all_options">[docs]</a>
+    <span class="k">def</span> <span class="nf">predict_for_all_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">answer</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">answer_options</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Iterates over all answer options and predicts for each.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Use the default possible answers if none are provided</span>
+        <span class="k">if</span> <span class="n">answer_options</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">answer_options</span><span class="p">:</span>
+            <span class="n">answer_options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">possible_answers</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">answer_options</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No possible answers provided&quot;</span><span class="p">)</span>
+
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">answer_option</span> <span class="ow">in</span> <span class="n">answer_options</span><span class="p">:</span>
+            <span class="n">predicted_label</span><span class="p">,</span> <span class="n">positive_probability</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict_answer</span><span class="p">(</span>
+                <span class="n">answer_option</span><span class="p">,</span> <span class="n">answer</span><span class="p">)</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                <span class="s1">&#39;answer_option&#39;</span><span class="p">:</span> <span class="n">answer_option</span><span class="p">,</span>
+                <span class="s1">&#39;predicted_label&#39;</span><span class="p">:</span> <span class="n">predicted_label</span><span class="p">,</span>
+                <span class="s1">&#39;positive_probability&#39;</span><span class="p">:</span> <span class="n">positive_probability</span>
+            <span class="p">})</span>
+        <span class="k">return</span> <span class="n">results</span></div>
+
+
+<div class="viewcode-block" id="ModelBasedAnswerJudge.parse">
+<a class="viewcode-back" href="../../../parsers.html#rupsycho.parsers.judges.ModelBasedAnswerJudge.parse">[docs]</a>
+    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">possible_answers</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parses the input text to determine the most likely answer from</span>
+<span class="sd">        the possible answers or returns &quot;inconclusive&quot; if the entropy is above the threshold.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict_for_all_options</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">possible_answers</span><span class="p">)</span>
+
+            <span class="c1"># Calculate entropy based on the decision probabilities</span>
+            <span class="n">entropy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_entropy</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">entropy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">entropy</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">entropy_threshold</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s2">&quot;inconclusive&quot;</span>
+
+            <span class="c1"># Sort results by probability of the positive class</span>
+            <span class="n">best_option</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;positive_probability&#39;</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">best_option</span><span class="p">[</span><span class="s1">&#39;answer_option&#39;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">OutputParserException</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;ModelBasedAnswerJudge encountered an error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;model_based_answer_parser&quot;</span></div>
 
 
 
@@ -166,8 +332,8 @@
                           <span class="s2">&quot;B. somewhat agree&quot;</span><span class="p">,</span> <span class="s2">&quot;C. agree&quot;</span><span class="p">]</span>
 
     <span class="c1"># Instantiate the custom parser</span>
-    <span class="n">parser_1</span> <span class="o">=</span> <span class="n">MultipleChoiceParser</span><span class="p">(</span><span class="n">possible_answers_1</span><span class="p">)</span>
-    <span class="n">parser_2</span> <span class="o">=</span> <span class="n">MultipleChoiceParser</span><span class="p">(</span><span class="n">possible_answers_2</span><span class="p">)</span>
+    <span class="n">parser_1</span> <span class="o">=</span> <span class="n">MultipleChoiceJudge</span><span class="p">(</span><span class="n">possible_answers_1</span><span class="p">)</span>
+    <span class="n">parser_2</span> <span class="o">=</span> <span class="n">MultipleChoiceJudge</span><span class="p">(</span><span class="n">possible_answers_2</span><span class="p">)</span>
 
     <span class="c1"># Example text to parse</span>
     <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;I think I would choose option 1 because it seems the best. Also, I somewhat disagree with option 2.&quot;</span>

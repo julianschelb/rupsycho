@@ -47,9 +47,9 @@
 <li class="toctree-l1"><a class="reference internal" href="init.html">Get Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reader.html">Load Experiments</a></li>
 <li class="toctree-l1"><a class="reference internal" href="experiment.html">Define Experiments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="run.html">Running an Experiment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="parser.html">Parse Answers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="parsers.html">Parsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="post.html">Postprocessing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="models.html">Data Models</a></li>
 </ul>
 
@@ -89,6 +89,7 @@
  | <a href="#G"><strong>G</strong></a>
  | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
+ | <a href="#J"><strong>J</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
@@ -119,7 +120,7 @@
       <li><a href="models.html#rupsycho.models.instruction.InstructionItem.answer_options">answer_options (rupsycho.models.instruction.InstructionItem attribute)</a>
 
       <ul>
-        <li><a href="models.html#id8">(rupsycho.models.questionnaire.InstructionItem attribute)</a>, <a href="models.html#rupsycho.models.questionnaire.InstructionItem.answer_options">[1]</a>
+        <li><a href="models.html#rupsycho.models.questionnaire.InstructionItem.answer_options">(rupsycho.models.questionnaire.InstructionItem attribute)</a>
 </li>
       </ul></li>
       <li><a href="models.html#rupsycho.models.instruction.AnswerOption">AnswerOption (class in rupsycho.models.instruction)</a>
@@ -128,14 +129,16 @@
         <li><a href="models.html#rupsycho.models.questionnaire.AnswerOption">(class in rupsycho.models.questionnaire)</a>
 </li>
       </ul></li>
+      <li><a href="models.html#rupsycho.models.questionnaire.AnswerOptions">AnswerOptions (class in rupsycho.models.questionnaire)</a>
+</li>
       <li><a href="models.html#rupsycho.models.questionnaire.InstructionItem.answers">answers (rupsycho.models.questionnaire.InstructionItem attribute)</a>
 </li>
       <li><a href="models.html#rupsycho.models.model.OpenAIModelConfig.api_key">api_key (rupsycho.models.model.OpenAIModelConfig attribute)</a>
 </li>
-      <li><a href="parsers.html#rupsycho.parsers.validators.ValidatorParser.apologies_parser">apologies_parser (rupsycho.parsers.validators.ValidatorParser attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="parsers.html#rupsycho.parsers.validators.ValidatorParser.apologies_parser">apologies_parser (rupsycho.parsers.validators.ValidatorParser attribute)</a>
+</li>
       <li><a href="parsers.html#rupsycho.parsers.validators.ApologiesValidatorParser">ApologiesValidatorParser (class in rupsycho.parsers.validators)</a>
 </li>
       <li><a href="experiment.html#rupsycho.experiment.ExperimentDocument.Config.arbitrary_types_allowed">arbitrary_types_allowed (rupsycho.experiment.ExperimentDocument.Config attribute)</a>
@@ -151,15 +154,15 @@
 </li>
         <li><a href="models.html#rupsycho.models.model.RemoteHuggingFaceModelConfig.Config.arbitrary_types_allowed">(rupsycho.models.model.RemoteHuggingFaceModelConfig.Config attribute)</a>
 </li>
-        <li><a href="models.html#rupsycho.models.profile.DemographicProfile.Config.arbitrary_types_allowed">(rupsycho.models.profile.DemographicProfile.Config attribute)</a>
+        <li><a href="parsers.html#rupsycho.parsers.judges.ModelBasedAnswerJudge.Config.arbitrary_types_allowed">(rupsycho.parsers.judges.ModelBasedAnswerJudge.Config attribute)</a>
+</li>
+        <li><a href="parsers.html#rupsycho.parsers.validators.ModelBasedValidator.Config.arbitrary_types_allowed">(rupsycho.parsers.validators.ModelBasedValidator.Config attribute)</a>
 </li>
       </ul></li>
-      <li><a href="models.html#rupsycho.models.profile.DemographicProfile.attributes">attributes (rupsycho.models.profile.DemographicProfile attribute)</a>
+      <li><a href="models.html#rupsycho.models.questionnaire.DemographicProfile.attributes">attributes (rupsycho.models.questionnaire.DemographicProfile attribute)</a>
 
       <ul>
-        <li><a href="models.html#rupsycho.models.questionnaire.DemographicProfile.attributes">(rupsycho.models.questionnaire.DemographicProfile attribute)</a>
-</li>
-        <li><a href="models.html#id9">(rupsycho.models.questionnaire.InstructionItem attribute)</a>, <a href="models.html#rupsycho.models.questionnaire.InstructionItem.attributes">[1]</a>
+        <li><a href="models.html#rupsycho.models.questionnaire.InstructionItem.attributes">(rupsycho.models.questionnaire.InstructionItem attribute)</a>
 </li>
         <li><a href="models.html#rupsycho.models.questionnaire.Questionnaire.attributes">(rupsycho.models.questionnaire.Questionnaire attribute)</a>
 </li>
@@ -186,6 +189,8 @@
 </li>
       <li><a href="parsers.html#rupsycho.parsers.validators.BeingAiValidatorParser">BeingAiValidatorParser (class in rupsycho.parsers.validators)</a>
 </li>
+      <li><a href="models.html#rupsycho.models.model.LocalHuggingFaceModelConfig.bitsandbytes_config">bitsandbytes_config (rupsycho.models.model.LocalHuggingFaceModelConfig attribute)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -194,19 +199,15 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="models.html#rupsycho.models.model.LocalHuggingFaceModelConfig.cache_dir">cache_dir (rupsycho.models.model.LocalHuggingFaceModelConfig attribute)</a>
 </li>
+      <li><a href="parsers.html#rupsycho.parsers.judges.ModelBasedAnswerJudge.calculate_entropy">calculate_entropy() (rupsycho.parsers.judges.ModelBasedAnswerJudge method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="experiment.html#rupsycho.mixins.model_managing.ModelManagementMixin.clear_models">clear_models() (rupsycho.mixins.model_managing.ModelManagementMixin method)</a>
 </li>
       <li><a href="experiment.html#rupsycho.mixins.persona_managing.PersonaManagementMixin.clear_personas">clear_personas() (rupsycho.mixins.persona_managing.PersonaManagementMixin method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="experiment.html#rupsycho.mixins.model_managing.ModelManagementMixin.count_models">count_models() (rupsycho.mixins.model_managing.ModelManagementMixin method)</a>
-</li>
-      <li><a href="experiment.html#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.create_all_chains">create_all_chains() (rupsycho.mixins.experiment_processing.ExperimentProcessingMixin method)</a>
-</li>
-      <li><a href="experiment.html#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.create_chain">create_chain() (rupsycho.mixins.experiment_processing.ExperimentProcessingMixin method)</a>
-</li>
-      <li><a href="experiment.html#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.create_input_dict">create_input_dict() (rupsycho.mixins.experiment_processing.ExperimentProcessingMixin method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -214,37 +215,37 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="models.html#id13">default_answer_options (rupsycho.models.questionnaire.Questionnaire attribute)</a>, <a href="models.html#rupsycho.models.questionnaire.Questionnaire.default_answer_options">[1]</a>
+      <li><a href="models.html#id6">default_answer_options (rupsycho.models.questionnaire.Questionnaire attribute)</a>, <a href="models.html#rupsycho.models.questionnaire.Questionnaire.default_answer_options">[1]</a>
 </li>
       <li><a href="models.html#rupsycho.models.model.LangChainModelConfig.definition">definition (rupsycho.models.model.LangChainModelConfig attribute)</a>
+</li>
+      <li><a href="models.html#rupsycho.models.questionnaire.AnswerOptions.delimiter">delimiter (rupsycho.models.questionnaire.AnswerOptions attribute)</a>
 </li>
       <li><a href="experiment.html#rupsycho.experiment.ExperimentDocument.demographic_profiles">demographic_profiles (rupsycho.experiment.ExperimentDocument attribute)</a>
 
       <ul>
-        <li><a href="models.html#id12">(rupsycho.models.questionnaire.Questionnaire attribute)</a>, <a href="models.html#rupsycho.models.questionnaire.Questionnaire.demographic_profiles">[1]</a>
+        <li><a href="models.html#id5">(rupsycho.models.questionnaire.Questionnaire attribute)</a>, <a href="models.html#rupsycho.models.questionnaire.Questionnaire.demographic_profiles">[1]</a>
 </li>
       </ul></li>
       <li><a href="models.html#rupsycho.models.questionnaire.DemographicAttributes">DemographicAttributes (class in rupsycho.models.questionnaire)</a>
 </li>
-      <li><a href="models.html#rupsycho.models.questionnaire.DemographicAttributes.Config">DemographicAttributes.Config (class in rupsycho.models.questionnaire)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="models.html#rupsycho.models.profile.DemographicProfile">DemographicProfile (class in rupsycho.models.profile)</a>
-
-      <ul>
-        <li><a href="models.html#rupsycho.models.questionnaire.DemographicProfile">(class in rupsycho.models.questionnaire)</a>
+      <li><a href="models.html#rupsycho.models.questionnaire.DemographicAttributes.Config">DemographicAttributes.Config (class in rupsycho.models.questionnaire)</a>
 </li>
-      </ul></li>
-      <li><a href="models.html#rupsycho.models.profile.DemographicProfile.Config">DemographicProfile.Config (class in rupsycho.models.profile)</a>
-
-      <ul>
-        <li><a href="models.html#rupsycho.models.questionnaire.DemographicProfile.Config">(class in rupsycho.models.questionnaire)</a>
+      <li><a href="models.html#rupsycho.models.questionnaire.DemographicProfile">DemographicProfile (class in rupsycho.models.questionnaire)</a>
 </li>
-      </ul></li>
+      <li><a href="models.html#rupsycho.models.questionnaire.DemographicProfile.Config">DemographicProfile.Config (class in rupsycho.models.questionnaire)</a>
+</li>
       <li><a href="experiment.html#rupsycho.experiment.ExperimentDocument.description">description (rupsycho.experiment.ExperimentDocument attribute)</a>
 </li>
-      <li><a href="models.html#rupsycho.models.model.LocalHuggingFaceModelConfig.device">device (rupsycho.models.model.LocalHuggingFaceModelConfig attribute)</a>
+      <li><a href="parsers.html#rupsycho.parsers.judges.ModelBasedAnswerJudge.device">device (rupsycho.parsers.judges.ModelBasedAnswerJudge attribute)</a>
+
+      <ul>
+        <li><a href="parsers.html#rupsycho.parsers.validators.ModelBasedValidator.device">(rupsycho.parsers.validators.ModelBasedValidator attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="models.html#rupsycho.models.model.LocalHuggingFaceModelConfig.device_map">device_map (rupsycho.models.model.LocalHuggingFaceModelConfig attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -252,6 +253,12 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="models.html#rupsycho.models.questionnaire.InstructionItem.ensure_answer_options_is_proper_model">ensure_answer_options_is_proper_model() (rupsycho.models.questionnaire.InstructionItem class method)</a>
+</li>
+      <li><a href="models.html#rupsycho.models.questionnaire.Questionnaire.ensure_default_answer_options_is_proper_model">ensure_default_answer_options_is_proper_model() (rupsycho.models.questionnaire.Questionnaire class method)</a>
+</li>
+      <li><a href="parsers.html#rupsycho.parsers.judges.ModelBasedAnswerJudge.entropy_threshold">entropy_threshold (rupsycho.parsers.judges.ModelBasedAnswerJudge attribute)</a>
+</li>
       <li><a href="init.html#rupsycho.example_experiment_bfi">example_experiment_bfi() (in module rupsycho)</a>
 </li>
       <li><a href="init.html#rupsycho.experiment_from_dict">experiment_from_dict() (in module rupsycho)</a>
@@ -264,12 +271,12 @@
 </li>
       <li><a href="experiment.html#rupsycho.experiment.ExperimentDocument">ExperimentDocument (class in rupsycho.experiment)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="experiment.html#rupsycho.experiment.ExperimentDocument.Config">ExperimentDocument.Config (class in rupsycho.experiment)</a>
 </li>
       <li><a href="experiment.html#rupsycho.mixins.experiment_exporting.ExperimentExportMixin">ExperimentExportMixin (class in rupsycho.mixins.experiment_exporting)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="reader.html#rupsycho.reader.ExperimentLoader">ExperimentLoader (class in rupsycho.reader)</a>
 </li>
       <li><a href="experiment.html#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin">ExperimentProcessingMixin (class in rupsycho.mixins.experiment_processing)</a>
@@ -282,11 +289,9 @@
 </li>
       <li><a href="experiment.html#rupsycho.mixins.experiment_exporting.ExperimentExportMixin.export_to_file">export_to_file() (rupsycho.mixins.experiment_exporting.ExperimentExportMixin method)</a>
 </li>
-      <li><a href="models.html#rupsycho.models.profile.DemographicProfile.Config.extra">extra (rupsycho.models.profile.DemographicProfile.Config attribute)</a>
+      <li><a href="models.html#rupsycho.models.questionnaire.DemographicAttributes.Config.extra">extra (rupsycho.models.questionnaire.DemographicAttributes.Config attribute)</a>
 
       <ul>
-        <li><a href="models.html#rupsycho.models.questionnaire.DemographicAttributes.Config.extra">(rupsycho.models.questionnaire.DemographicAttributes.Config attribute)</a>
-</li>
         <li><a href="models.html#rupsycho.models.questionnaire.DemographicProfile.Config.extra">(rupsycho.models.questionnaire.DemographicProfile.Config attribute)</a>
 </li>
       </ul></li>
@@ -304,9 +309,15 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="models.html#id11">general_instruction (rupsycho.models.questionnaire.Questionnaire attribute)</a>, <a href="models.html#rupsycho.models.questionnaire.Questionnaire.general_instruction">[1]</a>
+      <li><a href="models.html#id4">general_instruction (rupsycho.models.questionnaire.Questionnaire attribute)</a>, <a href="models.html#rupsycho.models.questionnaire.Questionnaire.general_instruction">[1]</a>
+</li>
+      <li><a href="models.html#rupsycho.models.questionnaire.InstructionItem.get_all_answers">get_all_answers() (rupsycho.models.questionnaire.InstructionItem method)</a>
 </li>
       <li><a href="experiment.html#rupsycho.mixins.model_managing.ModelManagementMixin.get_all_runnable_models">get_all_runnable_models() (rupsycho.mixins.model_managing.ModelManagementMixin method)</a>
+</li>
+      <li><a href="models.html#rupsycho.models.questionnaire.InstructionItem.get_answer">get_answer() (rupsycho.models.questionnaire.InstructionItem method)</a>
+</li>
+      <li><a href="models.html#rupsycho.models.questionnaire.InstructionItem.get_answer_options_as_list">get_answer_options_as_list() (rupsycho.models.questionnaire.InstructionItem method)</a>
 </li>
       <li><a href="experiment.html#rupsycho.mixins.experiment_exporting.ExperimentExportMixin.get_answers">get_answers() (rupsycho.mixins.experiment_exporting.ExperimentExportMixin method)</a>
 </li>
@@ -320,9 +331,13 @@
 </li>
       <li><a href="experiment.html#rupsycho.mixins.model_managing.ModelManagementMixin.get_model">get_model() (rupsycho.mixins.model_managing.ModelManagementMixin method)</a>
 </li>
-      <li><a href="models.html#id15">get_number_of_questions() (rupsycho.models.questionnaire.Questionnaire method)</a>, <a href="models.html#rupsycho.models.questionnaire.Questionnaire.get_number_of_questions">[1]</a>
+      <li><a href="models.html#id8">get_number_of_questions() (rupsycho.models.questionnaire.Questionnaire method)</a>, <a href="models.html#rupsycho.models.questionnaire.Questionnaire.get_number_of_questions">[1]</a>
+</li>
+      <li><a href="models.html#rupsycho.models.questionnaire.AnswerOptions.get_options_as_list">get_options_as_list() (rupsycho.models.questionnaire.AnswerOptions method)</a>
 </li>
       <li><a href="experiment.html#rupsycho.mixins.persona_managing.PersonaManagementMixin.get_persona">get_persona() (rupsycho.mixins.persona_managing.PersonaManagementMixin method)</a>
+</li>
+      <li><a href="models.html#rupsycho.models.questionnaire.DemographicProfile.get_profile_desc">get_profile_desc() (rupsycho.models.questionnaire.DemographicProfile method)</a>
 </li>
       <li><a href="experiment.html#rupsycho.mixins.prompt_managing.PromptTemplateMixin.get_prompt">get_prompt() (rupsycho.mixins.prompt_managing.PromptTemplateMixin method)</a>
 </li>
@@ -340,7 +355,7 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="experiment.html#rupsycho.mixins.prompt_managing.PromptTemplateMixin.has_prompt">has_prompt() (rupsycho.mixins.prompt_managing.PromptTemplateMixin method)</a>
 </li>
-      <li><a href="models.html#rupsycho.models.model.RemoteHuggingFaceModelConfig.huggingfacehub_api_token">huggingfacehub_api_token (rupsycho.models.model.RemoteHuggingFaceModelConfig attribute)</a>
+      <li><a href="models.html#rupsycho.models.model.LocalHuggingFaceModelConfig.huggingfacehub_api_token">huggingfacehub_api_token (rupsycho.models.model.LocalHuggingFaceModelConfig attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -348,17 +363,17 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="parsers.html#rupsycho.parsers.judges.MultipleChoiceJudge.ignore_case">ignore_case (rupsycho.parsers.judges.MultipleChoiceJudge attribute)</a>
+</li>
       <li><a href="models.html#rupsycho.models.instruction.AnswerOption.ignored_for_scale">ignored_for_scale (rupsycho.models.instruction.AnswerOption attribute)</a>
 
       <ul>
-        <li><a href="models.html#id4">(rupsycho.models.questionnaire.AnswerOption attribute)</a>, <a href="models.html#rupsycho.models.questionnaire.AnswerOption.ignored_for_scale">[1]</a>
+        <li><a href="models.html#rupsycho.models.questionnaire.AnswerOption.ignored_for_scale">(rupsycho.models.questionnaire.AnswerOption attribute)</a>
 </li>
       </ul></li>
-      <li><a href="experiment.html#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.initialize_answers_if_needed">initialize_answers_if_needed() (rupsycho.mixins.experiment_processing.ExperimentProcessingMixin method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="models.html#id14">instruction_items (rupsycho.models.questionnaire.Questionnaire attribute)</a>, <a href="models.html#rupsycho.models.questionnaire.Questionnaire.instruction_items">[1]</a>
+      <li><a href="models.html#id7">instruction_items (rupsycho.models.questionnaire.Questionnaire attribute)</a>, <a href="models.html#rupsycho.models.questionnaire.Questionnaire.instruction_items">[1]</a>
 </li>
       <li><a href="models.html#rupsycho.models.instruction.InstructionItem">InstructionItem (class in rupsycho.models.instruction)</a>
 
@@ -367,6 +382,14 @@
 </li>
       </ul></li>
       <li><a href="experiment.html#rupsycho.experiment_collection.ExperimentCollection.is_lc_serializable">is_lc_serializable() (rupsycho.experiment_collection.ExperimentCollection class method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="J">J</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="models.html#rupsycho.models.questionnaire.AnswerOptions.join_options">join_options() (rupsycho.models.questionnaire.AnswerOptions method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -419,6 +442,8 @@
       <ul>
         <li><a href="models.html#rupsycho.models.model.OpenAIModelConfig.model">(rupsycho.models.model.OpenAIModelConfig attribute)</a>
 </li>
+        <li><a href="parsers.html#rupsycho.parsers.judges.ModelBasedAnswerJudge.model">(rupsycho.parsers.judges.ModelBasedAnswerJudge attribute)</a>
+</li>
       </ul></li>
       <li><a href="models.html#rupsycho.models.instruction.AnswerOption.model_computed_fields">model_computed_fields (rupsycho.models.instruction.AnswerOption attribute)</a>
 
@@ -435,9 +460,9 @@
 </li>
         <li><a href="models.html#rupsycho.models.model.RemoteHuggingFaceModelConfig.model_computed_fields">(rupsycho.models.model.RemoteHuggingFaceModelConfig attribute)</a>
 </li>
-        <li><a href="models.html#rupsycho.models.profile.DemographicProfile.model_computed_fields">(rupsycho.models.profile.DemographicProfile attribute)</a>
-</li>
         <li><a href="models.html#rupsycho.models.questionnaire.AnswerOption.model_computed_fields">(rupsycho.models.questionnaire.AnswerOption attribute)</a>
+</li>
+        <li><a href="models.html#rupsycho.models.questionnaire.AnswerOptions.model_computed_fields">(rupsycho.models.questionnaire.AnswerOptions attribute)</a>
 </li>
         <li><a href="models.html#rupsycho.models.questionnaire.DemographicAttributes.model_computed_fields">(rupsycho.models.questionnaire.DemographicAttributes attribute)</a>
 </li>
@@ -463,9 +488,9 @@
 </li>
         <li><a href="models.html#rupsycho.models.model.RemoteHuggingFaceModelConfig.model_config">(rupsycho.models.model.RemoteHuggingFaceModelConfig attribute)</a>
 </li>
-        <li><a href="models.html#rupsycho.models.profile.DemographicProfile.model_config">(rupsycho.models.profile.DemographicProfile attribute)</a>
-</li>
         <li><a href="models.html#rupsycho.models.questionnaire.AnswerOption.model_config">(rupsycho.models.questionnaire.AnswerOption attribute)</a>
+</li>
+        <li><a href="models.html#rupsycho.models.questionnaire.AnswerOptions.model_config">(rupsycho.models.questionnaire.AnswerOptions attribute)</a>
 </li>
         <li><a href="models.html#rupsycho.models.questionnaire.DemographicAttributes.model_config">(rupsycho.models.questionnaire.DemographicAttributes attribute)</a>
 </li>
@@ -493,9 +518,9 @@
 </li>
         <li><a href="models.html#rupsycho.models.model.RemoteHuggingFaceModelConfig.model_fields">(rupsycho.models.model.RemoteHuggingFaceModelConfig attribute)</a>
 </li>
-        <li><a href="models.html#rupsycho.models.profile.DemographicProfile.model_fields">(rupsycho.models.profile.DemographicProfile attribute)</a>
-</li>
         <li><a href="models.html#rupsycho.models.questionnaire.AnswerOption.model_fields">(rupsycho.models.questionnaire.AnswerOption attribute)</a>
+</li>
+        <li><a href="models.html#rupsycho.models.questionnaire.AnswerOptions.model_fields">(rupsycho.models.questionnaire.AnswerOptions attribute)</a>
 </li>
         <li><a href="models.html#rupsycho.models.questionnaire.DemographicAttributes.model_fields">(rupsycho.models.questionnaire.DemographicAttributes attribute)</a>
 </li>
@@ -508,6 +533,20 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="parsers.html#rupsycho.parsers.judges.ModelBasedAnswerJudge.model_name">model_name (rupsycho.parsers.judges.ModelBasedAnswerJudge attribute)</a>
+
+      <ul>
+        <li><a href="parsers.html#rupsycho.parsers.validators.ModelBasedValidator.model_name">(rupsycho.parsers.validators.ModelBasedValidator attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="parsers.html#rupsycho.parsers.judges.ModelBasedAnswerJudge">ModelBasedAnswerJudge (class in rupsycho.parsers.judges)</a>
+</li>
+      <li><a href="parsers.html#rupsycho.parsers.judges.ModelBasedAnswerJudge.Config">ModelBasedAnswerJudge.Config (class in rupsycho.parsers.judges)</a>
+</li>
+      <li><a href="parsers.html#rupsycho.parsers.validators.ModelBasedValidator">ModelBasedValidator (class in rupsycho.parsers.validators)</a>
+</li>
+      <li><a href="parsers.html#rupsycho.parsers.validators.ModelBasedValidator.Config">ModelBasedValidator.Config (class in rupsycho.parsers.validators)</a>
+</li>
       <li><a href="experiment.html#rupsycho.mixins.model_managing.ModelManagementMixin">ModelManagementMixin (class in rupsycho.mixins.model_managing)</a>
 </li>
       <li><a href="experiment.html#rupsycho.experiment.ExperimentDocument.models">models (rupsycho.experiment.ExperimentDocument attribute)</a>
@@ -548,10 +587,12 @@
 </li>
         <li><a href="parsers.html#module-rupsycho.parsers.validators">rupsycho.parsers.validators</a>
 </li>
+        <li><a href="post.html#module-rupsycho.postprocessing">rupsycho.postprocessing</a>
+</li>
         <li><a href="reader.html#module-rupsycho.reader">rupsycho.reader</a>
 </li>
       </ul></li>
-      <li><a href="parsers.html#rupsycho.parsers.judges.MultipleChoiceParser">MultipleChoiceParser (class in rupsycho.parsers.judges)</a>
+      <li><a href="parsers.html#rupsycho.parsers.judges.MultipleChoiceJudge">MultipleChoiceJudge (class in rupsycho.parsers.judges)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -564,12 +605,14 @@
       <ul>
         <li><a href="models.html#id2">(rupsycho.models.questionnaire.DemographicAttributes attribute)</a>, <a href="models.html#rupsycho.models.questionnaire.DemographicAttributes.name">[1]</a>
 </li>
-        <li><a href="models.html#id10">(rupsycho.models.questionnaire.Questionnaire attribute)</a>, <a href="models.html#rupsycho.models.questionnaire.Questionnaire.name">[1]</a>
+        <li><a href="models.html#id3">(rupsycho.models.questionnaire.Questionnaire attribute)</a>, <a href="models.html#rupsycho.models.questionnaire.Questionnaire.name">[1]</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="models.html#rupsycho.models.model.LocalHuggingFaceModelConfig.name_or_path">name_or_path (rupsycho.models.model.LocalHuggingFaceModelConfig attribute)</a>
+</li>
+      <li><a href="parsers.html#rupsycho.parsers.validators.normalize">normalize() (in module rupsycho.parsers.validators)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -581,11 +624,13 @@
 </li>
       <li><a href="models.html#rupsycho.models.model.OllamaModelConfig.Config">OllamaModelConfig.Config (class in rupsycho.models.model)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="models.html#rupsycho.models.model.OpenAIModelConfig">OpenAIModelConfig (class in rupsycho.models.model)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="models.html#rupsycho.models.model.OpenAIModelConfig.Config">OpenAIModelConfig.Config (class in rupsycho.models.model)</a>
+</li>
+      <li><a href="models.html#rupsycho.models.questionnaire.AnswerOptions.options">options (rupsycho.models.questionnaire.AnswerOptions attribute)</a>
 </li>
       <li><a href="models.html#rupsycho.models.model.OpenAIModelConfig.organization">organization (rupsycho.models.model.OpenAIModelConfig attribute)</a>
 </li>
@@ -616,11 +661,17 @@
 </li>
         <li><a href="parsers.html#rupsycho.parsers.cleaners.PromptRemovalCleaner.parse">(rupsycho.parsers.cleaners.PromptRemovalCleaner method)</a>
 </li>
-        <li><a href="parsers.html#rupsycho.parsers.judges.MultipleChoiceParser.parse">(rupsycho.parsers.judges.MultipleChoiceParser method)</a>
+        <li><a href="parsers.html#rupsycho.parsers.cleaners.RegexExtractorCleaner.parse">(rupsycho.parsers.cleaners.RegexExtractorCleaner method)</a>
+</li>
+        <li><a href="parsers.html#rupsycho.parsers.judges.ModelBasedAnswerJudge.parse">(rupsycho.parsers.judges.ModelBasedAnswerJudge method)</a>
+</li>
+        <li><a href="parsers.html#rupsycho.parsers.judges.MultipleChoiceJudge.parse">(rupsycho.parsers.judges.MultipleChoiceJudge method)</a>
 </li>
         <li><a href="parsers.html#rupsycho.parsers.validators.ApologiesValidatorParser.parse">(rupsycho.parsers.validators.ApologiesValidatorParser method)</a>
 </li>
         <li><a href="parsers.html#rupsycho.parsers.validators.BeingAiValidatorParser.parse">(rupsycho.parsers.validators.BeingAiValidatorParser method)</a>
+</li>
+        <li><a href="parsers.html#rupsycho.parsers.validators.ModelBasedValidator.parse">(rupsycho.parsers.validators.ModelBasedValidator method)</a>
 </li>
         <li><a href="parsers.html#rupsycho.parsers.validators.RefusalValidatorParser.parse">(rupsycho.parsers.validators.RefusalValidatorParser method)</a>
 </li>
@@ -629,9 +680,23 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="parsers.html#rupsycho.parsers.cleaners.RegexExtractorCleaner.pattern">pattern (rupsycho.parsers.cleaners.RegexExtractorCleaner attribute)</a>
+</li>
       <li><a href="experiment.html#rupsycho.mixins.persona_managing.PersonaManagementMixin">PersonaManagementMixin (class in rupsycho.mixins.persona_managing)</a>
 </li>
-      <li><a href="parsers.html#rupsycho.parsers.judges.MultipleChoiceParser.possible_answers">possible_answers (rupsycho.parsers.judges.MultipleChoiceParser attribute)</a>
+      <li><a href="parsers.html#rupsycho.parsers.judges.ModelBasedAnswerJudge.possible_answers">possible_answers (rupsycho.parsers.judges.ModelBasedAnswerJudge attribute)</a>
+
+      <ul>
+        <li><a href="parsers.html#rupsycho.parsers.judges.MultipleChoiceJudge.possible_answers">(rupsycho.parsers.judges.MultipleChoiceJudge attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="post.html#rupsycho.postprocessing.PostprocessingPipeline">PostprocessingPipeline (class in rupsycho.postprocessing)</a>
+</li>
+      <li><a href="parsers.html#rupsycho.parsers.judges.ModelBasedAnswerJudge.predict_answer">predict_answer() (rupsycho.parsers.judges.ModelBasedAnswerJudge method)</a>
+</li>
+      <li><a href="parsers.html#rupsycho.parsers.judges.ModelBasedAnswerJudge.predict_for_all_options">predict_for_all_options() (rupsycho.parsers.judges.ModelBasedAnswerJudge method)</a>
+</li>
+      <li><a href="models.html#rupsycho.models.questionnaire.AnswerOptions.prepend_delimiter">prepend_delimiter (rupsycho.models.questionnaire.AnswerOptions attribute)</a>
 </li>
       <li><a href="models.html#rupsycho.models.questionnaire.Questionnaire.print_questionnaire">print_questionnaire() (rupsycho.models.questionnaire.Questionnaire method)</a>
 </li>
@@ -664,7 +729,7 @@
       <li><a href="models.html#rupsycho.models.instruction.InstructionItem.question">question (rupsycho.models.instruction.InstructionItem attribute)</a>
 
       <ul>
-        <li><a href="models.html#id6">(rupsycho.models.questionnaire.InstructionItem attribute)</a>, <a href="models.html#rupsycho.models.questionnaire.InstructionItem.question">[1]</a>
+        <li><a href="models.html#rupsycho.models.questionnaire.InstructionItem.question">(rupsycho.models.questionnaire.InstructionItem attribute)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -683,6 +748,8 @@
 </li>
       <li><a href="parsers.html#rupsycho.parsers.validators.RefusalValidatorParser">RefusalValidatorParser (class in rupsycho.parsers.validators)</a>
 </li>
+      <li><a href="parsers.html#rupsycho.parsers.cleaners.RegexExtractorCleaner">RegexExtractorCleaner (class in rupsycho.parsers.cleaners)</a>
+</li>
       <li><a href="models.html#rupsycho.models.model.RemoteHuggingFaceModelConfig">RemoteHuggingFaceModelConfig (class in rupsycho.models.model)</a>
 </li>
       <li><a href="models.html#rupsycho.models.model.RemoteHuggingFaceModelConfig.Config">RemoteHuggingFaceModelConfig.Config (class in rupsycho.models.model)</a>
@@ -700,13 +767,17 @@
       <li><a href="models.html#rupsycho.models.instruction.AnswerOption.reversed">reversed (rupsycho.models.instruction.AnswerOption attribute)</a>
 
       <ul>
-        <li><a href="models.html#id7">(rupsycho.models.questionnaire.InstructionItem attribute)</a>, <a href="models.html#rupsycho.models.questionnaire.InstructionItem.reversed">[1]</a>
+        <li><a href="models.html#rupsycho.models.questionnaire.InstructionItem.reversed">(rupsycho.models.questionnaire.InstructionItem attribute)</a>
 </li>
       </ul></li>
       <li><a href="models.html#rupsycho.models.model.LocalHuggingFaceModelConfig.revision">revision (rupsycho.models.model.LocalHuggingFaceModelConfig attribute)</a>
 </li>
       <li><a href="experiment.html#rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.run">run() (rupsycho.mixins.experiment_processing.ExperimentProcessingMixin method)</a>
+
+      <ul>
+        <li><a href="post.html#rupsycho.postprocessing.PostprocessingPipeline.run">(rupsycho.postprocessing.PostprocessingPipeline method)</a>
 </li>
+      </ul></li>
       <li><a href="experiment.html#rupsycho.experiment_collection.ExperimentCollection.run_all">run_all() (rupsycho.experiment_collection.ExperimentCollection method)</a>
 </li>
       <li><a href="experiment.html#rupsycho.experiment.ExperimentDocument.runnable_models">runnable_models (rupsycho.experiment.ExperimentDocument attribute)</a>
@@ -830,6 +901,13 @@
 </li>
       </ul></li>
       <li>
+    rupsycho.postprocessing
+
+      <ul>
+        <li><a href="post.html#module-rupsycho.postprocessing">module</a>
+</li>
+      </ul></li>
+      <li>
     rupsycho.reader
 
       <ul>
@@ -868,19 +946,17 @@
         <li><a href="models.html#rupsycho.models.model.RemoteHuggingFaceModelConfig.task">(rupsycho.models.model.RemoteHuggingFaceModelConfig attribute)</a>
 </li>
       </ul></li>
-      <li><a href="models.html#rupsycho.models.profile.DemographicProfile.template">template (rupsycho.models.profile.DemographicProfile attribute)</a>
-
-      <ul>
-        <li><a href="models.html#rupsycho.models.questionnaire.DemographicProfile.template">(rupsycho.models.questionnaire.DemographicProfile attribute)</a>
+      <li><a href="models.html#rupsycho.models.questionnaire.DemographicProfile.template">template (rupsycho.models.questionnaire.DemographicProfile attribute)</a>
 </li>
-      </ul></li>
       <li><a href="models.html#rupsycho.models.instruction.AnswerOption.text">text (rupsycho.models.instruction.AnswerOption attribute)</a>
 
       <ul>
-        <li><a href="models.html#id3">(rupsycho.models.questionnaire.AnswerOption attribute)</a>, <a href="models.html#rupsycho.models.questionnaire.AnswerOption.text">[1]</a>
+        <li><a href="models.html#rupsycho.models.questionnaire.AnswerOption.text">(rupsycho.models.questionnaire.AnswerOption attribute)</a>
 </li>
       </ul></li>
       <li><a href="models.html#id1">title (rupsycho.models.questionnaire.DemographicAttributes attribute)</a>, <a href="models.html#rupsycho.models.questionnaire.DemographicAttributes.title">[1]</a>
+</li>
+      <li><a href="parsers.html#rupsycho.parsers.judges.ModelBasedAnswerJudge.tokenizer">tokenizer (rupsycho.parsers.judges.ModelBasedAnswerJudge attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -892,6 +968,8 @@
         <li><a href="experiment.html#rupsycho.experiment_collection.ExperimentCollection.type">(rupsycho.experiment_collection.ExperimentCollection attribute)</a>
 </li>
         <li><a href="models.html#rupsycho.models.model.LangChainModelConfig.type">(rupsycho.models.model.LangChainModelConfig attribute)</a>
+</li>
+        <li><a href="models.html#rupsycho.models.model.LocalHuggingFaceModelConfig.type">(rupsycho.models.model.LocalHuggingFaceModelConfig attribute)</a>
 </li>
         <li><a href="models.html#rupsycho.models.model.OllamaModelConfig.type">(rupsycho.models.model.OllamaModelConfig attribute)</a>
 </li>
@@ -906,7 +984,7 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="models.html#rupsycho.models.model.LocalHuggingFaceModelConfig.use_auth_token">use_auth_token (rupsycho.models.model.LocalHuggingFaceModelConfig attribute)</a>
+      <li><a href="models.html#rupsycho.models.questionnaire.InstructionItem.update_answer">update_answer() (rupsycho.models.questionnaire.InstructionItem method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -925,7 +1003,7 @@
       <li><a href="models.html#rupsycho.models.instruction.AnswerOption.weight">weight (rupsycho.models.instruction.AnswerOption attribute)</a>
 
       <ul>
-        <li><a href="models.html#id5">(rupsycho.models.questionnaire.AnswerOption attribute)</a>, <a href="models.html#rupsycho.models.questionnaire.AnswerOption.weight">[1]</a>
+        <li><a href="models.html#rupsycho.models.questionnaire.AnswerOption.weight">(rupsycho.models.questionnaire.AnswerOption attribute)</a>
 </li>
       </ul></li>
   </ul></td>
