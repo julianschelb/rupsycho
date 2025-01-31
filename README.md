@@ -2,7 +2,7 @@
 # RUPsycho Python Package
 
 ## Introduction
-RUPsycho is a Python package designed for the application of large language models (LLMs) in social science research. It facilitates exploring humanlike behaviors through LLMs, offering a unique perspective in the field of natural language processing (NLP). This README guide will help you in setting up and effectively utilizing the RUPsycho package for your research needs.
+RUPsycho is a Python package designed for the application of large language models (LLMs) in social science research. It facilitates exploring humanlike behaviors through LLMs, offering a unique perspective in the field of natural language processing (NLP).
 
 ## Installation
 
