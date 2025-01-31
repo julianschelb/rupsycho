@@ -391,14 +391,12 @@ DEFAULT_MODEL_CONFIG_DICT = {
     "name_or_path": "HuggingFaceTB/SmolLM-1.7b-Instruct",
     "task": "text-generation",
     "pipeline_kwargs": {
-        "min_new_tokens": 2,
-        "max_new_tokens": 128,
-        "max_length": 1024,
+        "max_new_tokens": 64,
+        "temperature": 1.0,
         "do_sample": True,
-        "repetition_penalty": 1.03,
-        "temperature": 0.8,
         "top_k": 50,
-        "top_p": 0.95
+        "top_p": 0.95,
+        "return_full_text": False,
     }
 }
 
