@@ -172,7 +172,7 @@ class ModelBasedAnswerJudge(BaseOutputParser[str]):
 
         return predicted_label, positive_probability
 
-    def predict_for_all_options(self, answer: str, possible_answers=None):
+    def predict_for_all_options(self, answer: str, answer_options=None):
         """
         Iterates over all answer options and predicts for each.
         """
@@ -184,7 +184,7 @@ class ModelBasedAnswerJudge(BaseOutputParser[str]):
                 raise ValueError("No possible answers provided")
 
         results = []
-        for answer_option in self.possible_answers:
+        for answer_option in answer_options:
             predicted_label, positive_probability = self.predict_answer(
                 answer_option, answer)
             results.append({

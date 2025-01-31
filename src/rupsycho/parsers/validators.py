@@ -306,7 +306,7 @@ class ModelBasedValidator(BaseOutputParser[dict]):
 
             return {
                 'text': text,  # return the original text
-                'classification': 'invalid' if label == 'REJECTION' else 'valid',
+                'validation_status': 'invalid' if label == 'REJECTION' else 'valid',
                 'confidence_score': score
             }
 
