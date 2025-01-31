@@ -84,3 +84,11 @@ make html
 ```
 
 This will generate HTML documentation in the `docs/_build/html` directory.
+
+### Running Tests
+
+To ensure everything is working correctly, run the test cases using pytest:
+
+```bash
+pytest -v 
+```
