@@ -64,11 +64,10 @@ from typing import Optional
 
 # ================================= Expose Sub Modules ================================
 
-from rupsycho import callbacks
-from rupsycho import models
-from rupsycho import parsers
-from rupsycho import postprocessing
-from rupsycho import parsers
+from rupsycho.callbacks import *
+from rupsycho.models import *
+from rupsycho.parsers import *
+from rupsycho.postprocessing import *
 
 # ================================= Create Single Experiment ================================
 
