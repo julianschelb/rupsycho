@@ -53,7 +53,7 @@ class MultipleChoiceJudge(BaseOutputParser[str]):
         possible answers.
         """
         try:
-            if possible_answers is None:
+            if possible_answers is None or not possible_answers:
                 possible_answers = self.possible_answers
                 if not possible_answers:
                     raise ValueError("No possible answers provided")
@@ -178,7 +178,7 @@ class ModelBasedAnswerJudge(BaseOutputParser[str]):
         """
 
         # Use the default possible answers if none are provided
-        if answer_options is None:
+        if answer_options is None or not answer_options:
             answer_options = self.possible_answers
             if not answer_options:
                 raise ValueError("No possible answers provided")

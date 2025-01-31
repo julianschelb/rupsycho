@@ -390,6 +390,7 @@ DEFAULT_MODEL_CONFIG_DICT = {
     "type": "local_huggingface",
     "name_or_path": "HuggingFaceTB/SmolLM-1.7b-Instruct",
     "task": "text-generation",
+    "device_map": "cpu",
     "pipeline_kwargs": {
         "max_new_tokens": 64,
         "temperature": 1.0,

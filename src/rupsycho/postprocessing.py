@@ -56,10 +56,15 @@ class PostprocessingPipeline:
         """
         # Apply cleaning
         df['cleaned_answer'] = df['answer'].progress_apply(self.cleaner.parse)
-
+  
         # Apply validation
         df['validation_status'] = df['cleaned_answer'].progress_apply(
             self.validator.parse)
+
+        # TODO: Use default answer options if not provided in the instruction item
+        # possible_answers = self.experiment.questionnaire.instruction_items[0].get_answer_options_as_list()
+ 
+        # print(possible_answers)
 
         # Apply judgment
         df['decision'] = df.progress_apply(
