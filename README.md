@@ -34,16 +34,24 @@ experiment.run()
 experiment.export_to_file("results.json")
 ```
 
+## For Devs
 
-## Installation via Git
+### Install Dependencies
+After cloning this repository, use Poetry to manage dependencies and install the necessary packages for development.
 
-Make sure your project is already managed by Poetry. If not, you can initiate Poetry in your project directory by running.
+1. Install Poetry:
+   ```
+   pip install poetry
+   ```
 
-```
-poetry init
-```
+2. Install dependencies:
+   ```
+   poetry install
+   ```
 
-Once your project is set up with Poetry, you can build the package by running:
+## Build and Install the Package
+
+You can build the package by running:
 
 ```
 poetry build
@@ -67,22 +75,6 @@ Or, you can install it directly from GitHub using pip:
 pip install git+https://github.com/julianschelb/rupsycho.git
 ```
 
-
-
-## For Devs
-
-### Installation using Poetry
-To install this package after cloning this repository, use Poetry for dependency management and package installation.
-
-1. Install Poetry:
-   ```
-   pip install poetry
-   ```
-
-2. Install dependencies:
-   ```
-   poetry install
-   ```
 
 ### Generating Documentation
 Navigate to the `docs/` directory and run:
