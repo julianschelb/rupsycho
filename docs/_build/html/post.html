@@ -54,6 +54,12 @@
 <li class="toctree-l1"><a class="reference internal" href="parsers.html">Parsers</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Postprocessing</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#rupsycho.postprocessing.PostprocessingPipeline"><code class="docutils literal notranslate"><span class="pre">PostprocessingPipeline</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.postprocessing.PostprocessingPipeline.config_file_path"><code class="docutils literal notranslate"><span class="pre">PostprocessingPipeline.config_file_path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.postprocessing.PostprocessingPipeline.results_file_patterns"><code class="docutils literal notranslate"><span class="pre">PostprocessingPipeline.results_file_patterns</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.postprocessing.PostprocessingPipeline.cleaner"><code class="docutils literal notranslate"><span class="pre">PostprocessingPipeline.cleaner</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.postprocessing.PostprocessingPipeline.validator"><code class="docutils literal notranslate"><span class="pre">PostprocessingPipeline.validator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.postprocessing.PostprocessingPipeline.judge"><code class="docutils literal notranslate"><span class="pre">PostprocessingPipeline.judge</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rupsycho.postprocessing.PostprocessingPipeline.output_path"><code class="docutils literal notranslate"><span class="pre">PostprocessingPipeline.output_path</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rupsycho.postprocessing.PostprocessingPipeline.run"><code class="docutils literal notranslate"><span class="pre">PostprocessingPipeline.run()</span></code></a></li>
 </ul>
 </li>
@@ -92,6 +98,76 @@
 <dt class="sig sig-object py" id="rupsycho.postprocessing.PostprocessingPipeline">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rupsycho.postprocessing.</span></span><span class="sig-name descname"><span class="pre">PostprocessingPipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results_file_patterns</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cleaner</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">judge</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'processed_results.csv'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/postprocessing.html#PostprocessingPipeline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.postprocessing.PostprocessingPipeline" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A pipeline for postprocessing experiment results by cleaning responses, validating them,
+and determining the best answer option.</p>
+<p>This class loads CSV files matching specified patterns, applies text cleaning, validation,
+and judgment processes, and then saves the processed results.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.postprocessing.PostprocessingPipeline.config_file_path">
+<span class="sig-name descname"><span class="pre">config_file_path</span></span><a class="headerlink" href="#rupsycho.postprocessing.PostprocessingPipeline.config_file_path" title="Link to this definition"></a></dt>
+<dd><p>Path to the JSON configuration file defining the experiment structure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.postprocessing.PostprocessingPipeline.results_file_patterns">
+<span class="sig-name descname"><span class="pre">results_file_patterns</span></span><a class="headerlink" href="#rupsycho.postprocessing.PostprocessingPipeline.results_file_patterns" title="Link to this definition"></a></dt>
+<dd><p>List of file patterns to locate result CSVs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.postprocessing.PostprocessingPipeline.cleaner">
+<span class="sig-name descname"><span class="pre">cleaner</span></span><a class="headerlink" href="#rupsycho.postprocessing.PostprocessingPipeline.cleaner" title="Link to this definition"></a></dt>
+<dd><p>An instance of a cleaner that preprocesses text responses.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.postprocessing.PostprocessingPipeline.validator">
+<span class="sig-name descname"><span class="pre">validator</span></span><a class="headerlink" href="#rupsycho.postprocessing.PostprocessingPipeline.validator" title="Link to this definition"></a></dt>
+<dd><p>An instance of a validator that determines the validity of responses.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.postprocessing.PostprocessingPipeline.judge">
+<span class="sig-name descname"><span class="pre">judge</span></span><a class="headerlink" href="#rupsycho.postprocessing.PostprocessingPipeline.judge" title="Link to this definition"></a></dt>
+<dd><p>An instance of a judge that selects the best answer option.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rupsycho.postprocessing.PostprocessingPipeline.output_path">
+<span class="sig-name descname"><span class="pre">output_path</span></span><a class="headerlink" href="#rupsycho.postprocessing.PostprocessingPipeline.output_path" title="Link to this definition"></a></dt>
+<dd><p>Path where the processed results CSV will be saved.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="rupsycho.postprocessing.PostprocessingPipeline.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rupsycho/postprocessing.html#PostprocessingPipeline.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rupsycho.postprocessing.PostprocessingPipeline.run" title="Link to this definition"></a></dt>

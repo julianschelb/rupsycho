@@ -6,6 +6,21 @@ tqdm.pandas()
 
 
 class PostprocessingPipeline:
+    """
+    A pipeline for postprocessing experiment results by cleaning responses, validating them, 
+    and determining the best answer option.
+
+    This class loads CSV files matching specified patterns, applies text cleaning, validation, 
+    and judgment processes, and then saves the processed results.
+
+    Attributes:
+        config_file_path (str): Path to the JSON configuration file defining the experiment structure.
+        results_file_patterns (list): List of file patterns to locate result CSVs.
+        cleaner (object): An instance of a cleaner that preprocesses text responses.
+        validator (object): An instance of a validator that determines the validity of responses.
+        judge (object): An instance of a judge that selects the best answer option.
+        output_path (str): Path where the processed results CSV will be saved.
+    """
     def __init__(self, config_file_path, results_file_patterns, cleaner, validator, judge, output_path="processed_results.csv"):
         """
         Initialize the PostprocessingPipeline.

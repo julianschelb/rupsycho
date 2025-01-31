@@ -39,7 +39,6 @@ html_theme = 'sphinx_rtd_theme'  # 'furo', sphinxawesome_theme' "sphinx_rtd_them
 html_static_path = ["_static"]
 
 html_theme_options = {
-    'display_version': False,
     'prev_next_buttons_location': None,
 }
 
