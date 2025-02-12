@@ -6,7 +6,7 @@ import os
 # -- Project information -----------------------------------------------------
 project = "RUPsycho"
 copyright = ""
-author = "Orr, Andreas, Julian"
+author = "Author"
 release = "0.10"
 
 # -- General configuration ---------------------------------------------------
