@@ -2,12 +2,12 @@
 name = "RUPsycho"
 version = "0.1.0"
 description = "RUPsycho is a Python package designed for the application of large language models (LLMs) in social science research"
-authors = ["Julian Schelb <julian.schelb@uni-konstanz.de>", "Orr Borin <orr.borin@uni-konstanz.de>", "Andreas Spitz <andreas.spitz@uni-konstanz.de>"]
+authors = ["Author 1 <author1@example.com>", "Author 2 <author2@example.com>", "Author 3 <author3@example.com>"]
 readme = "README.md"
 license = "MIT" 
 homepage = "https://github.com/julianschelb/rupsycho"
 repository = "https://github.com/julianschelb/rupsycho"
-documentation = "https://julianschelb.github.io/rupsycho/"
+documentation = "https://github.com/julianschelb/rupsycho"
 keywords = ["LLM", "social science", "psychology", "machine learning"]
 classifiers = [
     "Programming Language :: Python :: 3",
