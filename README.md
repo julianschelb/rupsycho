@@ -6,10 +6,10 @@ RUPsycho is a Python package designed for the application of large language mode
 
 ## Installation
 
-To install RUPsycho, run the following command in your Python environment:
+Please download the repository files and run the following command:
 
-```bash
-pip install git+https://github.com/julianschelb/rupsycho.git
+```
+pip install .
 ```
 
 ## Example Usage
@@ -64,13 +64,6 @@ Alternatively, you can install the package directly from the project directory w
 ```
 pip install .
 ```
-
-Or, you can install it directly from GitHub using pip:
-
-```
-pip install git+https://github.com/julianschelb/rupsycho.git
-```
-
 
 ### Generating Documentation
 Navigate to the `docs/` directory and run:
