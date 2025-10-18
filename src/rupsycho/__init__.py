@@ -274,7 +274,7 @@ def example_experiment_bfi(
     experiment.set_prompt(chat_prompt)
 
     # Set a simple string output parser
-    parser = StrOutputParser()
+    parser = StrOutputParser() # returns the input text with no changes
     experiment.set_parser(parser)
 
     # Return the configured experiment

@@ -9,6 +9,7 @@ from difflib import SequenceMatcher
 import re
 import json
 import warnings
+import string
 import os
 from rupsycho.utils.files import json_loader
 
@@ -195,19 +196,24 @@ def check_multiple_choice_answers(text: str, possible_answers: list[str], ignore
     text = text.lower() if ignore_case else text
     answer_counts = {answer: 0 for answer in possible_answers}
 
-    # Pattern to split number and remove punctuation
-    number_pattern = r'^(\d+)\.'  # Matches number at start followed by period
-    punctuation_pattern = r'[^\w\s]'  # Matches punctuation
+    # Matches a number or letter at start followed by one of four punctuations or a space <- added more patterns
+    enumeration_pattern = r'^(\d+|[a-zA-Z])(?:\.| *= *| *: *| *- *| +)' 
+    # Matches punctuation at beginning
+    punctuation_pattern = r'[^\w\s]' 
 
     for answer in possible_answers:
         normalized_answer = answer.lower() if ignore_case else answer
-        number_match = re.match(number_pattern, normalized_answer)
+        enumeration_match = re.match(enumeration_pattern, normalized_answer)
 
         # If a number is found, split it from the rest of the text and remove punctuation
-        number = number_match.group(1) if number_match else None
-        answer_text = re.sub(number_pattern, '', normalized_answer).strip()
+        enumeration = enumeration_match.group(1) if enumeration_match else None
+        answer_text = re.sub(enumeration_pattern, '', normalized_answer).strip()
         answer_text = re.sub(punctuation_pattern, '', answer_text)
-        components = [number, answer_text] if number else [answer_text]
+        components = [enumeration, answer_text] if enumeration else [answer_text]
+
+        # also remove puctuation from model answer text to ensure 'self-match' 
+        # e.g. "neutral (neither agree nor disagree)" would not match itself otherwise because of removed parenthesis
+        text = re.sub(punctuation_pattern, '', text)
 
         # Refine matching logic: only match numbers exactly and ensure full word matching for text
         for component in components:
@@ -216,6 +222,105 @@ def check_multiple_choice_answers(text: str, possible_answers: list[str], ignore
                 answer_counts[answer] += len(re.findall(match_pattern, text))
 
     return answer_counts
+
+
+def mk_age_keywords(max_age: int = 100) -> list[list]:
+    """
+    Return a list that contains (in order) for each number in the specified range a list of all 
+    common expectable representations of that number as stings.
+
+    For expample for the range 0-44:
+    [['0', 'nil', 'nought', 'oh', 'zero'] ... ['44', 'forty four', 'forty-four', 'fortyfour']].
+    """
+    from num2words import num2words
+
+    # generate different written forms of a number
+    def generate_written_forms(n):
+        forms = set()
+        # Basic form
+        forms.add(num2words(n))
+        
+        # Variations with and without hyphens for compound numbers
+        base = num2words(n)
+        if '-' in base:
+            forms.add(base.replace('-', ' '))
+            forms.add(base.replace('-', ''))
+
+        # Special case for 0
+        if n == 0:
+            forms.update(["zero", "nought", "nil", "oh"])
+
+        return sorted(forms)
+
+    # Generate the list of lists
+    number_list = []
+    for i in range(max_age + 1):
+        written_forms = generate_written_forms(i)
+        entry = [str(i)] + written_forms
+        number_list.append(entry)
+    return number_list
+
+
+def check_gender(text: str, ignore_case: bool = True) -> str:
+    """
+    Judge what gender a model claims to have in its answer.
+    
+    Gender can be either 'male', 'female', or 'other'.
+    The decision is made by counting the occurences of related words for each of the
+    three options. The option that has the highest score wins.
+    """
+    male_keywords = ["man", "male", "boy", "guy", "he", "him", "his", "gentleman", "sir", "mr", "masculine", "trans man", "transgender man", "transmasc"]
+    female_keywords = ["woman", "female", "girl", "lady", "she", "her", "hers", "miss", "ms", "mrs", "feminine", "trans woman", "transgender woman", "transfem"]
+    other_keywords = ["non-binary", "nonbinary", "nb", "enby", "genderqueer", "genderfluid", "agender", "bigender", "none", "pangender", "other"]
+    answer_counts = {"female": 0, "male": 0, "other": 0}
+
+    text = text.lower() if ignore_case else text
+    text = text.translate(str.maketrans('', '', string.punctuation))
+    words = text.split()
+
+    for keyword in female_keywords:
+        answer_counts["female"] += 1 if keyword in words else 0
+    for keyword in male_keywords:
+        answer_counts["male"] += 1 if keyword in words else 0
+    for keyword in other_keywords:
+        answer_counts["other"] += 1 if keyword in words else 0
+
+    # pprint(answer_counts)
+
+    max_value = max(answer_counts.values())
+    if max_value == 0:
+        return "not present"
+    else:
+        # Find all options with the max_value
+        max_keys = [key for key, value in answer_counts.items() if value == max_value]
+        if len(max_keys) > 1:
+            return "inconclusive"
+        else:
+            return max_keys[0]
+
+
+def check_age(text: str, max_age: int, ignore_case: bool = True) -> str:
+    """
+    Judge what age a model claims to have in its answer.
+
+    Returns:
+        str: string of the decided age in numbers (if judging was successful)
+    
+    The decision is made based on the first occurence of a number (either written
+    or in numbers) in the sentence. All possible subsequent numbers are ignored.
+    """
+    age_keywords = mk_age_keywords(max_age)
+
+    text = text.lower() if ignore_case else text
+    text = text.translate(str.maketrans('', '', string.punctuation))
+    words = text.split()
+
+    # search first instance of any form of number
+    for word in words:
+        for keywords in age_keywords:
+            if word in keywords:
+                return keywords[0]
+    return 'inconclusive'
 
 
 def split_on_symbols(text: str) -> list[str]:
