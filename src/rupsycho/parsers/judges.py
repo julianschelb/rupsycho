@@ -34,18 +34,6 @@ class MultipleChoiceJudge(BaseOutputParser[str]):
     possible_answers: list[str] = Field(...)
     ignore_case: bool = Field(True)
 
-    # def __init__(self, possible_answers: list[str], ignore_case: bool = True):
-    #     """
-    #     Initializes the parser with a list of possible answers.
-
-    #     Parameters
-    #     ----------
-    #     possible_answers : list[str]
-    #         A list of possible answers to be considered in the parsing process.
-    #     """
-    #     super().__init__()
-    #     object.__setattr__(self, 'possible_answers', possible_answers)
-    #     object.__setattr__(self, 'ignore_case', ignore_case)
 
     def parse(self, text: str, possible_answers=None) -> str:
         """
@@ -89,7 +77,7 @@ class MultipleChoiceJudge(BaseOutputParser[str]):
 
 # ---------------------- Demographic Judge ---------------------
 
-class DemogrphicJudge(BaseOutputParser[str]): # <-
+class DemographicsJudge(BaseOutputParser[str]): # <-
     """
     Custom parser for demographic questionnaires that can either judge statements on
     age or on gender. Which of the two tasks is required has to be specified by a 
@@ -102,7 +90,6 @@ class DemogrphicJudge(BaseOutputParser[str]): # <-
 
     def parse(self, text: str, possible_answers: list=None) -> str:
         try:
-            # print(possible_answers)
             if possible_answers is None:
                 raise ValueError("No possible answer/question-type provided")
             
@@ -118,7 +105,7 @@ class DemogrphicJudge(BaseOutputParser[str]): # <-
             return ans
         
         except Exception as e:
-            raise OutputParserException(f"DemogrphicJudge encountered an error: {e}")
+            raise OutputParserException(f"DemographicsJudge encountered an error: {e}")
         
     @property
     def _type(self) -> str:
@@ -138,48 +125,52 @@ class ModelBasedAnswerJudge(BaseOutputParser[str]):
     If the entropy of the decision probabilities is greater than a threshold, it returns "inconclusive".
     """
 
-    model_name: str = Field(...)
-    possible_answers: list[str] = Field(...)
-    device: str = Field('cuda:0')
-    model: Any = Field(...)
-    tokenizer: Any = Field(...)
-    entropy_threshold: float = Field(0.359)  # Default entropy threshold
+    model_name: str = Field(
+        ...,
+        description="The Hugging Face model name or path for the sequence classification model."
+    )
+    possible_answers: list[str] = Field(
+        ...,
+        description="A list of possible answers to be considered during prediction."
+    )
+    device: str = Field(
+        'cuda:0',
+        description="The device to run the model on (e.g., 'cuda:0' for GPU or 'cpu')."
+    )
+    model: Any = Field(
+        default=None,
+        init=False,
+        description="The model that is used as a judge."
+        
+    )
+    tokenizer: Any = Field(
+        default=None,
+        init=False,
+        description="The tokenizer for the model that is used as a judge"
+    )
+    entropy_threshold: float = Field(
+        0.359, # Default entropy threshold
+        description="The threshold for entropy above which the result is considered inconclusive."
+    )
 
     class Config:
         arbitrary_types_allowed = True
 
-    # def __init__(self, model_name: str, possible_answers: list[str], device: str = 'cuda:0', entropy_threshold: float = 0.359):
-    #     """
-    #     Initializes the parser with a Hugging Face model and a list of possible answers.
 
-    #     Parameters
-    #     ----------
-    #     model_name : str
-    #         The Hugging Face model name or path for the sequence classification model.
-    #     possible_answers : list[str]
-    #         A list of possible answers to be considered during prediction.
-    #     device : str
-    #         The device to run the model on (e.g., 'cuda:0' for GPU or 'cpu').
-    #     entropy_threshold : float
-    #         The threshold for entropy above which the result is considered inconclusive.
-    #     """
-    #     super().__init__()
+    def model_post_init(self, __context):
+        """Set up LLM."""
+        # Load the tokenizer and model from Hugging Face
+        tokenizer = RobertaTokenizer.from_pretrained(self.model_name)
+        model = RobertaForSequenceClassification.from_pretrained(
+            self.model_name, num_labels=2)
 
-    #     # Load the tokenizer and model from Hugging Face
-    #     tokenizer = RobertaTokenizer.from_pretrained(model_name)
-    #     model = RobertaForSequenceClassification.from_pretrained(
-    #         model_name, num_labels=2)
+        # Move model to the specified device
+        model.to(self.device)
 
-    #     # Move model to the specified device
-    #     model.to(device)
+        # Manually set the fields
+        self.model = model
+        self.tokenizer = tokenizer
 
-    #     # Manually set the field
-    #     object.__setattr__(self, 'model_name', model_name)
-    #     object.__setattr__(self, 'possible_answers', possible_answers)
-    #     object.__setattr__(self, 'device', device)
-    #     object.__setattr__(self, 'model', model)
-    #     object.__setattr__(self, 'tokenizer', tokenizer)
-    #     object.__setattr__(self, 'entropy_threshold', entropy_threshold)
 
     def calculate_entropy(self, decision_list):
         """
