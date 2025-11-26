@@ -5,7 +5,7 @@
 
 
 # from langchain.llms import HuggingFacePipeline
-import bitsandbytes as bnb  # Ensure this is installed for quantized loading
+# import bitsandbytes as bnb  # Ensure this is installed for quantized loading
 import torch
 import warnings
 from pydantic import BaseModel, Field
@@ -18,6 +18,8 @@ from langchain_huggingface import HuggingFacePipeline
 from langchain_huggingface import ChatHuggingFace
 from langchain_ollama.llms import OllamaLLM
 from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_deepseek import ChatDeepSeek
 
 from .prompt import (
     ChatPromptTemplateConfig,
@@ -326,7 +328,7 @@ class OpenAIModelConfig(BaseModel):
     type: str = Field(
         "openai", description="The type of the model configuration.")
 
-    model: str = Field(
+    name_or_path: str = Field(
         ..., description="The identifier for the OpenAI model (e.g., 'gpt-4')."
     )
 
@@ -371,7 +373,7 @@ class OpenAIModelConfig(BaseModel):
         try:
             # Create the OpenAI model instance using the provided config
             model_openai = ChatOpenAI(
-                model=self.model,
+                model=self.name_or_path,
                 api_key=self.api_key,
                 base_url=self.base_url,
                 organization=self.organization,
@@ -382,6 +384,118 @@ class OpenAIModelConfig(BaseModel):
 
         except Exception as e:
             raise ValueError(f"Failed to load the OpenAI model: {e}")
+
+
+# ------------------------------------------------
+#               Remote Google Config
+# ------------------------------------------------
+
+class GoogleModelConfig(BaseModel):
+    """Configuration for a Google model."""
+
+    type: str = Field(
+        "google", description="The type of the model configuration.")
+
+    name_or_path: str = Field(
+        ..., description="The identifier for the Google model (e.g., 'gemini-2.0-flash')."
+    )
+
+    api_key: Optional[str] = Field(
+        None, description="The API key for accessing Google models."
+    )
+
+    parameters: Dict = Field(
+        {},
+        description="The parameters for text generation"
+    )
+
+    prompt_template: ChatPromptTemplateConfig = Field(
+        None, description="The prompt template used by the model"
+    )
+
+    def load_model(self):
+        """
+        Loads and returns a Google model based on the provided configuration.
+
+        Parameters
+        ----------
+        config : GoogleModelConfig
+            The configuration object containing the details for loading the Google model.
+
+        Returns
+        -------
+        ChatGoogleGenerativeAI
+            The instantiated Google model ready for use.
+        """
+        try:
+            # Create the google model instance using the provided config
+            model_google = ChatGoogleGenerativeAI(
+                model=self.name_or_path,
+                api_key=self.api_key,
+                **self.parameters  # Pass generation parameters
+            )
+
+            return model_google
+
+        except Exception as e:
+            raise ValueError(f"Failed to load the Google model: {e}")
+
+
+
+# ------------------------------------------------
+#               Remote DeepSeek Config
+# ------------------------------------------------
+
+class DeepSeekModelConfig(BaseModel):
+    """Configuration for a DeepSeek model."""
+
+    type: str = Field(
+        "deepseek", description="The type of the model configuration.")
+
+    name_or_path: str = Field(
+        ..., description="The identifier for the DeepSeek model (e.g. 'deepseek-chat')."
+    )
+
+    api_key: Optional[str] = Field(
+        None, description="The API key for accessing DeepSeek models."
+    )
+
+    parameters: Dict = Field(
+        {},
+        description="The parameters for text generation"
+    )
+
+    prompt_template: ChatPromptTemplateConfig = Field(
+        None, description="The prompt template used by the model"
+    )
+
+    def load_model(self):
+        """
+        Loads and returns a DeepSeek model based on the provided configuration.
+
+        Parameters
+        ----------
+        config : DeepSeekModelConfig
+            The configuration object containing the details for loading the Google model.
+
+        Returns
+        -------
+        ChatDeepSeek
+            The instantiated Google model ready for use.
+        """
+        try:
+            # Create the DeepSeek model instance using the provided config
+            model_deepseek = ChatDeepSeek(
+                model=self.name_or_path,
+                # api_key=self.api_key, # key can for some reason only given explicitly or implicitly
+                # api_key=os.environ.get('DEEPSEEK_API_KEY'),
+                **self.parameters  # Pass generation parameters
+            )
+
+            return model_deepseek
+
+        except Exception as e:
+            raise ValueError(f"Failed to load the DeepSeek model: {e}")
 
 
 # ------------------- Default Model -------------------

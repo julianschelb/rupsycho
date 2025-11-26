@@ -98,7 +98,7 @@ class PromptRemovalCleaner(BaseOutputParser[str]):
         fast : bool, optional
             A flag to indicate whether the cleaning process should be fast (default is True).
         """
-        super().__init__()
+        super().__init__(prompt=prompt, similarity_threshold=similarity_threshold, fast=fast)
         self.prompt = prompt
         self.similarity_threshold = similarity_threshold
         self.fast = fast
@@ -167,7 +167,7 @@ class RegexExtractorCleaner(BaseOutputParser[str]):
         pattern : str
             The regex pattern used to extract values from the input text.
         """
-        super().__init__()
+        super().__init__(pattern=pattern)
         self.pattern = pattern
 
     def parse(self, text: str) -> str:

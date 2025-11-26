@@ -56,6 +56,7 @@ class PostprocessingPipeline:
             csv_files = glob.glob(pattern)
             for csv_file in csv_files:
                 df = pd.read_csv(csv_file)
+                df['answer'] = df['answer'].astype('string') # in case model answers with just numbers
                 dataframes.append(df)
         return pd.concat(dataframes, ignore_index=True)
 

@@ -1,0 +1,77 @@
+{
+    "name": "",
+    "description": "Experiment config template for experiments on paraphrasing the items of the demographic questions.",
+    "parameters": {
+        "seeds": [ "1", "2", "3"]
+    },
+    "prompt_template": {
+        "type": "chat",
+        "messages": [
+            {
+                "role": "system",
+                "content": "\nAct like you are a participant in a demographic survey. Answer the questions, even if you are not completely sure of your response. Answer concisely.\n"
+            },
+            {
+                "role": "user",
+                "content": "\nQuestion: {question}\nAnswer:"
+            }
+        ]
+    },
+    "models":{
+        "qwen temp=0.5": {
+        "type": "local_huggingface",
+        "name_or_path": "Qwen/Qwen2.5-7B-Instruct",
+        "device_map": {
+            "": "cuda"
+        },
+        "task": "text-generation",
+        "parameters": {
+            "max_new_tokens": 16,
+            "temperature": 0.5,
+            "do_sample": true,
+            "return_full_text": false
+        }
+    }
+    },
+    "demographic_profiles": {
+        "Mr. Placeholder": {
+            "attributes": {
+                "title": "Mr.",
+                "name": "Placeholder",
+                "id": 1
+            },
+            "template": "{title} {name}"
+        }
+    },
+    "questionnaire": {
+        "name": "Demographic Questions",
+        "general_instruction": "Please answer the following questions about your demographic background.",
+        "attributes": {},
+        "instruction_items": [
+            {
+                "question": "What gender do you identify with?",
+                "reversed": false,
+                "answer_options": {
+                    "1": {
+                        "text": "gender",
+                        "weight": 1,
+                        "ignored_for_scale": false
+                    }
+                },
+                "attributes": {}
+            },
+            {
+                "question": "What is your current age in years?",
+                "reversed": false,
+                "answer_options": {
+                    "1": {
+                        "text": "age",
+                        "weight": 1,
+                        "ignored_for_scale": false
+                    }
+                },
+                "attributes": {}
+            }
+        ]
+    }
+}

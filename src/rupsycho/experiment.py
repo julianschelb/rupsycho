@@ -7,8 +7,7 @@
 
 from typing import Any, Literal, Optional, Dict, Type, Union
 from langchain_core.documents.base import BaseMedia
-from langchain_core.pydantic_v1 import Field
-from pydantic import BaseModel
+from pydantic import Field, BaseModel
 
 from .models.model import (
     DEFAULT_MODEL_CONFIG,
@@ -16,7 +15,9 @@ from .models.model import (
     LocalHuggingFaceModelConfig,
     OllamaModelConfig,
     OpenAIModelConfig,
-    RemoteHuggingFaceModelConfig
+    RemoteHuggingFaceModelConfig,
+    GoogleModelConfig,
+    DeepSeekModelConfig
 )
 
 from .models.prompt import (
@@ -54,7 +55,9 @@ MODEL_CONFIG_CLASSES: Dict[str, Type[BaseModel]] = {
     "remote_huggingface": RemoteHuggingFaceModelConfig,
     "ollama": OllamaModelConfig,
     "openai": OpenAIModelConfig,
-    "langchain": LangChainModelConfig
+    "langchain": LangChainModelConfig,
+    "google": GoogleModelConfig,
+    "deepseek": DeepSeekModelConfig
 }
 
 # ================================= Experiment Class ================================
@@ -106,7 +109,7 @@ class ExperimentDocument(
     )
     models: Dict[str, Union[
         LangChainModelConfig, LocalHuggingFaceModelConfig, RemoteHuggingFaceModelConfig,
-        OllamaModelConfig, OpenAIModelConfig
+        OllamaModelConfig, OpenAIModelConfig, GoogleModelConfig, DeepSeekModelConfig
     ]] = Field(
         default_factory=dict, description="The models in the experiment"
     )

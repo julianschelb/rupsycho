@@ -78,20 +78,21 @@ class CSVCallback(Callback):
             with open(self.file_path, 'x', newline='') as f:
                 writer = csv.writer(f)
                 writer.writerow(["experiment_name", "instruction_item_id", "instruction_item", "model_id",
-                                 "profile_id", "random_seed", "answer"])
+                                 "profile_id", "random_seed", "time", "answer"])
         except FileExistsError:
             # File already exists, do nothing
             pass
 
-    def save_answer(self, experiment, instruction_item_id, instruction_item, model_id, profile_id, random_seed, answer):
+    def save_answer(self, experiment, instruction_item_id, instruction_item, model_id, profile_id, random_seed, time, answer):
         output_data = [
             experiment.name,  # Accessing experiment details
             instruction_item_id,
-            instruction_item.question,  # Assuming instruction_item has a 'question' attribute
+            instruction_item.question.replace('\n', ' '),  # Assuming instruction_item has a 'question' attribute + remove linebreaks for nicer format <-
             model_id,
             profile_id,
             random_seed,
-            answer
+            time,
+            answer,
         ]
 
         # Open the CSV file in append mode and write the data
