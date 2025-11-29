@@ -1,5 +1,5 @@
 """ 
-This module defines a class to represent questionnaires.
+This module defines a class to represent questionnaires in the configurator app.
 
 Instances of this class are easily convertible into the 'questionnaire' section of a 
 R.U.Psycho experiment configuration.
@@ -14,7 +14,7 @@ import traceback
 import datetime
 import os
 
-class Questionnaire():
+class ConfigQuestionnaire():
     """
     This class represents a questionnaire for the configurator GUI.
     

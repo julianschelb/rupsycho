@@ -20,7 +20,7 @@ from langchain_openai import ChatOpenAI
 import openai
 import time
 import utils
-from questionnaire import Questionnaire
+from rupsycho_configurator.config_questionnaire import ConfigQuestionnaire
 
 
 
@@ -340,7 +340,7 @@ with col1:
 
                         chain = model | utils.extract_json
                         name, instr, questions, answers = chain.invoke(prompt)
-                        quest = Questionnaire('', '', questions, answers)
+                        quest = ConfigQuestionnaire('', '', questions, answers)
                         questions_answers = quest.get_merged_questions_answers()
 
                         # print extracted model outputs
