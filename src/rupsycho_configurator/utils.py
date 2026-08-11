@@ -3,6 +3,7 @@ This module defines utility methods that are used across the project.
 """
 
 import re
+import ast
 import json
 import typing
 from pypdf import PdfReader
@@ -112,44 +113,53 @@ def extract_json_array(txt: str, nested: bool) -> list[str] | list[list[str]]:
     Returns:
         list[str] | list[list[str]]: Deserialized Json in the form of a list. If no match was found, the empty list is returned.
     """
-    list_list_reg = '\[\s*(\[\s*(?:[\"\'][^\"]*[\"\'],?\s*)*\],?\s*)*\s*\]' 
-    list_reg = '\[\s*(?:[\"\'][^\"]*[\"\'],?\s*)*\]'
-    str_reg = '\"[^\"]*\"'
-    quotes_reg = '\"|\''
-
     txt = re.sub('#[^\n]*\n', '', txt) # remove all comments
-    
-    if nested:
-        match = re.search(list_list_reg, txt) # match first list of lists of strings
-        if match:
-            span = match.span() 
-        else:
-            return [] 
-    else:
-        match = re.search(list_reg, txt) # match first list of strings
-        if match:
-            span = match.span()
-        else:
-            return [] 
-        
-    list_string = txt[span[0]: span[1]] # cut out list from input string
-    list_string = re.sub('\n', '', list_string)
-    list_string = re.sub(' +', ' ', list_string)
 
-    if nested:
-        out = []
-        lsts = re.findall(list_reg, list_string) # matches all list elements
-        if lsts == ['[]'] or lsts == ['[ ]']:
-            return []
-        for l in lsts:
-            strs = re.findall(str_reg, l) # matches all string elements
-            # if strs: # ignores empty lists
-            out.append(list(map(lambda x: re.sub(quotes_reg,'', x), strs)))
-    else:
-        strs = re.findall(str_reg, list_string) # matches all string elements
-        return list(map(lambda x: re.sub(quotes_reg,'', x), strs))
+    start = txt.find('[')
+    while start != -1:
+        depth = 0
+        quote_char = None
+        escape = False
 
-    return out
+        for end in range(start, len(txt)):
+            char = txt[end]
+
+            if quote_char is not None:
+                if escape:
+                    escape = False
+                elif char == '\\':
+                    escape = True
+                elif char == quote_char:
+                    quote_char = None
+                continue
+
+            if char in ('"', "'"):
+                quote_char = char
+            elif char == '[':
+                depth += 1
+            elif char == ']':
+                depth -= 1
+                if depth == 0:
+                    list_string = txt[start:end + 1]
+                    try:
+                        parsed = ast.literal_eval(list_string)
+                    except (SyntaxError, ValueError):
+                        break
+
+                    if nested:
+                        if isinstance(parsed, list) and all(
+                            isinstance(item, list) and all(isinstance(value, str) for value in item)
+                            for item in parsed
+                        ):
+                            return parsed
+                    elif isinstance(parsed, list) and all(isinstance(item, str) for item in parsed):
+                        return parsed
+
+                    break
+
+        start = txt.find('[', start + 1)
+
+    return []
 
 
 def mk_prompt(quest_text: str) -> ChatPromptValue: 
