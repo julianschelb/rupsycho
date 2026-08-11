@@ -34,7 +34,7 @@ class ModelManagementMixin:
             warnings.warn(f"Failed to load model: {e}", UserWarning)
             return None
 
-    def add_model(self, model: Any, identifier: Optional[str] = None) -> None:
+    def add_model(self, model: Any, identifier: Optional[str] = None) -> None: # bug when running exp with model that was added as a dict
         """
         Adds a model to the experiment.
 

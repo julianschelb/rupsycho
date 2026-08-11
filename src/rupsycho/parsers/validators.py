@@ -174,19 +174,10 @@ class ValidatorParser(BaseOutputParser[dict]):
     against these checks and return the original text along with a combined validation status.
     """
 
-    apologies_parser: ApologiesValidatorParser = Field(...)
-    being_ai_parser: BeingAiValidatorParser = Field(...)
-    refusal_parser: RefusalValidatorParser = Field(...)
+    apologies_parser: ApologiesValidatorParser = Field(default_factory=ApologiesValidatorParser)
+    being_ai_parser: BeingAiValidatorParser = Field(default_factory=BeingAiValidatorParser)
+    refusal_parser: RefusalValidatorParser = Field(default_factory=RefusalValidatorParser)
 
-    def __init__(self):
-        """
-        Initializes the combined validator parser by creating instances of the
-        Apologies, Being AI, and Refusal validators.
-        """
-        super().__init__()
-        self.apologies_parser = ApologiesValidatorParser()
-        self.being_ai_parser = BeingAiValidatorParser()
-        self.refusal_parser = RefusalValidatorParser()
 
     def parse(self, text: str) -> dict:
         """
@@ -253,7 +244,7 @@ class ModelBasedValidator(BaseOutputParser[dict]):
 
     model_name: str = Field("ProtectAI/distilroberta-base-rejection-v1")
     device: str = Field('cuda' if torch.cuda.is_available() else 'cpu')
-    classifier = Field(...)
+    # classifier = Field(...)
 
     class Config:
         arbitrary_types_allowed = True
