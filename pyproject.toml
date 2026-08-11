@@ -14,7 +14,10 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
-packages = [{ include = "rupsycho", from = "src" }]
+packages = [
+    { include = "rupsycho", from = "src" },
+    { include = "rupsycho_configurator", from = "src" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.10"

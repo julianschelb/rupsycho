@@ -34,6 +34,13 @@ class MultipleChoiceJudge(BaseOutputParser[str]):
     possible_answers: list[str] = Field(...)
     ignore_case: bool = Field(True)
 
+    def __init__(self, possible_answers: list[str], ignore_case: bool = True, **kwargs):
+        super().__init__(
+            possible_answers=possible_answers,
+            ignore_case=ignore_case,
+            **kwargs,
+        )
+
 
     def parse(self, text: str, possible_answers=None) -> str:
         """
