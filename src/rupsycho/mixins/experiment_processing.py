@@ -17,6 +17,10 @@ from rupsycho.utils import import_tqdm
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
 from typing import Any, Dict, Optional
 tqdm = import_tqdm()  # Import tqdm based on the environment
+from langchain_google_genai import ChatGoogleGenerativeAI
+from functools import wraps
+from time import time
+from copy import deepcopy
 
 # ------------------- DEFAULT MODEL -------------------
 
@@ -75,13 +79,33 @@ class ExperimentProcessingMixin:
             parser = StrOutputParser()
 
         # Create the chain
-        return (
-            RunnablePassthrough()
-            | prompt_template
-            | model.bind(seed=int(seed))  # TODO: Add params
-            | parser
-        ).with_config(run_name=name)
+        if isinstance(model, ChatGoogleGenerativeAI): # google models don't accept the seed parameter
+            chain = (
+                RunnablePassthrough()
+                | prompt_template
+                | model  # don't bind seed here
+                | parser
+            ).with_config(run_name=name)
+        else:
+            chain = (
+                RunnablePassthrough()
+                | prompt_template
+                | model.bind(seed=int(seed))  # TODO: Add params
+                | parser
+            ).with_config(run_name=name)
+        return chain
 
+    def timed(f):
+        """Decorator for meassureing runtime."""
+        @wraps(f)
+        def wrap(*args, **kwargs):
+            start_time = time()
+            result = f(*args, **kwargs)
+            elapsed_time = round(time()-start_time, 3)
+            return (result, elapsed_time)
+        return wrap
+
+    @timed
     def _generate_answer(self, chain, input_values):
         """Invoke the chain to generate an answer."""
         try:
@@ -122,6 +146,23 @@ class ExperimentProcessingMixin:
         """Check if the model is a runnable LangChain model."""
         return isinstance(model, Runnable)
 
+    def print_assembled_prompt(self, item_idx: int=0, persona_idx: int=0): # <-
+        """
+        Print the fully assembled prompt with the specified instruction item and persona.
+        
+        Note: does not support assembly of a response memory prompt.
+        """
+        try:
+            profile = list(self.demographic_profiles.values())[persona_idx]
+            item = self.questionnaire.instruction_items[item_idx]
+            input_values = self._create_input_dict(profile, item)
+            assembled_prompt = self.get_prompt().format(**input_values)
+            print(f"\n++++++++++++++++++ assembled prompt (item {item_idx}, persona {persona_idx}) ++++++++++++++++++\n" + assembled_prompt + "\n+++++++++++++++++++++++++++++++++++++++++++++++++++++")
+
+        except Exception as e:
+            warnings.warn(f"Failed to assebel prompt: {e}", UserWarning)
+            return None
+
     def _cleanup_memory(self):
         """Cleanup memory by running garbage collection and emptying the cache."""
         gc.collect()
@@ -153,29 +194,92 @@ class ExperimentProcessingMixin:
                         profile, instruction_item)
 
                     # Generate an answer using the chain
-                    answer = self._generate_answer(chain, input_values)
-
+                    answer, time = self._generate_answer(chain, input_values)
+                    
                     # Update the instruction item with the generated answer.
                     instruction_item.update_answer(
                         model_id, profile_id, random_seed, answer)
 
                     # Trigger all callbacks to save the answer
                     self._trigger_callbacks(
-                        callbacks, instruction_item_id, instruction_item, model_id, profile_id, random_seed, answer)
+                        callbacks, instruction_item_id, instruction_item, model_id, profile_id, random_seed, time, answer)
 
                     # Update the progress bar
                     pbar.update(1)
 
-    def _trigger_callbacks(self, callbacks, instruction_item_id, instruction_item, model_id, profile_id, random_seed, answer):
+
+    def _generate_and_process_answers_cumulative(self, model, model_id, seed_values, params, questionnaire, demographic_profiles, callbacks, pbar): # <-
+        """Generate answers for each instruction item, random seed, and demographic profile with a 'response memory' prompt that includes / accumulates prior items and answers."""
+        # Iterate over random seeds
+        for random_seed in seed_values:
+            
+            base_messages = {
+                "type": "chat",
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": self.runnable_prompt.messages[0].prompt.template
+                    },
+                    {
+                        "role": "user",
+                        "content": self.runnable_prompt.messages[1].prompt.template
+                    }
+                ]
+            }
+
+            base_message_str_user = base_messages['messages'][1]["content"]
+
+            persona_messages = {}
+            # each persona gets its own prompt with its individual prior answers
+            for profile_id, profile in demographic_profiles.items():
+                persona_messages[profile_id] = deepcopy(base_messages)
+
+            # Iterate over each instruction item in the questionnaire
+            for instruction_item_id, instruction_item in enumerate(questionnaire.instruction_items):
+
+                # Iterate over each demographic profile
+                for profile_id, profile in demographic_profiles.items():
+
+                    # Create an input dictionary based on the profile and instruction item
+                    input_values = self._create_input_dict(
+                        profile, instruction_item)
+
+                    current_prompt = self._convert_prompt(persona_messages[profile_id]).load_prompt_template()
+                    # print('\n----------------\n' + current_prompt.format(**input_values) + '\n----------------\n')
+
+                    # Generate the chain for the current model and seed combination.
+                    chain = self._get_chain(current_prompt, model, self.runnable_parser,
+                                            model_id, seed=int(random_seed), params=params)
+
+                    # Generate an answer using the chain
+                    answer, time = self._generate_answer(chain, input_values)
+
+                    # Update the instruction item with the generated answer.
+                    instruction_item.update_answer(
+                        model_id, profile_id, random_seed, answer)
+
+                    # update the prompt of this persona
+                    current_user_msg = persona_messages[profile_id]['messages'][1]['content']
+                    persona_messages[profile_id]['messages'][1]['content'] = current_user_msg.format(question=instruction_item.question) + ' ' + answer + '\n' + base_message_str_user
+
+                    # Trigger all callbacks to save the answer
+                    self._trigger_callbacks(
+                        callbacks, instruction_item_id, instruction_item, model_id, profile_id, random_seed, time, answer)
+
+                    # Update the progress bar
+                    pbar.update(1)
+
+
+    def _trigger_callbacks(self, callbacks, instruction_item_id, instruction_item, model_id, profile_id, random_seed, time, answer):
         """Trigger all the callbacks to save the generated answer."""
         for callback in callbacks:
             try:
                 callback.save_answer(
-                    self, instruction_item_id, instruction_item, model_id, profile_id, random_seed, answer)
+                    self, instruction_item_id, instruction_item, model_id, profile_id, random_seed, time, answer)
             except Exception as e:
                 warnings.warn(f"Error while saving answer: {e}")
 
-    def process_single_experiment(self, pbar=None, callbacks=[]) -> None:
+    def process_single_experiment(self, cumulative: bool, pbar=None, callbacks=[]) -> None:
         """Process the experiment, iterating through models, profiles, and instruction items."""
 
         # ------------------- Validation -------------------
@@ -210,8 +314,12 @@ class ExperimentProcessingMixin:
             params = {**default_params, **model_params}
 
             # Generate answers for the current model
-            self._generate_and_process_answers(
-                model, model_id, seed_values, params, questionnaire, demographic_profiles, callbacks, pbar)
+            if cumulative:
+                self._generate_and_process_answers_cumulative(
+                    model, model_id, seed_values, params, questionnaire, demographic_profiles, callbacks, pbar)
+            else:
+                self._generate_and_process_answers(
+                    model, model_id, seed_values, params, questionnaire, demographic_profiles, callbacks, pbar)
 
             # Cleanup memory after processing the model
             del model
@@ -219,7 +327,7 @@ class ExperimentProcessingMixin:
             gc.collect()  # Cleanup CPU memory
             torch.cuda.empty_cache()  # Cleanup GPU memory
 
-    def run(self, callbacks=[]) -> None:
+    def run(self, callbacks=[], cumulative=False) -> None:
         """Run the experiment processing with a progress bar and callbacks."""
 
         # Ensure that the required attributes are set
@@ -227,4 +335,4 @@ class ExperimentProcessingMixin:
 
         # Create a progress bar for tracking the experiment progress
         with tqdm(total=self._calculate_total_iterations(), desc=self.name or "Experiment", unit=" prompts") as pbar:
-            self.process_single_experiment(pbar, callbacks=callbacks)
+            self.process_single_experiment(cumulative, pbar, callbacks=callbacks)
