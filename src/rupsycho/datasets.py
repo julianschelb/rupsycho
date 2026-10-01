@@ -69,7 +69,10 @@ def load_example_config(name: str = "bfi") -> dict[str, Any]:
 
 
 def load_example_experiment(
-    name: str = "bfi", *, models: dict[str, Any] | None = None
+    name: str = "bfi",
+    *,
+    models: dict[str, Any] | None = None,
+    seeds: list[int] | list[str] | None = None,
 ) -> ExperimentDocument:
     """Create an experiment from a bundled example.
 
@@ -78,6 +81,7 @@ def load_example_experiment(
         models: Replacement for the ``models`` section of the example, e.g. ``{}`` to add
             your own model with ``experiment.add_model(...)`` without the example's
             Hugging Face model being used.
+        seeds: Replacement for the example's seeds, e.g. ``[1, 2, 3]``.
 
     Returns:
         The validated experiment.
@@ -92,4 +96,6 @@ def load_example_experiment(
     config = load_example_config(name)
     if models is not None:
         config["models"] = models
+    if seeds is not None:
+        config.setdefault("parameters", {})["seeds"] = seeds
     return ExperimentDocument(**config)

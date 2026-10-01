@@ -5,7 +5,7 @@
 #  data, questionnaires, and metadata. It integrates multiple mixins and
 #  extends BaseMedia and Pydantic's BaseModel.
 
-import warnings
+from collections.abc import Mapping
 from typing import Any, Literal
 
 from langchain_core.documents.base import BaseMedia
@@ -186,57 +186,71 @@ class ExperimentDocument(
     # --------------------------------- Conversion Methods --------------------------------
 
     @staticmethod
-    def _convert_parameters(parameters: ExperimentParameters | dict) -> ExperimentParameters:
-        """Convert parameters to an instance of Parameters."""
-        if isinstance(parameters, dict):
-            return ExperimentParameters(**parameters)
-        return parameters
+    def _require_mapping(value: Any, section: str) -> Mapping[str, Any]:
+        """Return ``value`` if it is a dictionary, else raise a ``ValueError`` naming the section."""
+        if not isinstance(value, Mapping):
+            raise ValueError(
+                f"'{section}' must be an object (a dictionary), got {type(value).__name__}"
+            )
+        return value
 
-    @staticmethod
+    @classmethod
+    def _convert_parameters(cls, parameters: ExperimentParameters | dict) -> ExperimentParameters:
+        """Convert parameters to an instance of ExperimentParameters."""
+        if isinstance(parameters, ExperimentParameters):
+            return parameters
+        return ExperimentParameters(**cls._require_mapping(parameters, "parameters"))
+
+    @classmethod
     def _convert_demographic_profiles(
-        profiles: dict[str, DemographicProfile | dict],
+        cls, profiles: dict[str, DemographicProfile | dict]
     ) -> dict[str, DemographicProfile]:
         """Convert demographic profiles to instances of DemographicProfile."""
         return {
-            key: DemographicProfile(**profile) if isinstance(profile, dict) else profile
-            for key, profile in profiles.items()
+            key: DemographicProfile(**cls._require_mapping(profile, f"demographic_profiles.{key}"))
+            if not isinstance(profile, DemographicProfile)
+            else profile
+            for key, profile in cls._require_mapping(profiles, "demographic_profiles").items()
         }
 
-    @staticmethod
-    def _convert_prompt(prompt: dict | BaseModel) -> BaseModel | dict:
-        """Convert a single prompt configuration to an instance of its respective Pydantic PromptTemplateConfig class."""
-        if isinstance(prompt, dict):
-            prompt_type = prompt.get("type")
-            if prompt_type and prompt_type in PROMPT_CONFIG_CLASSES:
-                return PROMPT_CONFIG_CLASSES[prompt_type](**prompt)
-            if prompt.get("lc") == 1:
-                # LangChain's own serialisation, as stored by set_prompt() and written by exports
-                return LangchainPromptTemplateConfig(definition=prompt)
-            raise ValueError("Unknown or missing prompt type.")
-        return prompt
+    @classmethod
+    def _convert_prompt(cls, prompt: dict | BaseModel) -> BaseModel:
+        """Convert a prompt configuration to its Pydantic PromptTemplateConfig class."""
+        if isinstance(prompt, BaseModel):
+            return prompt
+        prompt = dict(cls._require_mapping(prompt, "prompt_template"))
+        prompt_type = prompt.get("type")
+        if prompt_type and prompt_type in PROMPT_CONFIG_CLASSES:
+            return PROMPT_CONFIG_CLASSES[prompt_type](**prompt)
+        if prompt.get("lc") == 1:
+            # LangChain's own serialisation, as stored by set_prompt() and written by exports
+            return LangchainPromptTemplateConfig(definition=prompt)
+        raise ValueError("Unknown or missing prompt type.")
 
-    @staticmethod
-    def _convert_models(models: dict[str, dict | BaseModel]) -> dict[str, BaseModel | dict]:
-        """Convert model configurations to instances of their respective Pydantic ModelConfig classes."""
+    @classmethod
+    def _convert_models(cls, models: dict[str, dict | BaseModel]) -> dict[str, BaseModel]:
+        """Convert model configurations to instances of their respective Pydantic classes."""
 
-        def convert_model(key: str, model: dict | BaseModel) -> BaseModel | dict:
+        def convert_model(key: str, model: dict | BaseModel) -> BaseModel:
+            if isinstance(model, BaseModel):
+                return model
+            model = dict(cls._require_mapping(model, f"models.{key}"))
+            model_type = model.get("type")
+            if model_type and model_type in MODEL_CONFIG_CLASSES:
+                return MODEL_CONFIG_CLASSES[model_type](**model)
+            raise ValueError(f"Unknown or missing model type for key: {key}")
 
-            if isinstance(model, dict):
-                model_type = model.get("type")
-                if model_type and model_type in MODEL_CONFIG_CLASSES:
-                    return MODEL_CONFIG_CLASSES[model_type](**model)
-                else:
-                    raise ValueError(f"Unknown or missing model type for key: {key}")
-            return model
+        return {
+            key: convert_model(key, model)
+            for key, model in cls._require_mapping(models, "models").items()
+        }
 
-        return {key: convert_model(key, model) for key, model in models.items()}
-
-    @staticmethod
-    def _convert_questionnaire(questionnaire: Questionnaire | dict) -> Questionnaire:
+    @classmethod
+    def _convert_questionnaire(cls, questionnaire: Questionnaire | dict) -> Questionnaire:
         """Convert questionnaire to an instance of Questionnaire."""
-        if isinstance(questionnaire, dict):
-            return Questionnaire(**questionnaire)
-        return questionnaire
+        if isinstance(questionnaire, Questionnaire):
+            return questionnaire
+        return Questionnaire(**cls._require_mapping(questionnaire, "questionnaire"))
 
     def _load_runnable_models(self, models: dict[str, Any]) -> dict[str, Any]:
         """Load models into runnable instances."""
@@ -247,13 +261,10 @@ class ExperimentDocument(
         if isinstance(prompt_template, str):
             return prompt_template  # Directly use if it's a string
 
-        runnable_prompt = None
         try:
-            runnable_prompt = prompt_template.load_prompt_template()  # type: ignore[attr-defined]
+            return prompt_template.load_prompt_template()  # type: ignore[attr-defined]
         except Exception as e:
-            warnings.warn(f"Failed to load prompt template: {e}", UserWarning, stacklevel=2)
-
-        return runnable_prompt
+            raise ValueError(f"Invalid prompt template: {e}") from e
 
     # --------------------------------- String Representation --------------------------------
 

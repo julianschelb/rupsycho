@@ -30,6 +30,32 @@ def test_import_does_not_load_provider_sdks():
     assert result.stdout.strip() == ""
 
 
+def test_plain_import_is_instant_and_loads_nothing_heavy():
+    """``import rupsycho`` only defines lazy names, so the CLI starts without the heavy stack."""
+    code = (
+        "import sys, rupsycho\n"
+        "heavy = [m for m in ('langchain_core', 'pydantic', 'pandas', 'numpy', 'torch', "
+        "'transformers') if m in sys.modules]\n"
+        "print(','.join(heavy))"
+    )
+    result = run_python(code)
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.strip() == ""
+
+
+def test_public_names_resolve_on_first_access():
+    code = (
+        "import sys, rupsycho as rup\n"
+        "assert 'rupsycho.reader' not in sys.modules\n"
+        "fn = rup.experiment_from_file\n"
+        "assert fn.__module__ == 'rupsycho.reader' and 'rupsycho.reader' in sys.modules\n"
+        "assert all(name in dir(rup) for name in rup.__all__)\n"
+        "from rupsycho import ExperimentDocument, RunSummary\n"
+    )
+    result = run_python(code)
+    assert result.returncode == 0, result.stderr
+
+
 def test_submodules_load_on_first_access():
     code = (
         "import rupsycho as rup\n"

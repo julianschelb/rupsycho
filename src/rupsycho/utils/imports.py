@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import importlib.util
 import sys
 from typing import Any
 
@@ -23,7 +24,9 @@ def import_tqdm() -> Any:
     if ipython is not None:
         shell = ipython.get_ipython()
         # Jupyter notebook or qtconsole
-        if shell is not None and "IPKernelApp" in shell.config:
+        in_kernel = shell is not None and "IPKernelApp" in shell.config
+        # tqdm.notebook cannot draw its widget without ipywidgets: fall back to the console bar
+        if in_kernel and importlib.util.find_spec("ipywidgets") is not None:
             from tqdm.notebook import tqdm as notebook_tqdm
 
             return notebook_tqdm

@@ -259,34 +259,55 @@ class ExperimentProcessingMixin:
         """Check if the model is a runnable LangChain model."""
         return isinstance(model, Runnable)
 
+    def assemble_prompt(self, item_idx: int = 0, persona_idx: int = 0) -> str:
+        """Return the fully assembled prompt for one item and persona, exactly as sent.
+
+        Args:
+            item_idx: Index of the instruction item.
+            persona_idx: Index of the demographic profile (in configuration order).
+
+        Returns:
+            The prompt text; for chat prompts the messages are joined as ``"System: ..."`` /
+            ``"Human: ..."`` blocks.
+
+        Raises:
+            IndexError: If ``item_idx`` or ``persona_idx`` is out of range.
+            ValueError: If the experiment has no questionnaire or prompt.
+
+        Note:
+            Does not include the accumulated memory of ``cumulative`` runs.
+
+        Example:
+            ```python
+            print(experiment.assemble_prompt(item_idx=0, persona_idx=1))
+            ```
+        """
+        if self.questionnaire is None or self.runnable_prompt is None:
+            raise ValueError("The experiment needs a questionnaire and a prompt template.")
+        profile = list(self.demographic_profiles.values())[persona_idx]
+        item = self.questionnaire.instruction_items[item_idx]
+        return str(self.runnable_prompt.format(**self._create_input_dict(profile, item)))
+
     def print_assembled_prompt(self, item_idx: int = 0, persona_idx: int = 0) -> None:
-        """Print the fully assembled prompt for one item and persona.
+        """Print the assembled prompt of one item and persona (see ``assemble_prompt``).
+
+        Problems (for example an out-of-range index) are reported as a warning instead of
+        raising, which is convenient in notebooks.
 
         Args:
             item_idx: Index of the instruction item.
             persona_idx: Index of the demographic profile.
-
-        Note:
-            Does not support the accumulated prompt of ``cumulative`` runs.
-
-        Example:
-            ```python
-            experiment.print_assembled_prompt(item_idx=0, persona_idx=1)
-            ```
         """
         try:
-            profile = list(self.demographic_profiles.values())[persona_idx]
-            item = self.questionnaire.instruction_items[item_idx]
-            input_values = self._create_input_dict(profile, item)
-            assembled_prompt = self.get_prompt().format(**input_values)
-            print(
-                f"\n++++++++++++++++++ assembled prompt (item {item_idx}, persona {persona_idx}) ++++++++++++++++++\n"
-                + assembled_prompt
-                + "\n+++++++++++++++++++++++++++++++++++++++++++++++++++++"
-            )
-
+            assembled_prompt = self.assemble_prompt(item_idx, persona_idx)
         except Exception as e:
             warnings.warn(f"Failed to assemble prompt: {e}", UserWarning, stacklevel=2)
+            return
+        print(
+            f"\n++++++++++++++++++ assembled prompt (item {item_idx}, persona {persona_idx}) "
+            f"++++++++++++++++++\n{assembled_prompt}\n"
+            "+++++++++++++++++++++++++++++++++++++++++++++++++++++"
+        )
 
     # ------------------- Memory management -------------------
 

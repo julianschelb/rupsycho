@@ -235,7 +235,9 @@ class Questionnaire(BaseModel):
             for item in self.instruction_items:
                 print(f"- Question: {item.question}")
                 print("  Answer Options:")
-                if item.answer_options:
+                if not item.answer_options:
+                    print("    (questionnaire defaults)")
+                else:
                     answer_options_table = [
                         [opt.text, opt.ignored_for_scale, opt.weight]
                         for opt in item.answer_options.options.values()

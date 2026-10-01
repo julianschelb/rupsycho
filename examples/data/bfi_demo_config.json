@@ -1,6 +1,6 @@
 {
-    "name": "Generative Models for Big Five Inventory",
-    "description": "Description: Testing Generative Models for BFI questionnaire using Rupsycho.",
+    "name": "Big Five Inventory example",
+    "description": "First five BFI items (one per trait; 'finds fault with others' is reverse-keyed) answered by two personas. Bundled with rupsycho as a quick-start example.",
     "parameters": {
         "seeds": [
             "7"
@@ -10,7 +10,7 @@
     "models": {
         "Qwen/Qwen2.5-0.5B-Instruct": {
             "type": "local_huggingface",
-            "name_or_path": "HuggingFaceTB/SmolLM-1.7b-Instruct",
+            "name_or_path": "Qwen/Qwen2.5-0.5B-Instruct",
             "device_map": "cpu",
             "task": "text-generation",
             "parameters": {
@@ -28,7 +28,7 @@
         "messages": [
             {
                 "role": "system",
-                "content": "Objective: Act like you are {persona_description}, a survey participant answering a questionnaire.\n{general_instruction}\nInstructions: Choose from the list of answer options to answer the question. Answer the question using only the provided answer options. If none of the options are correct, choose the option that is closest to being correct. The solution must be provided in this format: {{answer: \"answer option\"}}"
+                "content": "Objective: Answer as the following survey participant: {persona_description}\n{general_instruction}\nInstructions: Choose from the list of answer options to answer the question. Answer the question using only the provided answer options. If none of the options are correct, choose the option that is closest to being correct. The solution must be provided in this format: {{answer: \"answer option\"}}"
             },
             {
                 "role": "user",
@@ -43,7 +43,7 @@
                 "title": "Ms",
                 "name": "Muller"
             },
-            "template": "{title} {name} is {age} years old and very open minded with a optimistic personality."
+            "template": "{title} {name} is {age} years old and very open minded with an optimistic personality."
         },
         "Conservative Persona": {
             "attributes": {
@@ -55,18 +55,8 @@
         }
     },
     "questionnaire": {
-        "name": "BIG FIVE INVENTORY RESPONSE FORM AND INSTRUCTIONS TO PARTICIPANTS",
-        "general_instruction": "Here are a number of characteristics that may or may not apply to you. For example, do you agree that you are someone who likes to spend time with others? Please return the number corresponding to the answer options to indicate the extent to which you agree or disagree with that statement.",
-        "demographic_profiles": [
-            {
-                "attributes": {
-                    "age": 18,
-                    "title": "Ms",
-                    "name": "Muller"
-                },
-                "template": "{title} {name} is {age} years old."
-            }
-        ],
+        "name": "Big Five Inventory (BFI), first five items",
+        "general_instruction": "Here are a number of characteristics that may or may not apply to you. Please indicate the extent to which you agree or disagree with each statement by choosing one of the answer options.",
         "attributes": {
             "dimension": {
                 "1": "Extraversion",
@@ -105,31 +95,38 @@
         },
         "instruction_items": [
             {
-                "question": "I see myself as someone who...",
+                "question": "I see myself as someone who is talkative.",
                 "reversed": false,
                 "attributes": {
                     "dimension": "1"
                 }
             },
             {
-                "question": "Tends to find fault with others",
-                "reversed": false,
+                "question": "I see myself as someone who tends to find fault with others.",
+                "reversed": true,
                 "attributes": {
-                    "dimension": "1"
+                    "dimension": "2"
                 }
             },
             {
-                "question": "Does a thorough job",
+                "question": "I see myself as someone who does a thorough job.",
                 "reversed": false,
                 "attributes": {
-                    "dimension": "1"
+                    "dimension": "3"
                 }
             },
             {
-                "question": "Is depressed, blue",
+                "question": "I see myself as someone who is depressed, blue.",
                 "reversed": false,
                 "attributes": {
-                    "dimension": "1"
+                    "dimension": "4"
+                }
+            },
+            {
+                "question": "I see myself as someone who is original, comes up with new ideas.",
+                "reversed": false,
+                "attributes": {
+                    "dimension": "5"
                 }
             }
         ]

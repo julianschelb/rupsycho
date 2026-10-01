@@ -11,9 +11,10 @@ experiment.run()
 answers = experiment.get_answers_as_dataframe()
 ```
 
-Sub-packages are imported on first access (``rup.parsers``, ``rup.callbacks``,
-``rup.postprocessing``, ``rup.seeding``, ``rup.models``) so that ``import rupsycho`` stays
-fast and does not require the heavy model back-ends.
+``import rupsycho`` is deliberately cheap: the public names and the sub-packages
+(``rup.parsers``, ``rup.callbacks``, ``rup.postprocessing``, ``rup.seeding``, ``rup.models``)
+are imported on first access, so the command line starts instantly and no model back-end is
+loaded until it is needed.
 """
 
 from __future__ import annotations
@@ -24,20 +25,19 @@ from typing import TYPE_CHECKING, Any
 
 __version__ = "0.1.0"
 
-from rupsycho.datasets import list_examples, load_example_config, load_example_experiment
-from rupsycho.experiment import ExperimentDocument
-from rupsycho.experiment_collection import ExperimentCollection
-from rupsycho.mixins.experiment_processing import RunSummary
-from rupsycho.reader import (
-    ExperimentLoader,
-    experiment_from_dict,
-    experiment_from_file,
-    experiments_from_dicts,
-    experiments_from_files,
-)
-
-if TYPE_CHECKING:
-    from rupsycho import callbacks, models, parsers, postprocessing, seeding
+if TYPE_CHECKING:  # pragma: no cover - for type checkers and IDEs only
+    from rupsycho import callbacks, models, parsers, postprocessing, scoring, seeding
+    from rupsycho.datasets import list_examples, load_example_config, load_example_experiment
+    from rupsycho.experiment import ExperimentDocument
+    from rupsycho.experiment_collection import ExperimentCollection
+    from rupsycho.mixins.experiment_processing import RunSummary
+    from rupsycho.reader import (
+        ExperimentLoader,
+        experiment_from_dict,
+        experiment_from_file,
+        experiments_from_dicts,
+        experiments_from_files,
+    )
 
 __all__ = [
     "__version__",
@@ -57,20 +57,48 @@ __all__ = [
     "load_example_experiment",
 ]
 
+# public name -> module that defines it (resolved on first access)
+_LAZY_ATTRIBUTES = {
+    "experiment_from_file": "rupsycho.reader",
+    "experiment_from_dict": "rupsycho.reader",
+    "experiments_from_files": "rupsycho.reader",
+    "experiments_from_dicts": "rupsycho.reader",
+    "ExperimentLoader": "rupsycho.reader",
+    "ExperimentDocument": "rupsycho.experiment",
+    "ExperimentCollection": "rupsycho.experiment_collection",
+    "RunSummary": "rupsycho.mixins.experiment_processing",
+    "list_examples": "rupsycho.datasets",
+    "load_example_config": "rupsycho.datasets",
+    "load_example_experiment": "rupsycho.datasets",
+}
+
 _LAZY_SUBMODULES = frozenset(
-    {"callbacks", "models", "parsers", "postprocessing", "seeding", "datasets", "utils"}
+    {
+        "callbacks",
+        "datasets",
+        "models",
+        "parsers",
+        "postprocessing",
+        "scoring",
+        "seeding",
+        "utils",
+    }
 )
 
 
 def __getattr__(name: str) -> Any:
-    """Import sub-packages on first access (PEP 562)."""
+    """Resolve public names and sub-packages on first access (PEP 562)."""
+    if name in _LAZY_ATTRIBUTES:
+        value = getattr(importlib.import_module(_LAZY_ATTRIBUTES[name]), name)
+        globals()[name] = value  # cache: later lookups bypass this function
+        return value
     if name in _LAZY_SUBMODULES:
         return importlib.import_module(f"rupsycho.{name}")
     raise AttributeError(f"module 'rupsycho' has no attribute {name!r}")
 
 
 def __dir__() -> list[str]:
-    return sorted(set(globals()) | _LAZY_SUBMODULES)
+    return sorted(set(globals()) | set(_LAZY_ATTRIBUTES) | _LAZY_SUBMODULES)
 
 
 def example_experiment_bfi(
@@ -106,6 +134,7 @@ def example_experiment_bfi(
         stacklevel=2,
     )
     from rupsycho._compat import require
+    from rupsycho.datasets import load_example_experiment
 
     transformers = require("transformers", "huggingface", feature="example_experiment_bfi")
     lc_hf = require("langchain_huggingface", "huggingface", feature="example_experiment_bfi")

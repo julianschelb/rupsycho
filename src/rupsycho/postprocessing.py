@@ -17,15 +17,16 @@ All three stages are LangChain output parsers from [`rupsycho.parsers`][rupsycho
 from __future__ import annotations
 
 import glob
+import json
 import logging
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 from typing import Any, Literal
 
 import pandas as pd
 
 from rupsycho.experiment import ExperimentDocument
-from rupsycho.reader import experiment_from_file
+from rupsycho.reader import experiment_from_dict
 
 __all__ = ["REQUIRED_COLUMNS", "PostprocessingPipeline"]
 
@@ -35,6 +36,12 @@ REQUIRED_COLUMNS = ("instruction_item_id", "answer")
 """Columns that every results file must contain (``CSVCallback`` writes them)."""
 
 
+def _runner(parser: Any) -> Callable[[Any], Any]:
+    """Return the callable that applies a LangChain parser, chain or plain parser object."""
+    invoke = getattr(parser, "invoke", None)
+    return invoke if callable(invoke) else parser.parse  # type: ignore[no-any-return]
+
+
 class PostprocessingPipeline:
     """Clean, validate and judge the answers stored in result CSV files.
 
@@ -42,10 +49,13 @@ class PostprocessingPipeline:
     of their own use the questionnaire's ``default_answer_options``.
 
     Args:
-        config_file_path: Path of the experiment configuration the results belong to.
+        config_file_path: The experiment the results belong to: the path of its JSON
+            configuration, a configuration dictionary or an ``ExperimentDocument`` (only its
+            questionnaire is used; no model is ever loaded).
         results_file_patterns: A path / glob pattern or a list of them locating the result
             CSV files (as written by ``CSVCallback``).
-        cleaner: Output parser applied to the raw answer, e.g. ``BasicCleaner()``.
+        cleaner: Output parser (or LangChain chain of parsers, such as
+            ``BasicCleaner() | RegexExtractorCleaner(...)``) applied to the raw answer.
         validator: Output parser returning a dictionary with ``"validation_status"``, e.g.
             ``ValidatorParser()``.
         judge: Output parser whose ``parse(text, possible_answers)`` returns the chosen
@@ -76,7 +86,7 @@ class PostprocessingPipeline:
 
     def __init__(
         self,
-        config_file_path: str | Path,
+        config_file_path: str | Path | Mapping[str, Any] | ExperimentDocument,
         results_file_patterns: str | Sequence[str],
         cleaner: Any,
         validator: Any,
@@ -101,9 +111,26 @@ class PostprocessingPipeline:
         self.errors = errors
         self.show_progress = show_progress
 
-        # The configuration provides the questionnaire; no model is needed here
-        self.experiment: ExperimentDocument = experiment_from_file(config_file_path)
-        self.experiment.clear_models()
+        # Only the questionnaire is needed: never load (or download) the models of the config
+        self.experiment: ExperimentDocument = self._load_experiment(config_file_path)
+
+    @staticmethod
+    def _load_experiment(
+        config: str | Path | Mapping[str, Any] | ExperimentDocument,
+    ) -> ExperimentDocument:
+        """Build the experiment that provides the questionnaire, without any model."""
+        if isinstance(config, ExperimentDocument):
+            return config
+        if isinstance(config, Mapping):
+            data = dict(config)
+        else:
+            path = Path(config)
+            if not path.is_file():
+                raise FileNotFoundError(f"Experiment configuration not found: {path}")
+            data = json.loads(path.read_text(encoding="utf-8"))
+        data["models"] = {}
+        data["parameters"] = {**(data.get("parameters") or {}), "lazy_load_models": True}
+        return experiment_from_dict(data)
 
     # ------------------------------------------------------------------ loading
 
@@ -190,9 +217,9 @@ class PostprocessingPipeline:
         Returns:
             The same frame with the new columns.
         """
-        df["cleaned_answer"] = self._apply(df["answer"], self.cleaner.parse, "Cleaning")
+        df["cleaned_answer"] = self._apply(df["answer"], _runner(self.cleaner), "Cleaning")
         df["validation_status"] = self._apply(
-            df["cleaned_answer"], self.validator.parse, "Validating"
+            df["cleaned_answer"], _runner(self.validator), "Validating"
         )
         df["valid"] = df["validation_status"].map(
             lambda verdict: (
