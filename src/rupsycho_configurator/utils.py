@@ -5,7 +5,6 @@ This module defines utility methods that are used across the project.
 import ast
 import json
 import re
-import traceback
 import typing
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
@@ -13,7 +12,7 @@ from langchain_core.prompt_values import ChatPromptValue
 from pypdf import PdfReader
 
 
-def extract_quest_text(file: str | typing.BinaryIO, page_numbers: list[int] = None) -> str:
+def extract_quest_text(file: str | typing.BinaryIO, page_numbers: list[int] | None = None) -> str:
     """Return the text from the specified pages of the given PDF as a single string.
 
     Args:
@@ -30,11 +29,10 @@ def extract_quest_text(file: str | typing.BinaryIO, page_numbers: list[int] = No
     pdf_text = ""
 
     for p in page_numbers:
-        try:
-            pdf_text += pages[p - 1] + "\n"
-        except Exception:
-            print(traceback.format_exc())
-            print(f"{p} / index {p - 1} is an invalid page number")
+        if not 1 <= p <= number_of_pages:
+            print(f"{p} is an invalid page number (the PDF has {number_of_pages} pages)")
+            continue
+        pdf_text += pages[p - 1] + "\n"
 
     pdf_text = rmv_special_chars(pdf_text)  # to avoid conflicts with JSON formatting
     return pdf_text
@@ -69,7 +67,7 @@ def list_pretty_print(lst: list[str], name_of_list="list"):
     print("]\n")
 
 
-def extract_json(output: AIMessage | str) -> any:
+def extract_json(output: AIMessage | str) -> typing.Any:
     r"""Extract the first JSON instance that is contained in the given language model output and return it as an object.
 
     Args:
@@ -94,9 +92,8 @@ def extract_json(output: AIMessage | str) -> any:
         try:
             json_str = match.group(1)  # only retrieves match of capturing group
             return json.loads(json_str)
-        except Exception:
-            # raise ValueError(f"Error: Invalid JSON:\n {json_str}")
-            raise ValueError("Error: Invalid JSON") from None
+        except Exception as e:
+            raise ValueError(f"Error: Invalid JSON ({e})") from e
     else:
         raise ValueError("Error: No JSON wrapper")
 

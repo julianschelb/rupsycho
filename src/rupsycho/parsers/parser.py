@@ -44,6 +44,11 @@ class BasicParser(BaseOutputParser[str]):
             # Remove line breaks and replace with a space
             cleaned_text = text.replace("\n", " ").replace("\r", " ")
 
+            # Map typographic quotes/apostrophes and no-break spaces to ASCII before dropping the rest
+            cleaned_text = cleaned_text.translate(
+                {0x2018: "'", 0x2019: "'", 0x201C: '"', 0x201D: '"', 0x00A0: " "}
+            )
+
             # Remove non-ASCII Unicode characters
             cleaned_text = re.sub(r"[^\x00-\x7F]+", "", cleaned_text)
 

@@ -1,6 +1,6 @@
 {
     "name": "Generative Models for Big Five Inventory",
-    "description": "Description: Testing Generative Models for BFI questionnaire using Rupsycho.",
+    "description": "Big Five Inventory (4 items) answered by two personas. Bundled with rupsycho as a quick-start example.",
     "parameters": {
         "seeds": [
             "7"
@@ -10,7 +10,7 @@
     "models": {
         "Qwen/Qwen2.5-0.5B-Instruct": {
             "type": "local_huggingface",
-            "name_or_path": "HuggingFaceTB/SmolLM-1.7b-Instruct",
+            "name_or_path": "Qwen/Qwen2.5-0.5B-Instruct",
             "device_map": "cpu",
             "task": "text-generation",
             "parameters": {

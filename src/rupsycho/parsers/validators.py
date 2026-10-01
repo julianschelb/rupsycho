@@ -20,12 +20,15 @@ from rupsycho._compat import require
 # ================================= Helpers ================================
 
 
+_TYPOGRAPHIC_QUOTES = str.maketrans({"\u2018": "'", "\u2019": "'", "\u201c": '"', "\u201d": '"'})
+
+
 def normalize(text):
     """
-    Removes leading noise (whitespaces, tabs, newlines, etc.) from the beginning of the text
-    and transforms it to lowercase.
+    Removes leading noise (whitespaces, tabs, newlines, etc.) from the beginning of the text,
+    maps typographic quotes to ASCII and transforms it to lowercase.
     """
-    return re.sub(r"^\s+", "", text).lower()
+    return re.sub(r"^\s+", "", text).translate(_TYPOGRAPHIC_QUOTES).lower()
 
 
 # ================================= Apologies Validator ================================

@@ -9,9 +9,9 @@ whose extra is missing raises an ``ImportError`` naming the extra to install.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Annotated, Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, SecretStr
 
 from rupsycho._compat import load_serialized, require
 from rupsycho.models.prompt import (
@@ -30,6 +30,25 @@ __all__ = [
     "OpenAIModelConfig",
     "RemoteHuggingFaceModelConfig",
 ]
+
+_MASK = "**********"
+
+
+def _unmask(value: Any) -> Any:
+    """Treat blanks and the placeholder written by exports as 'no key given'."""
+    if isinstance(value, str) and value.strip() in ("", _MASK):
+        return None
+    return value
+
+
+Secret = Annotated[SecretStr | None, BeforeValidator(_unmask)]
+"""A secret such as an API key: never shown in ``repr`` or exports (masked as ``**********``).
+When a configuration contains no key - or only that placeholder - the provider's environment
+variable (``OPENAI_API_KEY``, ``GOOGLE_API_KEY``, ``DEEPSEEK_API_KEY``, ...) is used."""
+
+
+def _reveal(secret: SecretStr | None) -> str | None:
+    return secret.get_secret_value() if secret else None
 
 
 # ------------------------------------------------
@@ -118,7 +137,7 @@ class LocalHuggingFaceModelConfig(BaseModel):
         description="Path to the directory where the downloaded model and tokenizer files will be cached.",
     )
 
-    huggingfacehub_api_token: str | None = Field(
+    huggingfacehub_api_token: Secret = Field(
         None, description="The API token for accessing gated or private Hugging Face models."
     )
 
@@ -165,7 +184,7 @@ class LocalHuggingFaceModelConfig(BaseModel):
         if self.cache_dir:
             hub_kwargs["cache_dir"] = self.cache_dir
         if self.huggingfacehub_api_token:
-            hub_kwargs["token"] = self.huggingfacehub_api_token
+            hub_kwargs["token"] = _reveal(self.huggingfacehub_api_token)
 
         try:
             tokenizer = transformers.AutoTokenizer.from_pretrained(
@@ -312,7 +331,7 @@ class OpenAIModelConfig(BaseModel):
         ..., description="The identifier for the OpenAI model (e.g., 'gpt-4')."
     )
 
-    api_key: str | None = Field(None, description="The API key for accessing OpenAI's models.")
+    api_key: Secret = Field(None, description="The API key for accessing OpenAI's models.")
 
     base_url: str | None = Field(None, description="The base URL for the OpenAI API endpoint.")
 
@@ -340,13 +359,14 @@ class OpenAIModelConfig(BaseModel):
         """
         lc_openai = require("langchain_openai", "openai", feature="OpenAI models")
         try:
-            return lc_openai.ChatOpenAI(
-                model=self.name_or_path,
-                api_key=self.api_key,
-                base_url=self.base_url,
-                organization=self.organization,
-                **self.parameters,
-            )
+            # Only pass what is configured: an explicit None would hide the environment fallback
+            optional = {
+                "api_key": _reveal(self.api_key),
+                "base_url": self.base_url,
+                "organization": self.organization,
+            }
+            kwargs = {key: value for key, value in optional.items() if value}
+            return lc_openai.ChatOpenAI(model=self.name_or_path, **kwargs, **self.parameters)
         except Exception as e:
             raise ValueError(f"Failed to load the OpenAI model: {e}") from e
 
@@ -369,7 +389,7 @@ class GoogleModelConfig(BaseModel):
         ..., description="The identifier for the Google model (e.g., 'gemini-2.0-flash')."
     )
 
-    api_key: str | None = Field(None, description="The API key for accessing Google models.")
+    api_key: Secret = Field(None, description="The API key for accessing Google models.")
 
     parameters: dict = Field({}, description="The parameters for text generation")
 
@@ -389,9 +409,10 @@ class GoogleModelConfig(BaseModel):
         """
         lc_google = require("langchain_google_genai", "google", feature="Google models")
         try:
-            return lc_google.ChatGoogleGenerativeAI(
-                model=self.name_or_path, api_key=self.api_key, **self.parameters
-            )
+            kwargs: dict[str, Any] = dict(self.parameters)
+            if self.api_key:
+                kwargs["api_key"] = _reveal(self.api_key)
+            return lc_google.ChatGoogleGenerativeAI(model=self.name_or_path, **kwargs)
         except Exception as e:
             raise ValueError(f"Failed to load the Google model: {e}") from e
 
@@ -414,7 +435,7 @@ class DeepSeekModelConfig(BaseModel):
         ..., description="The identifier for the DeepSeek model (e.g. 'deepseek-chat')."
     )
 
-    api_key: str | None = Field(None, description="The API key for accessing DeepSeek models.")
+    api_key: Secret = Field(None, description="The API key for accessing DeepSeek models.")
 
     parameters: dict = Field({}, description="The parameters for text generation")
 
@@ -435,7 +456,7 @@ class DeepSeekModelConfig(BaseModel):
         lc_deepseek = require("langchain_deepseek", "deepseek", feature="DeepSeek models")
         kwargs: dict[str, Any] = dict(self.parameters)
         if self.api_key:
-            kwargs["api_key"] = self.api_key
+            kwargs["api_key"] = _reveal(self.api_key)
         try:
             return lc_deepseek.ChatDeepSeek(model=self.name_or_path, **kwargs)
         except Exception as e:

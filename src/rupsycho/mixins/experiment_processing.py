@@ -366,8 +366,7 @@ class ExperimentProcessingMixin:
         model: Any,
         model_id: str,
         seed_values: list,
-        questionnaire: Any,
-        demographic_profiles: dict[str, Any],
+        grid: list[_Call],
         callbacks: Sequence,
         pbar: Any,
         summary: RunSummary,
@@ -375,7 +374,6 @@ class ExperimentProcessingMixin:
         max_workers: int = 1,
     ) -> None:
         """Ask every persona every question once per seed."""
-        grid = self._build_call_grid(questionnaire, demographic_profiles)
 
         for random_seed in seed_values:
             # The chain only depends on the model and the seed
@@ -407,8 +405,7 @@ class ExperimentProcessingMixin:
         model: Any,
         model_id: str,
         seed_values: list,
-        questionnaire: Any,
-        demographic_profiles: dict[str, Any],
+        grid: list[_Call],
         callbacks: Sequence,
         pbar: Any,
         summary: RunSummary,
@@ -431,13 +428,12 @@ class ExperimentProcessingMixin:
                 "by a user message."
             )
         system_template, user_template = messages[0], messages[1]
-        grid = self._build_call_grid(questionnaire, demographic_profiles)
         calls_by_item: dict[int, list[_Call]] = {}
         for call in grid:
             calls_by_item.setdefault(call.item_id, []).append(call)
 
         for random_seed in seed_values:
-            history: dict[str, list[tuple[str, str]]] = {pid: [] for pid in demographic_profiles}
+            history: dict[str, list[tuple[str, str]]] = {call.profile_id: [] for call in grid}
 
             for item_calls in calls_by_item.values():
                 thunks = []
@@ -537,6 +533,8 @@ class ExperimentProcessingMixin:
             if cumulative
             else self._generate_and_process_answers
         )
+        # The prompt inputs depend neither on the model nor on the seed: build them once
+        grid = self._build_call_grid(self.questionnaire, self.demographic_profiles)
         summary = RunSummary()
         start = perf_counter()
 
@@ -559,8 +557,7 @@ class ExperimentProcessingMixin:
                     model,
                     model_id,
                     seed_values,
-                    self.questionnaire,
-                    self.demographic_profiles,
+                    grid,
                     callbacks,
                     pbar,
                     summary,

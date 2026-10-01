@@ -60,7 +60,7 @@ MODEL_CONFIG_CLASSES: dict[str, type[BaseModel]] = {
 # ================================= Experiment Class ================================
 
 
-class ExperimentDocument(  # type: ignore[misc]
+class ExperimentDocument(
     BaseMedia,
     ExperimentProcessingMixin,
     ExperimentExportMixin,
@@ -209,8 +209,10 @@ class ExperimentDocument(  # type: ignore[misc]
             prompt_type = prompt.get("type")
             if prompt_type and prompt_type in PROMPT_CONFIG_CLASSES:
                 return PROMPT_CONFIG_CLASSES[prompt_type](**prompt)
-            else:
-                raise ValueError("Unknown or missing prompt type.")
+            if prompt.get("lc") == 1:
+                # LangChain's own serialisation, as stored by set_prompt() and written by exports
+                return LangchainPromptTemplateConfig(definition=prompt)
+            raise ValueError("Unknown or missing prompt type.")
         return prompt
 
     @staticmethod

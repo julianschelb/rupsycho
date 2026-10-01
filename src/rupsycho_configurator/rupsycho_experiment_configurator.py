@@ -135,6 +135,21 @@ if "dem_profiles" not in st.session_state:
     st.session_state.dem_profiles = [default_profile]
 
 
+def next_weight(options) -> int:
+    """Return the weight of a newly appended answer option (continues the existing scale)."""
+    return max((o["weight"] for o in options), default=-1) + 1
+
+
+def delete_option(options: list, position: int):
+    """Delete options[position]; a consecutive scale (e.g. 1..5 or 0..4) stays consecutive."""
+    weights = [o["weight"] for o in options]
+    consecutive = weights == list(range(weights[0], weights[0] + len(weights)))
+    del options[position]
+    if consecutive:
+        for weight, option in enumerate(options, start=weights[0]):
+            option["weight"] = weight
+
+
 def add_answer(idx: int):
     """Add a new empty answer option to the questionnaire item at index 'idx'."""
     item = st.session_state.quest_items[idx]
@@ -142,7 +157,7 @@ def add_answer(idx: int):
     ans = deepcopy(answer_template)
     ans.update(
         {
-            "weight": length,
+            "weight": next_weight(item["answer_options"].values()),
             "widget_key": item["next_answer_widget_key"],
         }
     )
@@ -163,11 +178,10 @@ if "quest_items" not in st.session_state:
 
 def add_global_answer():
     """Add a new empty global answer option to the session state."""
-    length = len(st.session_state.global_answer_set)
     ans = deepcopy(answer_template)
     ans.update(
         {
-            "weight": length,
+            "weight": next_weight(st.session_state.global_answer_set),
             "widget_key": st.session_state.next_global_ans_widget_key,
         }
     )
@@ -271,10 +285,15 @@ with col1:
             def set_or_delete_pdf():
                 """Update session state to reflect the change the user made on the value of the PDF input widget."""
                 if st.session_state.uploaded_pdf is not None:
-                    st.session_state.quest_pages = utils.extract_quest_pages(
-                        st.session_state.uploaded_pdf
-                    )
-                    st.session_state.page_range = (1, len(st.session_state.quest_pages))
+                    try:
+                        pages = utils.extract_quest_pages(st.session_state.uploaded_pdf)
+                    except Exception:
+                        print(traceback.format_exc())
+                        with notification_container:
+                            st.error("Could not read the PDF", icon=":material/warning:")
+                        pages = []
+                    st.session_state.quest_pages = pages
+                    st.session_state.page_range = (1, len(pages))
                     st.session_state.quest_text = concat_pages(0, st.session_state.page_range[1])
                 else:
                     # if the user removes the questionnaire pdf -> leave the displayed text untouched but remove pdf content and slider in background
@@ -337,7 +356,6 @@ with col1:
 
             def run_model():
                 """Run the model with a single prompt that contains the currently displayed questionnaire text and add the output as new experiment elements."""
-                st.session_state.step = "step2"
                 with notification_container:
                     try:
                         st.session_state.use_global_answer_set = False
@@ -359,6 +377,18 @@ with col1:
 
                         chain = model | utils.extract_json
                         name, instr, questions, answers = chain.invoke(prompt)
+                        if not (
+                            isinstance(name, str)
+                            and isinstance(instr, str)
+                            and isinstance(questions, list)
+                            and all(isinstance(q, str) for q in questions)
+                            and isinstance(answers, list)
+                            and all(
+                                isinstance(a, list) and all(isinstance(o, str) for o in a)
+                                for a in answers
+                            )
+                        ):
+                            raise ValueError("Unexpected structure of the model output")
                         quest = ConfigQuestionnaire("", "", questions, answers)
                         questions_answers = quest.get_merged_questions_answers()
 
@@ -436,6 +466,7 @@ with col1:
             for item in st.session_state.quest_items:
                 key = f"question_{item['widget_key']}"
                 st.session_state[key] = item["question"]
+                st.session_state[f"reversed_{item['widget_key']}"] = item["reversed"]
 
                 for ans in item["answer_options"].values():
                     key = f"ans_{ans['widget_key']}_item_{item['widget_key']}"
@@ -456,14 +487,14 @@ with col1:
             st.session_state.next_profile_widget_key = st.session_state.next_profile_widget_key + 1
 
         def add_predef_item(
-            question: str, reversed: bool, predef_answers: dict[any], attributes: dict[any] = None
+            question: str, reversed: bool, predef_answers: dict, attributes: dict | None = None
         ):
             """Add a new non-empty questionnaire item to session state with the given values."""
             # avoids 'mutable default parameter pitfall'
             if attributes is None:
                 attributes = {}
             # adds item to session state
-            item = deepcopy(profile_template)
+            item = deepcopy(item_template)
             item.update(
                 {
                     "question": question,
@@ -483,7 +514,7 @@ with col1:
                 ans.update(
                     {
                         "text": predef_ans["text"],
-                        "weight": predef_ans["weight"],
+                        "weight": int(predef_ans["weight"]),
                         "ignored_for_scale": predef_ans["ignored_for_scale"],
                         "widget_key": i,
                     }
@@ -532,12 +563,13 @@ with col1:
                             st.session_state.quest_name = quest["name"]
                             st.session_state.quest_instr = quest["general_instruction"]
                             st.session_state.attributes = quest["attributes"]
+                            default_options = quest.get("default_answer_options") or {}
                             for item in quest["instruction_items"]:
                                 add_predef_item(
                                     item["question"],
-                                    item["reversed"],
-                                    item["answer_options"],
-                                    item["attributes"],
+                                    item.get("reversed", False),
+                                    item.get("answer_options") or default_options,
+                                    item.get("attributes", {}),
                                 )
                             update_item_widgets_values()
                             st.success("Configuration loaded", icon=":material/done:")
@@ -545,7 +577,6 @@ with col1:
                         except Exception:
                             print(traceback.format_exc())
                             st.error("Invalid configuration", icon=":material/warning:")
-                            print("reset this bs")
                             reset_app()
                 else:
                     pass  # if imported config file is removed by the user -> do nothing
@@ -564,7 +595,7 @@ with col1:
 
         with st.expander(label="Help", icon=":material/help:"):
             paper_url = "https://doi.org/10.48550/arXiv.2503.10229"
-            help = f"This configurator facilitates the creation of new and editing of existing experiment configurations for the R.U.Psycho framework.\n\nA guide on how to use the configurator can be found in the section 'Using the Configurator App' in the README.md file of the package.\n\nInformation about the structure of the configuration format and its components can be found in the section '3.1 Experiment Definition' of the [paper]({paper_url})."
+            help = f"This configurator facilitates the creation of new and editing of existing experiment configurations for the R.U.Psycho framework.\n\nA guide on how to use the configurator can be found at https://julianschelb.github.io/rupsycho/tutorials/configurator/.\n\nInformation about the structure of the configuration format and its components can be found in the section '3.1 Experiment Definition' of the [paper]({paper_url})."
             st.markdown(help)
 
     with tab2:
@@ -632,7 +663,9 @@ with col1:
                 with notification_container:
                     try:
                         st.session_state.dem_profiles = []
-                        profiles = pd.read_csv(st.session_state.uploaded_csv)
+                        profiles = pd.read_csv(
+                            st.session_state.uploaded_csv, dtype=str, keep_default_na=False
+                        )
 
                         if not all(
                             attr in profiles.columns.to_list()
@@ -640,8 +673,8 @@ with col1:
                         ):
                             # missing attribute
                             raise TypeError
-                        if profiles.isna().any().any():
-                            # NaN value
+                        if (profiles == "").any().any():
+                            # empty value
                             raise TypeError
 
                         for _, p in profiles.iterrows():
@@ -831,9 +864,6 @@ with col1:
 
                 # renders global answer input widgets
                 for j, ans_opt in enumerate(st.session_state.global_answer_set):
-                    # updates weights of answer options in case an answer was deleted
-                    ans_opt.update({"weight": j})
-
                     col1_1, col1_2, col1_3 = st.columns(
                         [0.05, 0.85, 0.1], gap="small", vertical_alignment="center"
                     )
@@ -848,7 +878,7 @@ with col1:
 
                     def delete_global_answer(ans_idx: int):
                         """Delete the global answer at the specified index."""
-                        del st.session_state.global_answer_set[ans_idx]
+                        delete_option(st.session_state.global_answer_set, ans_idx)
 
                     with col1_3:
                         st.button(
@@ -889,6 +919,7 @@ with col1:
             st.session_state[key] = dupl["question"]
 
             if not st.session_state.use_global_answer_set:
+                st.session_state[f"reversed_{dupl['widget_key']}"] = dupl["reversed"]
                 for ans in dupl["answer_options"].values():
                     key = f"ans_{ans['widget_key']}_item_{dupl['widget_key']}"
                     st.session_state[key] = ans["text"]
@@ -964,12 +995,11 @@ with col1:
                             # renders input widgets of the answer options
                             answer_options = item["answer_options"]
                             for j, ans_opt_key in enumerate(list(answer_options)):
-                                # updates dict key and weight in case an answer was deleted
+                                # updates the dict key in case an answer was deleted
                                 # after the for loop the dict has its original order again
                                 new_key = f"{j + 1}"
                                 answer_options[new_key] = answer_options.pop(ans_opt_key)
                                 ans_opt = answer_options[new_key]
-                                ans_opt.update({"weight": j})
 
                                 col1_1, col1_2, col1_3 = st.columns(
                                     [0.05, 0.85, 0.1], gap="small", vertical_alignment="center"
@@ -989,6 +1019,7 @@ with col1:
                                         ans_options = st.session_state.quest_items[item_idx][
                                             "answer_options"
                                         ]
+                                        delete_option(list(ans_options.values()), ans_key - 1)
                                         ans_options.pop(f"{ans_key}")
 
                                     st.button(
@@ -1048,7 +1079,6 @@ with col2:
             {
                 "question": item["question"],
                 "reversed": item["reversed"],
-                "widget_key": item["widget_key"],
                 "answer_options": {
                     key: {
                         "text": anss[key]["text"],
@@ -1101,5 +1131,3 @@ with col2:
         st.json(out_json)
 
 st.session_state.pop("error_message")
-
-print("------- END OF RUN ------- ")

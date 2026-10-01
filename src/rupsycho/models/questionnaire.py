@@ -112,7 +112,7 @@ class InstructionItem(BaseModel):
         description="Additional attributes related to the question, such as its dimension in a multi-dimensional test structure.",
     )
     answers: dict[Any, dict[Any, dict[Any, str]]] | None = Field(  # type: ignore[assignment]
-        default_factory=lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(dict))),
+        default_factory=lambda: defaultdict(lambda: defaultdict(dict)),
         description="A nested dictionary storing answers indexed by model, profile, and run.",
     )
 
@@ -139,9 +139,12 @@ class InstructionItem(BaseModel):
 
     def update_answer(self, model_key: str, profile_key: str, run_idx: int, answer: Any) -> None:
         """Store the answer in the appropriate location."""
-        if answer is not None:
-            assert self.answers is not None
-            self.answers[model_key][profile_key][run_idx] = answer
+        if answer is None:
+            return
+        if self.answers is None:
+            self.answers = {}
+        # setdefault keeps this working for plain dicts, e.g. after loading an exported experiment
+        self.answers.setdefault(model_key, {}).setdefault(profile_key, {})[run_idx] = answer
 
     def get_answer(self, model_key: str, profile_key: str, run_idx: int) -> Any:
         """Retrieve the answer from the appropriate location."""
@@ -226,7 +229,7 @@ class Questionnaire(BaseModel):
             print("\nDefault Answer Options:")
             answer_options_table = [
                 [key, opt.text, opt.ignored_for_scale, opt.weight]
-                for key, opt in self.default_answer_options.items()  # type: ignore[attr-defined]
+                for key, opt in self.default_answer_options.options.items()
             ]
             print(
                 tabulate(
@@ -242,8 +245,8 @@ class Questionnaire(BaseModel):
                 print("  Answer Options:")
                 if item.answer_options:
                     answer_options_table = [
-                        [opt[1].text, opt[1].ignored_for_scale, opt[1].weight]
-                        for opt in item.answer_options.items()  # type: ignore[attr-defined]
+                        [opt.text, opt.ignored_for_scale, opt.weight]
+                        for opt in item.answer_options.options.values()
                     ]
                     print(
                         tabulate(

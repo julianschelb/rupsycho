@@ -45,6 +45,7 @@ def json_saver(data: dict, name: str = "output", path: str = "") -> None:
         full_path = os.path.join(path, f"{name}.json")
     else:
         full_path = os.path.join(path, f"{name}")
+    payload = json.dumps(data, indent=4)  # serialise first: a failure must not truncate the file
     with open(full_path, "w", encoding="utf-8") as file:
-        json.dump(data, file, indent=4)
+        file.write(payload)
     print(f"File saved successfully at: {full_path}")

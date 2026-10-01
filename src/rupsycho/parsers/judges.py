@@ -13,7 +13,7 @@ from langchain_core.exceptions import OutputParserException
 from langchain_core.output_parsers import BaseOutputParser
 from pydantic import ConfigDict, Field
 
-from rupsycho._compat import require
+from rupsycho._compat import default_device, require
 from rupsycho.parsers.parser_utils import (
     check_age,
     check_gender,
@@ -97,7 +97,7 @@ class DemographicsJudge(BaseOutputParser[str]):  # <-
 
     def parse(self, text: str, possible_answers: list | None = None) -> str:
         try:
-            if possible_answers is None:
+            if not possible_answers:
                 raise ValueError("No possible answer/question-type provided")
 
             type_of_question = possible_answers[0]
@@ -140,7 +140,8 @@ class ModelBasedAnswerJudge(BaseOutputParser[str]):
         ..., description="A list of possible answers to be considered during prediction."
     )
     device: str = Field(
-        "cuda:0", description="The device to run the model on (e.g., 'cuda:0' for GPU or 'cpu')."
+        default_factory=default_device,
+        description="The device to run the model on (e.g., 'cuda:0' for GPU or 'cpu').",
     )
     model: Any = Field(default=None, init=False, description="The model that is used as a judge.")
     tokenizer: Any = Field(

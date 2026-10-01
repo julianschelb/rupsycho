@@ -13,7 +13,7 @@ import inspect
 from types import ModuleType
 from typing import Any
 
-__all__ = ["is_available", "load_serialized", "require"]
+__all__ = ["default_device", "is_available", "load_serialized", "require"]
 
 
 def require(module: str, extra: str, *, feature: str | None = None) -> ModuleType:
@@ -73,3 +73,13 @@ def load_serialized(definition: dict[str, Any]) -> Any:
     if "allowed_objects" in inspect.signature(load).parameters:
         return load(definition, allowed_objects="all")
     return load(definition)
+
+
+def default_device() -> str:
+    """Return ``"cuda:0"`` if a CUDA GPU is available, otherwise ``"cpu"``.
+
+    Raises:
+        ImportError: If PyTorch (the ``huggingface`` extra) is not installed.
+    """
+    torch = require("torch", "huggingface", feature="Model-based parsers")
+    return "cuda:0" if torch.cuda.is_available() else "cpu"

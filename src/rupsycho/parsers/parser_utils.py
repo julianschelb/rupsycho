@@ -8,7 +8,6 @@
 import json
 import os
 import re
-import string
 import warnings
 from difflib import SequenceMatcher
 from typing import Any
@@ -38,10 +37,7 @@ def check_span(
         sub_text = text[start:end]
     elif ratio:
         length = int(len(text) * abs(ratio))
-        if ratio > 0:
-            sub_text = text[:length]
-        else:
-            sub_text = text[-length:]
+        sub_text = text[:length] if ratio > 0 else text[max(len(text) - length, 0) :]
     else:
         sub_text = text
 
@@ -102,10 +98,10 @@ def prompt_cleaner(
     else:
         ratio = matcher.ratio()
 
-    if matcher.find_longest_match().size > 0 and ratio >= similarity_threshold:
-        smallest_block = min(matcher.get_matching_blocks(), key=lambda x: x.size, default=None)
-        if smallest_block is not None:
-            completion = completion[smallest_block.a : smallest_block.b].strip()
+    blocks = [block for block in matcher.get_matching_blocks() if block.size > 0]
+    # only strip the prompt if the completion actually starts with (a copy of) it
+    if blocks and blocks[0].b == 0 and ratio >= similarity_threshold:
+        completion = completion[len(prompt) :].strip()
 
     return {
         "completion": completion,
@@ -145,9 +141,6 @@ def process_completion(
 
     if user_input_pattern:
         pattern = user_input_pattern
-        match = re.findall(pattern, text)
-        if isinstance(match, list) and len(match) == 1:
-            return match
 
     elif regex_dict_path:
         with open(regex_dict_path) as file:
@@ -172,7 +165,11 @@ def process_completion(
             "You must provide either pattern_name, regex_dict_path, or user_input_pattern."
         )
 
-    return [item.strip() for match in re.findall(pattern, text) for item in match]
+    return [
+        item.strip()
+        for match in re.findall(pattern, text)
+        for item in (match if isinstance(match, tuple) else (match,))
+    ]
 
 
 # def check_multiple_choice_answers(text: str, possible_answers: list[str]) -> dict:
@@ -228,25 +225,39 @@ def check_multiple_choice_answers(
     # Matches punctuation at beginning
     punctuation_pattern = r"[^\w\s]"
 
+    def squash(value: str) -> str:
+        # Punctuation separates tokens ("answer:3"): replace it by a space and collapse whitespace.
+        # Applied to the answer and to the options, so an option still matches itself
+        # (e.g. "neutral (neither agree nor disagree)").
+        return re.sub(r"\s+", " ", re.sub(punctuation_pattern, " ", value)).strip()
+
+    text = squash(text)
+    text_matches = []  # (start, end, option) of every match of an option's text
+
     for answer in possible_answers:
         normalized_answer = answer.lower() if ignore_case else answer
         enumeration_match = re.match(enumeration_pattern, normalized_answer)
 
         # If a number is found, split it from the rest of the text and remove punctuation
         enumeration = enumeration_match.group(1) if enumeration_match else None
-        answer_text = re.sub(enumeration_pattern, "", normalized_answer).strip()
-        answer_text = re.sub(punctuation_pattern, "", answer_text)
-        components = [enumeration, answer_text] if enumeration else [answer_text]
-
-        # also remove puctuation from model answer text to ensure 'self-match'
-        # e.g. "neutral (neither agree nor disagree)" would not match itself otherwise because of removed parenthesis
-        text = re.sub(punctuation_pattern, "", text)
+        answer_text = squash(re.sub(enumeration_pattern, "", normalized_answer))
 
         # Refine matching logic: only match numbers exactly and ensure full word matching for text
-        for component in components:
-            if component:
-                match_pattern = rf"\b{re.escape(component)}\b"
-                answer_counts[answer] += len(re.findall(match_pattern, text))
+        if enumeration:
+            answer_counts[answer] += len(re.findall(rf"\b{re.escape(enumeration)}\b", text))
+        if answer_text:
+            for match in re.finditer(rf"\b{re.escape(answer_text)}\b", text):
+                text_matches.append((match.start(), match.end(), answer))
+
+    # A text match inside the (longer) match of another option counts for that option only:
+    # "Strongly agree" must not also be a hit for "Agree".
+    for start, end, answer in text_matches:
+        covered = any(
+            other != answer and o_start <= start and end <= o_end and o_end - o_start > end - start
+            for o_start, o_end, other in text_matches
+        )
+        if not covered:
+            answer_counts[answer] += 1
 
     return answer_counts
 
@@ -344,8 +355,8 @@ def check_gender(text: str, ignore_case: bool = True) -> str:
     answer_counts = {"female": 0, "male": 0, "other": 0}
 
     text = text.lower() if ignore_case else text
-    text = text.translate(str.maketrans("", "", string.punctuation))
-    words = text.split()
+    # words may contain hyphens and apostrophes; every other symbol separates words ("she/her")
+    words = re.findall(r"[\w'-]+", text)
 
     for keyword in female_keywords:
         answer_counts["female"] += 1 if keyword in words else 0
@@ -378,17 +389,22 @@ def check_age(text: str, max_age: int, ignore_case: bool = True) -> str:
     The decision is made based on the first occurence of a number (either written
     or in numbers) in the sentence. All possible subsequent numbers are ignored.
     """
-    age_keywords = mk_age_keywords(max_age)
+    forms: dict[str, str] = {}
+    for keywords in mk_age_keywords(max_age):
+        for form in keywords:
+            if form != "oh":  # the interjection "Oh" is not the age 0
+                forms.setdefault(form, keywords[0])
 
     text = text.lower() if ignore_case else text
-    text = text.translate(str.maketrans("", "", string.punctuation))
-    words = text.split()
+    # hyphens and every other symbol separate words: "twenty-one" -> "twenty one", "18-year-old"
+    words = re.findall(r"[A-Za-z0-9]+", text)
 
-    # search first instance of any form of number
-    for word in words:
-        for keywords in age_keywords:
-            if word in keywords:
-                return keywords[0]
+    # search first instance of any form of number, longest spelling first ("twenty five" != "twenty")
+    for start in range(len(words)):
+        for length in (4, 3, 2, 1):
+            candidate = " ".join(words[start : start + length])
+            if candidate in forms:
+                return forms[candidate]
     return "inconclusive"
 
 
@@ -432,6 +448,7 @@ def json_saver(data: dict, name: str = "output", path: str = "") -> None:
         full_path = os.path.join(path, f"{name}.json")
     else:
         full_path = os.path.join(path, f"{name}")
+    payload = json.dumps(data, indent=4)  # serialise first: a failure must not truncate the file
     with open(full_path, "w", encoding="utf-8") as file:
-        json.dump(data, file, indent=4)
+        file.write(payload)
     print(f"File saved successfully at: {full_path}")

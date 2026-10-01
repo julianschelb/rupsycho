@@ -38,7 +38,7 @@ class ConfigQuestionnaire:
     def from_raw_output(cls, title_instr: str, questions: str, answers: str):
         """Create a questionnaire instance directly from the outputs of a LM that follow the structure specified in the 'Prompts' module."""
         try:
-            title, instructions = extract_json(title_instr, False)
+            title, instructions = extract_json(title_instr)
         except Exception as e:
             raise ValueError("Could not parse title and instructions from the model output.") from e
         questions = extract_json(questions)
@@ -53,11 +53,11 @@ class ConfigQuestionnaire:
         instructions = quest["general_instruction"]
         questions = []
         answers = []
-        items = quest["instruction_items"]
-        for item in items:
+        default_options = quest.get("default_answer_options") or {}
+        for item in quest["instruction_items"]:
             questions.append(item["question"])
-            ans_set = [opt["text"] for opt in item["answer_options"].values()]
-            answers.append(ans_set)
+            options = item.get("answer_options") or default_options
+            answers.append([opt["text"] for opt in options.values()])
 
         return cls(title, instructions, questions, answers)
 
@@ -66,7 +66,7 @@ class ConfigQuestionnaire:
         """Create questionnaire instance from a JSON file that follows the format of the 'questionnaire' section
         of a R.U.psycho experiment configuration.
         """
-        with open(path) as f:
+        with open(path, encoding="utf-8") as f:
             quest_dict = json.load(f)
             return cls.from_dict(quest_dict)
 
@@ -133,7 +133,7 @@ class ConfigQuestionnaire:
     def to_json_file(self, path: str) -> str:
         "Write the questionnaire to a JSON file at the specified location in R.U.Psycho format and return it as a serialized json."
         json_quest = json.dumps(self.mk_dict(), indent=4)
-        with open(path, "w") as f:
+        with open(path, "w", encoding="utf-8") as f:
             f.write(json_quest)
         # print('JSON created')
         return json_quest
