@@ -9,13 +9,11 @@
 from typing import Any
 
 import numpy as np
-import torch
 from langchain_core.exceptions import OutputParserException
 from langchain_core.output_parsers import BaseOutputParser
 from pydantic import ConfigDict, Field
-from scipy.stats import entropy
-from transformers import RobertaForSequenceClassification, RobertaTokenizer
 
+from rupsycho._compat import require
 from rupsycho.parsers.parser_utils import (
     check_age,
     check_gender,
@@ -157,9 +155,13 @@ class ModelBasedAnswerJudge(BaseOutputParser[str]):
 
     def model_post_init(self, __context):
         """Set up LLM."""
+        transformers = require("transformers", "huggingface", feature="ModelBasedAnswerJudge")
+
         # Load the tokenizer and model from Hugging Face
-        tokenizer = RobertaTokenizer.from_pretrained(self.model_name)
-        model = RobertaForSequenceClassification.from_pretrained(self.model_name, num_labels=2)
+        tokenizer = transformers.RobertaTokenizer.from_pretrained(self.model_name)
+        model = transformers.RobertaForSequenceClassification.from_pretrained(
+            self.model_name, num_labels=2
+        )
 
         # Move model to the specified device
         model.to(self.device)
@@ -172,9 +174,13 @@ class ModelBasedAnswerJudge(BaseOutputParser[str]):
         """
         Calculates entropy from a list of decision probabilities.
         """
-        probabilities = np.array([item.get("positive_probability", 0.0) for item in decision_list])
-        probabilities /= np.sum(probabilities) if np.sum(probabilities) > 0 else 1e-12
-        return entropy(probabilities, base=2)
+        probabilities = np.array(
+            [item.get("positive_probability", 0.0) for item in decision_list], dtype=float
+        )
+        total = probabilities.sum()
+        probabilities = probabilities / (total if total > 0 else 1e-12)
+        nonzero = probabilities[probabilities > 0]
+        return float(-(nonzero * np.log2(nonzero)).sum())
 
     def predict_answer(self, answer_option: str, answer: str):
         """
@@ -186,6 +192,7 @@ class ModelBasedAnswerJudge(BaseOutputParser[str]):
         )
         inputs = inputs.to(self.device)
 
+        torch = require("torch", "huggingface", feature="ModelBasedAnswerJudge")
         with torch.no_grad():
             outputs = self.model(**inputs)
             logits = outputs.logits

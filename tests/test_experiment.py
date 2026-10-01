@@ -69,7 +69,9 @@ def test_failing_model_does_not_abort_run(fake_experiment):
 
     fake_experiment.clear_models()
     fake_experiment.add_model(Broken(responses=["x"]), identifier="broken")
-    fake_experiment.run()  # must not raise
+    with pytest.warns(RuntimeWarning, match="8 of 8 model calls failed"):
+        summary = fake_experiment.run()  # must not raise
+    assert summary.n_failed == 8
 
 
 def test_callbacks_receive_every_answer(fake_experiment, tmp_path):

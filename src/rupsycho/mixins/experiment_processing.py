@@ -1,61 +1,118 @@
-# ===========================================================================
-#                      ExperimentProcessingMixin Implementation
-# ===========================================================================
-#  This mixin provides methods for processing experiments by creating and
-#  executing chains with different models, profiles, and instructions. It
-#  includes error handling, progress tracking, and result storage.
+# experiment_processing.py
+"""Run loop of an experiment.
+
+``ExperimentProcessingMixin`` implements ``ExperimentDocument.run``: for every model and
+every seed it asks every persona every question, records the answers on the questionnaire
+items and forwards them to callbacks.
+"""
 
 from __future__ import annotations
 
 import gc
 import logging
+import sys
 import warnings
-from collections.abc import Sequence
-from copy import deepcopy
+from collections.abc import Callable, Iterator, Sequence
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass, field
+from functools import partial
 from time import perf_counter
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
-import torch
 from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable, RunnablePassthrough
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_huggingface.llms import HuggingFacePipeline
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
 
+from rupsycho.seeding import is_thread_safe, seed_model
 from rupsycho.utils import import_tqdm
+
+__all__ = ["DEFAULT_SEED", "ErrorPolicy", "ExperimentProcessingMixin", "RunSummary"]
 
 logger = logging.getLogger(__name__)
 tqdm = import_tqdm()  # Import tqdm based on the environment
 
 DEFAULT_SEED = 42
+"""Seed used when an experiment defines none."""
 
-# ------------------- DEFAULT MODEL -------------------
+ErrorPolicy = Literal["warn", "raise", "ignore"]
+"""What to do when a model call fails: warn and continue (default), raise, or stay silent."""
 
-
-def get_default_model() -> HuggingFacePipeline:
-    """Load the small default model (``google/flan-t5-small``) as a LangChain LLM."""
-    params = {
-        "min_new_tokens": 1,
-        "max_new_tokens": 64,
-        "temperature": 0.6,
-        "do_sample": True,
-    }
-
-    model_id = "google/flan-t5-small"
-    tokenizer = AutoTokenizer.from_pretrained(model_id)
-    model = AutoModelForSeq2SeqLM.from_pretrained(model_id)
-    pipe = pipeline("text2text-generation", model=model, tokenizer=tokenizer, **params)  # type: ignore[call-overload]
-    return HuggingFacePipeline(pipeline=pipe)
+_MAX_RECORDED_ERRORS = 5
 
 
-# ------------------------------------------------
+@dataclass
+class RunSummary:
+    """Outcome of :meth:`ExperimentProcessingMixin.run`.
+
+    Attributes:
+        n_calls: Number of model calls made.
+        n_failed: Number of calls that raised; their answers are missing from the results.
+        elapsed: Wall-clock seconds of the whole run.
+        errors: The first distinct error messages (at most five).
+
+    Example:
+        ```python
+        summary = experiment.run()
+        if summary.n_failed:
+            print(summary.errors)
+        ```
+    """
+
+    n_calls: int = 0
+    n_failed: int = 0
+    elapsed: float = 0.0
+    errors: list[str] = field(default_factory=list)
+
+    @property
+    def n_succeeded(self) -> int:
+        """Number of calls that returned an answer."""
+        return self.n_calls - self.n_failed
+
+    def __add__(self, other: RunSummary) -> RunSummary:
+        merged = self.errors + [e for e in other.errors if e not in self.errors]
+        return RunSummary(
+            self.n_calls + other.n_calls,
+            self.n_failed + other.n_failed,
+            self.elapsed + other.elapsed,
+            merged[:_MAX_RECORDED_ERRORS],
+        )
+
+    def __str__(self) -> str:
+        text = f"{self.n_calls} model calls in {self.elapsed:.1f}s"
+        return text + (f", {self.n_failed} failed" if self.n_failed else "")
+
+
+@dataclass
+class _Call:
+    """One model call of the grid: an instruction item asked to one persona."""
+
+    item_id: int
+    item: Any
+    profile_id: str
+    inputs: dict[str, Any]
+
+
+_CallResult = tuple[Any, float, "Exception | None"]
+
+
+def _escape(text: str) -> str:
+    """Escape braces so that ``text`` is taken literally inside a prompt template."""
+    return text.replace("{", "{{").replace("}", "}}")
+
+
+class _SafeFormat(dict):
+    """``str.format_map`` helper that leaves unknown placeholders untouched."""
+
+    def __missing__(self, key: str) -> str:
+        return "{" + key + "}"
 
 
 class ExperimentProcessingMixin:
-    """
-    A mixin that provides methods for processing experiments with various models,
-    profiles, and instructions. This class is designed to facilitate the creation
-    and execution of experiment chains, manage errors, track progress, and store results.
+    """Runs an experiment: models x seeds x items x personas.
+
+    The mixin relies on the attributes of ``ExperimentDocument`` (``questionnaire``,
+    ``demographic_profiles``, ``runnable_models``, ``runnable_prompt``, ``runnable_parser``,
+    ``parameters``, ``models`` and ``name``).
     """
 
     if TYPE_CHECKING:
@@ -70,12 +127,11 @@ class ExperimentProcessingMixin:
         demographic_profiles: dict[str, Any]
 
         def get_prompt(self) -> Any: ...
-        def _convert_prompt(self, prompt: Any) -> Any: ...
 
     # ------------------- Prompt inputs -------------------
 
     def _create_input_dict(self, profile: Any, instruction_item: Any) -> dict[str, Any]:
-        """Create the input dictionary required for invoking the chain."""
+        """Build the template variables for asking ``instruction_item`` to ``profile``."""
 
         # Use the item's own answer options, or fall back to the questionnaire defaults
         if instruction_item.answer_options:
@@ -90,14 +146,16 @@ class ExperimentProcessingMixin:
             "answer_options": answer_options,
         }
 
-    def _build_input_grid(self, questionnaire: Any, demographic_profiles: dict[str, Any]) -> list:
-        """Precompute the prompt inputs for every (item, profile) pair.
+    def _build_call_grid(
+        self, questionnaire: Any, demographic_profiles: dict[str, Any]
+    ) -> list[_Call]:
+        """Precompute the prompt inputs of every (item, persona) pair.
 
-        The inputs do not depend on the model or the seed, so they are built once
-        and reused for every seed instead of being rebuilt in the innermost loop.
+        The inputs depend neither on the model nor on the seed, so they are built once
+        per run instead of once per call.
         """
         return [
-            (item_id, item, profile_id, self._create_input_dict(profile, item))
+            _Call(item_id, item, profile_id, self._create_input_dict(profile, item))
             for item_id, item in enumerate(questionnaire.instruction_items)
             for profile_id, profile in demographic_profiles.items()
         ]
@@ -111,9 +169,8 @@ class ExperimentProcessingMixin:
         parser: Runnable | None,
         name: str,
         seed: int = DEFAULT_SEED,
-        params: dict | None = None,
     ) -> Any:
-        """Create a chain ``prompt | model | parser`` for running the experiment."""
+        """Create the chain ``prompt | seeded model | parser`` for one model and seed."""
 
         if not prompt_template:
             raise ValueError("Prompt template not set.")
@@ -122,33 +179,57 @@ class ExperimentProcessingMixin:
         if not parser:
             parser = StrOutputParser()
 
-        # Google models do not accept a seed parameter
-        bound_model = (
-            model if isinstance(model, ChatGoogleGenerativeAI) else model.bind(seed=int(seed))
-        )
+        return (
+            RunnablePassthrough() | prompt_template | seed_model(model, seed) | parser
+        ).with_config(run_name=name)
 
-        return (RunnablePassthrough() | prompt_template | bound_model | parser).with_config(
-            run_name=name
-        )
+    def _invoke(self, chain: Runnable, input_values: dict[str, Any]) -> _CallResult:
+        """Invoke the chain once; never raises. Returns ``(answer, seconds, error)``."""
+        start = perf_counter()
+        try:
+            answer, error = chain.invoke(input_values), None
+        except Exception as e:
+            answer, error = None, e
+        return answer, round(perf_counter() - start, 3), error
 
     def _generate_answer(self, chain: Runnable, input_values: dict[str, Any]) -> tuple[Any, float]:
         """Invoke the chain and return ``(answer, elapsed_seconds)``.
 
-        A failing invocation does not abort the experiment: the error is logged and
-        the answer is ``None``.
+        A failing invocation does not abort the experiment: the error is logged and the
+        answer is ``None``.
         """
-        start = perf_counter()
-        try:
-            answer = chain.invoke(input_values)
-        except Exception as e:
-            logger.error("Error invoking chain for run: %s", e)
-            answer = None
-        return answer, round(perf_counter() - start, 3)
+        answer, elapsed, error = self._invoke(chain, input_values)
+        if error is not None:
+            logger.error("Error invoking chain for run: %s", error)
+        return answer, elapsed
+
+    @staticmethod
+    def _run_calls(
+        thunks: Sequence[Callable[[], _CallResult]], max_workers: int
+    ) -> Iterator[_CallResult]:
+        """Run the calls and yield their results **in submission order**.
+
+        With ``max_workers > 1`` the calls run in a thread pool (for I/O-bound API models);
+        order and per-call error isolation are preserved either way.
+        """
+        if max_workers <= 1 or len(thunks) <= 1:
+            for thunk in thunks:
+                yield thunk()
+            return
+
+        with ThreadPoolExecutor(max_workers=max_workers) as pool:
+            futures = [pool.submit(thunk) for thunk in thunks]
+            try:
+                for future in futures:
+                    yield future.result()
+            finally:
+                for future in futures:
+                    future.cancel()
 
     # ------------------- Validation helpers -------------------
 
     def _ensure_requirements_to_run(self) -> bool:
-        """Ensure that at least one model, a prompt, a questionnaire and personas are set."""
+        """Ensure that models, a prompt, a questionnaire and personas are set."""
 
         if not self.runnable_models:
             raise ValueError("No models have been set in runnable_models.")
@@ -166,7 +247,7 @@ class ExperimentProcessingMixin:
         return self.parameters.seeds if self.parameters.seeds else [DEFAULT_SEED]
 
     def _calculate_total_iterations(self) -> int:
-        """Calculate the total number of iterations for the progress bar."""
+        """Calculate the total number of model calls for the progress bar."""
         return (
             len(self.questionnaire.instruction_items)
             * len(self.runnable_models)
@@ -179,10 +260,19 @@ class ExperimentProcessingMixin:
         return isinstance(model, Runnable)
 
     def print_assembled_prompt(self, item_idx: int = 0, persona_idx: int = 0) -> None:
-        """
-        Print the fully assembled prompt with the specified instruction item and persona.
+        """Print the fully assembled prompt for one item and persona.
 
-        Note: does not support assembly of a response memory prompt.
+        Args:
+            item_idx: Index of the instruction item.
+            persona_idx: Index of the demographic profile.
+
+        Note:
+            Does not support the accumulated prompt of ``cumulative`` runs.
+
+        Example:
+            ```python
+            experiment.print_assembled_prompt(item_idx=0, persona_idx=1)
+            ```
         """
         try:
             profile = list(self.demographic_profiles.values())[persona_idx]
@@ -201,9 +291,10 @@ class ExperimentProcessingMixin:
     # ------------------- Memory management -------------------
 
     def _cleanup_memory(self) -> None:
-        """Cleanup memory by running garbage collection and emptying the CUDA cache."""
+        """Run garbage collection and release cached GPU memory if PyTorch is in use."""
         gc.collect()
-        if torch.cuda.is_available():
+        torch = sys.modules.get("torch")
+        if torch is not None and torch.cuda.is_available():
             torch.cuda.empty_cache()
 
     def _load_model(self, model: Any) -> Any:
@@ -217,122 +308,158 @@ class ExperimentProcessingMixin:
     def _record_answer(
         self,
         callbacks: Sequence,
-        instruction_item_id: int,
-        instruction_item: Any,
+        call: _Call,
         model_id: str,
-        profile_id: str,
         random_seed: Any,
         elapsed: float,
         answer: Any,
     ) -> None:
         """Store an answer on the instruction item and forward it to all callbacks."""
-        instruction_item.update_answer(model_id, profile_id, random_seed, answer)
+        call.item.update_answer(model_id, call.profile_id, random_seed, answer)
         self._trigger_callbacks(
             callbacks,
-            instruction_item_id,
-            instruction_item,
+            call.item_id,
+            call.item,
             model_id,
-            profile_id,
+            call.profile_id,
             random_seed,
             elapsed,
             answer,
         )
+
+    def _handle_result(
+        self,
+        result: _CallResult,
+        call: _Call,
+        model_id: str,
+        random_seed: Any,
+        callbacks: Sequence,
+        pbar: Any,
+        summary: RunSummary,
+        on_error: ErrorPolicy,
+    ) -> Any:
+        """Count a finished call, apply the error policy, record the answer."""
+        answer, elapsed, error = result
+        summary.n_calls += 1
+        if error is not None:
+            summary.n_failed += 1
+            message = f"{type(error).__name__}: {error}"
+            if message not in summary.errors and len(summary.errors) < _MAX_RECORDED_ERRORS:
+                summary.errors.append(message)
+            if on_error == "raise":
+                raise error
+            if on_error == "warn":
+                logger.warning(
+                    "Model call failed (model=%s, persona=%s, item=%s, seed=%s): %s",
+                    model_id,
+                    call.profile_id,
+                    call.item_id,
+                    random_seed,
+                    message,
+                )
+        self._record_answer(callbacks, call, model_id, random_seed, elapsed, answer)
+        pbar.update(1)
+        return answer
 
     def _generate_and_process_answers(
         self,
         model: Any,
         model_id: str,
         seed_values: list,
-        params: dict,
         questionnaire: Any,
         demographic_profiles: dict[str, Any],
         callbacks: Sequence,
         pbar: Any,
+        summary: RunSummary,
+        on_error: ErrorPolicy = "warn",
+        max_workers: int = 1,
     ) -> None:
-        """Generate answers for each random seed, instruction item and demographic profile."""
-        input_grid = self._build_input_grid(questionnaire, demographic_profiles)
+        """Ask every persona every question once per seed."""
+        grid = self._build_call_grid(questionnaire, demographic_profiles)
 
         for random_seed in seed_values:
             # The chain only depends on the model and the seed
             chain = self._get_chain(
-                self.runnable_prompt,
-                model,
-                self.runnable_parser,
-                model_id,
-                seed=int(random_seed),
-                params=params,
+                self.runnable_prompt, model, self.runnable_parser, model_id, seed=int(random_seed)
             )
-
-            for item_id, item, profile_id, input_values in input_grid:
-                answer, elapsed = self._generate_answer(chain, input_values)
-                self._record_answer(
-                    callbacks, item_id, item, model_id, profile_id, random_seed, elapsed, answer
+            thunks = [partial(self._invoke, chain, call.inputs) for call in grid]
+            for call, result in zip(grid, self._run_calls(thunks, max_workers)):
+                self._handle_result(
+                    result, call, model_id, random_seed, callbacks, pbar, summary, on_error
                 )
-                pbar.update(1)
+
+    def _memory_prompt(
+        self, history: list[tuple[str, str]], system_template: Any, user_template: Any
+    ) -> Runnable:
+        """Build the chat prompt of one persona that remembers its earlier answers.
+
+        ``history`` holds the already rendered earlier user messages with the answers given.
+        They are inserted literally (braces escaped), followed by the live user template.
+        """
+        memory = "".join(f"{_escape(question)} {_escape(answer)}\n" for question, answer in history)
+        user_text = memory + user_template.prompt.template
+        return ChatPromptTemplate.from_messages(
+            [system_template, type(user_template).from_template(user_text)]
+        )
 
     def _generate_and_process_answers_cumulative(
         self,
         model: Any,
         model_id: str,
         seed_values: list,
-        params: dict,
         questionnaire: Any,
         demographic_profiles: dict[str, Any],
         callbacks: Sequence,
         pbar: Any,
+        summary: RunSummary,
+        on_error: ErrorPolicy = "warn",
+        max_workers: int = 1,
     ) -> None:
-        """Generate answers with a 'response memory' prompt that accumulates prior items and answers."""
-        input_grid = self._build_input_grid(questionnaire, demographic_profiles)
+        """Ask the questions in order, letting each persona remember its earlier answers.
 
-        base_messages = {
-            "type": "chat",
-            "messages": [
-                {
-                    "role": "system",
-                    "content": self.runnable_prompt.messages[0].prompt.template,
-                },
-                {
-                    "role": "user",
-                    "content": self.runnable_prompt.messages[1].prompt.template,
-                },
-            ],
-        }
-        base_message_str_user = base_messages["messages"][1]["content"]  # type: ignore[index]
+        Personas are independent of each other, so the calls of one item run concurrently
+        when ``max_workers > 1``; the items themselves are asked in order.
+        """
+        messages = getattr(self.runnable_prompt, "messages", None)
+        if (
+            not isinstance(self.runnable_prompt, ChatPromptTemplate)
+            or messages is None
+            or len(messages) < 2
+        ):
+            raise ValueError(
+                "Cumulative mode needs a chat prompt template with a system message followed "
+                "by a user message."
+            )
+        system_template, user_template = messages[0], messages[1]
+        grid = self._build_call_grid(questionnaire, demographic_profiles)
+        calls_by_item: dict[int, list[_Call]] = {}
+        for call in grid:
+            calls_by_item.setdefault(call.item_id, []).append(call)
 
         for random_seed in seed_values:
-            # Each persona gets its own prompt with its individual prior answers
-            persona_messages = {pid: deepcopy(base_messages) for pid in demographic_profiles}
+            history: dict[str, list[tuple[str, str]]] = {pid: [] for pid in demographic_profiles}
 
-            for item_id, item, profile_id, input_values in input_grid:
-                current_prompt = self._convert_prompt(
-                    persona_messages[profile_id]
-                ).load_prompt_template()
+            for item_calls in calls_by_item.values():
+                thunks = []
+                for call in item_calls:
+                    prompt = self._memory_prompt(
+                        history[call.profile_id], system_template, user_template
+                    )
+                    chain = self._get_chain(
+                        prompt, model, self.runnable_parser, model_id, seed=int(random_seed)
+                    )
+                    thunks.append(partial(self._invoke, chain, call.inputs))
 
-                # The prompt changes with every answer, so the chain is rebuilt per call
-                chain = self._get_chain(
-                    current_prompt,
-                    model,
-                    self.runnable_parser,
-                    model_id,
-                    seed=int(random_seed),
-                    params=params,
-                )
-                answer, elapsed = self._generate_answer(chain, input_values)
-
-                # Extend this persona's prompt with the question and the answer just given
-                user_message = persona_messages[profile_id]["messages"][1]
-                user_message["content"] = (  # type: ignore[index]
-                    user_message["content"].format(question=item.question)  # type: ignore[index]
-                    + " "
-                    + str(answer)
-                    + "\n"
-                    + base_message_str_user
-                )
-
-                self._record_answer(
-                    callbacks, item_id, item, model_id, profile_id, random_seed, elapsed, answer
-                )
-                pbar.update(1)
+                for call, result in zip(item_calls, self._run_calls(thunks, max_workers)):
+                    answer = self._handle_result(
+                        result, call, model_id, random_seed, callbacks, pbar, summary, on_error
+                    )
+                    if answer is not None:
+                        # Remember the question as the persona saw it, plus the answer given
+                        rendered = user_template.prompt.template.format_map(
+                            _SafeFormat(call.inputs)
+                        )
+                        history[call.profile_id].append((rendered, str(answer)))
 
     def _trigger_callbacks(
         self,
@@ -364,22 +491,45 @@ class ExperimentProcessingMixin:
     # ------------------- Entry points -------------------
 
     def process_single_experiment(
-        self, cumulative: bool, pbar: Any = None, callbacks: Sequence = ()
-    ) -> None:
-        """Process the experiment, iterating through models, profiles, and instruction items."""
+        self,
+        cumulative: bool,
+        pbar: Any = None,
+        callbacks: Sequence = (),
+        *,
+        max_concurrency: int = 1,
+        on_error: ErrorPolicy = "warn",
+    ) -> RunSummary:
+        """Process every model of the experiment and return a :class:`RunSummary`.
 
+        Args:
+            cumulative: Let each persona remember its earlier answers.
+            pbar: Progress bar to update; one is created if omitted.
+            callbacks: Callbacks that receive every answer.
+            max_concurrency: Calls to run at the same time (API models only; local
+                Hugging Face models always run sequentially).
+            on_error: ``"warn"`` (default) logs failed calls and continues, ``"raise"``
+                stops at the first failure, ``"ignore"`` continues silently.
+
+        Returns:
+            A summary of the calls made.
+
+        Raises:
+            ValueError: If ``on_error`` or ``max_concurrency`` is invalid or the experiment
+                is incomplete.
+        """
+        if on_error not in ("warn", "raise", "ignore"):
+            raise ValueError(f"on_error must be 'warn', 'raise' or 'ignore', got {on_error!r}")
+        if max_concurrency < 1:
+            raise ValueError("max_concurrency must be at least 1")
         self._ensure_requirements_to_run()
 
-        # Create a progress bar for tracking the experiment progress if not provided
-        if pbar is None:
+        own_pbar = pbar is None
+        if own_pbar:
             pbar = tqdm(
                 total=self._calculate_total_iterations(),
                 desc=self.name or "Experiment",
                 unit=" prompts",
             )
-
-        # Precompute default parameters once as they do not change per model
-        default_params = self.parameters.model_dump(exclude_none=True, exclude=["seeds"])
 
         seed_values = self._get_seed_values()
         generate = (
@@ -387,41 +537,106 @@ class ExperimentProcessingMixin:
             if cumulative
             else self._generate_and_process_answers
         )
+        summary = RunSummary()
+        start = perf_counter()
 
-        for model_id, model in list(self.runnable_models.items()):
+        for model_id, original in list(self.runnable_models.items()):
             # Load the model (lazy loading if required)
-            model = self._load_model(model)
-            self.runnable_models[model_id] = model
+            model = self._load_model(original)
 
-            # Merge model-specific parameters over the experiment defaults
-            model_config = self.models.get(model_id)
-            model_params = model_config.parameters if model_config else {}
-            params = {**default_params, **model_params}
+            workers = max_concurrency
+            if workers > 1 and not is_thread_safe(model):
+                warnings.warn(
+                    f"Model '{model_id}' runs in this process and cannot be called concurrently; "
+                    "running it sequentially.",
+                    UserWarning,
+                    stacklevel=3,
+                )
+                workers = 1
 
-            generate(
-                model,
-                model_id,
-                seed_values,
-                params,
-                self.questionnaire,
-                self.demographic_profiles,
-                callbacks,
-                pbar,
+            try:
+                generate(
+                    model,
+                    model_id,
+                    seed_values,
+                    self.questionnaire,
+                    self.demographic_profiles,
+                    callbacks,
+                    pbar,
+                    summary,
+                    on_error,
+                    workers,
+                )
+            finally:
+                # Release the loaded model but keep its definition, so the run can be repeated
+                del model
+                self.runnable_models[model_id] = original
+                self._cleanup_memory()
+
+        summary.elapsed = round(perf_counter() - start, 3)
+        if own_pbar:
+            pbar.close()
+        if summary.n_failed and on_error == "warn":
+            warnings.warn(
+                f"{summary.n_failed} of {summary.n_calls} model calls failed and are missing "
+                f"from the results (first error: {summary.errors[0]}).",
+                RuntimeWarning,
+                stacklevel=3,
             )
+        return summary
 
-            # Release the model before the next one is loaded
-            del model
-            self.runnable_models[model_id] = None
-            self._cleanup_memory()
+    def run(
+        self,
+        callbacks: Sequence = (),
+        cumulative: bool = False,
+        *,
+        max_concurrency: int = 1,
+        on_error: ErrorPolicy = "warn",
+        show_progress: bool = True,
+    ) -> RunSummary:
+        """Run the experiment.
 
-    def run(self, callbacks: Sequence = (), cumulative: bool = False) -> None:
-        """Run the experiment processing with a progress bar and callbacks."""
+        Every model is asked every question as every persona, once per seed. Answers are
+        stored on the questionnaire items (see ``get_answers`` / ``get_answers_as_dataframe``)
+        and passed to the callbacks as soon as they are generated.
 
+        Args:
+            callbacks: Callbacks such as ``CSVCallback`` that receive every answer.
+            cumulative: Let each persona remember its earlier answers ("response memory").
+                Needs a chat prompt whose user message is asked once per item.
+            max_concurrency: Number of calls to run in parallel. Useful for API models where
+                the time is spent waiting; models running in this process (local Hugging
+                Face) are always called sequentially. Results and callbacks keep their order.
+            on_error: What to do when a model call fails. ``"warn"`` (default) logs the
+                failure, continues and warns once at the end; ``"raise"`` stops at the first
+                failure; ``"ignore"`` continues silently. Failed calls have no answer.
+            show_progress: Show a progress bar.
+
+        Returns:
+            A [`RunSummary`][rupsycho.mixins.experiment_processing.RunSummary] with the number
+            of calls, failures and the elapsed time.
+
+        Raises:
+            ValueError: If the experiment is incomplete (no model, prompt, questionnaire).
+
+        Example:
+            ```python
+            summary = experiment.run(callbacks=[CSVCallback("answers.csv")], max_concurrency=8)
+            print(summary)  # "160 model calls in 12.3s"
+            ```
+        """
         self._ensure_requirements_to_run()
 
         with tqdm(
             total=self._calculate_total_iterations(),
             desc=self.name or "Experiment",
             unit=" prompts",
+            disable=not show_progress,
         ) as pbar:
-            self.process_single_experiment(cumulative, pbar, callbacks=callbacks)
+            return self.process_single_experiment(
+                cumulative,
+                pbar,
+                callbacks=callbacks,
+                max_concurrency=max_concurrency,
+                on_error=on_error,
+            )

@@ -11,11 +11,11 @@
 
 import re
 
-import torch
 from langchain_core.exceptions import OutputParserException
 from langchain_core.output_parsers import BaseOutputParser
 from pydantic import ConfigDict, Field
-from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
+
+from rupsycho._compat import require
 
 # ================================= Helpers ================================
 
@@ -264,7 +264,7 @@ class ModelBasedValidator(BaseOutputParser[dict]):
     """
 
     model_name: str = Field("ProtectAI/distilroberta-base-rejection-v1")
-    device: str = Field("cuda" if torch.cuda.is_available() else "cpu")
+    device: str = Field("cpu")
     # classifier = Field(...)
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -272,7 +272,7 @@ class ModelBasedValidator(BaseOutputParser[dict]):
     def __init__(
         self,
         model_name: str = "ProtectAI/distilroberta-base-rejection-v1",
-        device: str = "cuda" if torch.cuda.is_available() else "cpu",
+        device: str | None = None,
     ):
         """
         Initializes the parser with a Hugging Face model to classify rejection.
@@ -286,20 +286,23 @@ class ModelBasedValidator(BaseOutputParser[dict]):
             The device to run the model on (e.g., 'cuda' for GPU or 'cpu').
         """
         super().__init__()
+        transformers = require("transformers", "huggingface", feature="ModelBasedValidator")
+        if device is None:
+            torch = require("torch", "huggingface", feature="ModelBasedValidator")
+            device = "cuda" if torch.cuda.is_available() else "cpu"
 
         # Load the tokenizer and model from Hugging Face
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
-        model = AutoModelForSequenceClassification.from_pretrained(model_name)
+        tokenizer = transformers.AutoTokenizer.from_pretrained(model_name)
+        model = transformers.AutoModelForSequenceClassification.from_pretrained(model_name)
 
         # Initialize the text classification pipeline
-        classifier = pipeline(
+        classifier = transformers.pipeline(
             "text-classification",
             model=model,
             tokenizer=tokenizer,
             truncation=True,
             max_length=512,
-            # 0 for GPU, -1 for CPU #TODO: Check if this is correct
-            device=0 if device == "cuda" else -1,
+            device=device,
         )
 
         # Manually set the fields

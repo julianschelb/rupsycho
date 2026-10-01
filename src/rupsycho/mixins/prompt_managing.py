@@ -11,7 +11,9 @@ from __future__ import annotations
 import warnings
 from typing import TYPE_CHECKING, Any
 
-from langchain_core.load import dumpd, load
+from langchain_core.load import dumpd
+
+from rupsycho._compat import load_serialized
 
 
 class PromptTemplateMixin:
@@ -28,7 +30,7 @@ class PromptTemplateMixin:
         runnable_prompt: Any
         runnable_parser: Any
 
-    def load_prompt(self, prompt_template: str) -> Any | None:
+    def load_prompt(self, prompt_template: dict[str, Any]) -> Any | None:
         """
         Load the prompt template from its serialized definition.
 
@@ -36,7 +38,7 @@ class PromptTemplateMixin:
         :return: Loaded prompt, or None if an error occurs.
         """
         try:
-            prompt = load(prompt_template)
+            prompt = load_serialized(prompt_template)
             return prompt
         except Exception as e:
             warnings.warn(f"Failed to load prompt template: {e}", UserWarning, stacklevel=2)
@@ -59,7 +61,7 @@ class PromptTemplateMixin:
         """
         return getattr(self, "runnable_prompt", None)
 
-    def get_prompt_config(self) -> str | None:
+    def get_prompt_config(self) -> dict[str, Any] | None:
         """
         Retrieve the serialized prompt template configuration.
 
@@ -67,7 +69,7 @@ class PromptTemplateMixin:
         """
         return getattr(self, "prompt_template", None)
 
-    def set_prompt_config(self, prompt_template: str) -> None:
+    def set_prompt_config(self, prompt_template: dict[str, Any]) -> None:
         """
         Set the prompt template configuration by loading its serialized form.
 

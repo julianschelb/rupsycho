@@ -147,9 +147,8 @@ class ExperimentDocument(  # type: ignore[misc]
     def __init__(self, **data: Any):
         """Initialize ExperimentDocument with optional conversions for nested data."""
 
-        # Handle nested data conversions for parameters
-        if "parameters" in data:
-            data["parameters"] = self._convert_parameters(data["parameters"])
+        # Handle nested data conversions for parameters (optional section)
+        data["parameters"] = self._convert_parameters(data.get("parameters") or {})
 
         # Convert demographic profiles to instances
         if "demographic_profiles" in data:
@@ -172,7 +171,7 @@ class ExperimentDocument(  # type: ignore[misc]
             data["models"] = {"default_model": DEFAULT_MODEL_CONFIG}
 
         # Load models if lazy_load_models is False; otherwise, leave them for later loading
-        if not data.get("parameters").lazy_load_models:  # type: ignore[union-attr]
+        if not data["parameters"].lazy_load_models:
             data["runnable_models"] = self._load_runnable_models(data["models"])
         else:
             # Models will be loaded later
@@ -239,14 +238,7 @@ class ExperimentDocument(  # type: ignore[misc]
 
     def _load_runnable_models(self, models: dict[str, Any]) -> dict[str, Any]:
         """Load models into runnable instances."""
-        runnable_models = {}
-        for key, model in models.items():
-            try:
-                runnable_models[key] = model.load_model()
-            except Exception as e:
-                print(f"Failed to load model: {e}")
-
-        return runnable_models
+        return {key: model.load_model() for key, model in models.items()}
 
     def _load_runnable_prompt(self, prompt_template: str | BaseModel) -> Any:
         """Load a prompt template into a runnable LangChain prompt."""

@@ -13,9 +13,7 @@ from langchain_core.documents.base import BaseMedia
 from pydantic import ConfigDict
 
 from rupsycho.experiment import ExperimentDocument
-from rupsycho.utils import import_tqdm
-
-tqdm = import_tqdm()  # Import tqdm based on the environment
+from rupsycho.mixins.experiment_processing import RunSummary
 
 # ================================= Experiments Class ================================
 
@@ -91,10 +89,14 @@ class ExperimentCollection(BaseMedia):
 
     # --------------------------------- Run Experiments --------------------------------
 
-    def run_all(self) -> None:
-        """
-        Run the experiment processing for all ExperimentDocuments in the collection.
-        """
+    def run_all(self, **run_kwargs: Any) -> list[RunSummary]:
+        """Run every experiment of the collection, one after another.
 
-        for experiment_doc in self.experiments:
-            experiment_doc.run()
+        Args:
+            **run_kwargs: Passed to [`run`][rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.run]
+                (``callbacks``, ``cumulative``, ``max_concurrency``, ``on_error``, ...).
+
+        Returns:
+            One [`RunSummary`][rupsycho.mixins.experiment_processing.RunSummary] per experiment.
+        """
+        return [experiment.run(**run_kwargs) for experiment in self.experiments]

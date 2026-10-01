@@ -1,0 +1,137 @@
+{
+    "name": "Generative Models for Big Five Inventory",
+    "description": "Description: Testing Generative Models for BFI questionnaire using Rupsycho.",
+    "parameters": {
+        "seeds": [
+            "7"
+        ],
+        "lazy_load_models": true
+    },
+    "models": {
+        "Qwen/Qwen2.5-0.5B-Instruct": {
+            "type": "local_huggingface",
+            "name_or_path": "HuggingFaceTB/SmolLM-1.7b-Instruct",
+            "device_map": "cpu",
+            "task": "text-generation",
+            "parameters": {
+                "max_new_tokens": 64,
+                "temperature": 1.0,
+                "do_sample": true,
+                "top_k": 50,
+                "top_p": 0.95,
+                "return_full_text": false
+            }
+        }
+    },
+    "prompt_template": {
+        "type": "chat",
+        "messages": [
+            {
+                "role": "system",
+                "content": "Objective: Act like you are {persona_description}, a survey participant answering a questionnaire.\n{general_instruction}\nInstructions: Choose from the list of answer options to answer the question. Answer the question using only the provided answer options. If none of the options are correct, choose the option that is closest to being correct. The solution must be provided in this format: {{answer: \"answer option\"}}"
+            },
+            {
+                "role": "user",
+                "content": "Question: {question}\nAnswer Options: {answer_options}\nAnswer:"
+            }
+        ]
+    },
+    "demographic_profiles": {
+        "Optimistic Persona": {
+            "attributes": {
+                "age": 18,
+                "title": "Ms",
+                "name": "Muller"
+            },
+            "template": "{title} {name} is {age} years old and very open minded with a optimistic personality."
+        },
+        "Conservative Persona": {
+            "attributes": {
+                "age": 65,
+                "title": "Mr",
+                "name": "Grueber"
+            },
+            "template": "{title} {name} is {age} years old and very conservative with a reserved personality."
+        }
+    },
+    "questionnaire": {
+        "name": "BIG FIVE INVENTORY RESPONSE FORM AND INSTRUCTIONS TO PARTICIPANTS",
+        "general_instruction": "Here are a number of characteristics that may or may not apply to you. For example, do you agree that you are someone who likes to spend time with others? Please return the number corresponding to the answer options to indicate the extent to which you agree or disagree with that statement.",
+        "demographic_profiles": [
+            {
+                "attributes": {
+                    "age": 18,
+                    "title": "Ms",
+                    "name": "Muller"
+                },
+                "template": "{title} {name} is {age} years old."
+            }
+        ],
+        "attributes": {
+            "dimension": {
+                "1": "Extraversion",
+                "2": "Agreeableness",
+                "3": "Conscientiousness",
+                "4": "Neuroticism",
+                "5": "Openness"
+            }
+        },
+        "default_answer_options": {
+            "1": {
+                "text": "1. Disagree strongly",
+                "ignored_for_scale": false,
+                "weight": 1
+            },
+            "2": {
+                "text": "2. Disagree a little",
+                "ignored_for_scale": false,
+                "weight": 2
+            },
+            "3": {
+                "text": "3. Neither agree nor disagree",
+                "ignored_for_scale": false,
+                "weight": 3
+            },
+            "4": {
+                "text": "4. Agree a little",
+                "ignored_for_scale": false,
+                "weight": 4
+            },
+            "5": {
+                "text": "5. Agree strongly",
+                "ignored_for_scale": false,
+                "weight": 5
+            }
+        },
+        "instruction_items": [
+            {
+                "question": "I see myself as someone who...",
+                "reversed": false,
+                "attributes": {
+                    "dimension": "1"
+                }
+            },
+            {
+                "question": "Tends to find fault with others",
+                "reversed": false,
+                "attributes": {
+                    "dimension": "1"
+                }
+            },
+            {
+                "question": "Does a thorough job",
+                "reversed": false,
+                "attributes": {
+                    "dimension": "1"
+                }
+            },
+            {
+                "question": "Is depressed, blue",
+                "reversed": false,
+                "attributes": {
+                    "dimension": "1"
+                }
+            }
+        ]
+    }
+}

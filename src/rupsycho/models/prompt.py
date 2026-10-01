@@ -6,8 +6,9 @@
 import warnings
 from typing import Any
 
-from langchain_core.load import load
 from pydantic import BaseModel, Field
+
+from rupsycho._compat import load_serialized
 
 # ================================= Prompt Template Configs ================================
 
@@ -84,7 +85,7 @@ class LangchainPromptTemplateConfig(BaseModel):
     def load_prompt_template(self):
         """Method to deserialize and create the actual LangChain PromptTemplate object."""
         try:
-            return load(self.definition)
+            return load_serialized(self.definition)
 
         except Exception as e:
             warnings.warn(

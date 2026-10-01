@@ -30,27 +30,42 @@ dependencies = [
     "pydantic (>=2.5.2,<3.0.0)",
     "pandas (>=2.0.0,<3.0.0)",
     "numpy (>=1.24.0,<3.0.0)",
-    "scipy (>=1.10.0,<2.0.0)",
     "tabulate (>=0.9.0,<1.0.0)",
     "tqdm (>=4.64.0,<5.0.0)",
     "aiofiles (>=24.1.0)",
+    "langchain-core (>=0.3.75,<0.4.0)",
+]
+
+[project.optional-dependencies]
+# Local Hugging Face models, remote endpoints and the model-based parsers
+huggingface = [
     "torch (>=2.1.2,<3.0.0)",
     "transformers (>=4.36.2,<5.0.0)",
     "accelerate (>=0.25.0)",
     "sentencepiece (>=0.1.99)",
-    "langchain-core (>=0.3.75,<0.4.0)",
+    "langchain-huggingface (>=0.3.1,<0.4.0)",
+]
+openai = ["langchain-openai (>=0.3.35,<0.4.0)"]
+ollama = ["langchain-ollama (>=0.3.10,<0.4.0)"]
+google = ["langchain-google-genai (>=2.1.12,<3.0.0)"]
+deepseek = ["langchain-deepseek (>=0.1.4,<1.0.0)"]
+# Every supported model back-end
+models = [
+    "torch (>=2.1.2,<3.0.0)",
+    "transformers (>=4.36.2,<5.0.0)",
+    "accelerate (>=0.25.0)",
+    "sentencepiece (>=0.1.99)",
     "langchain-huggingface (>=0.3.1,<0.4.0)",
     "langchain-openai (>=0.3.35,<0.4.0)",
     "langchain-ollama (>=0.3.10,<0.4.0)",
     "langchain-google-genai (>=2.1.12,<3.0.0)",
     "langchain-deepseek (>=0.1.4,<1.0.0)",
 ]
-
-[project.optional-dependencies]
 configurator = [
     "streamlit (>=1.40.2,<2.0.0)",
     "pypdf (>=5.1.0,<7.0.0)",
     "openai (>=1.42.0,<2.0.0)",
+    "langchain-openai (>=0.3.35,<0.4.0)",
 ]
 notebook = [
     "ipywidgets (>=8.1.5,<9.0.0)",
@@ -59,6 +74,15 @@ quantization = [
     "bitsandbytes (>=0.43.0)",
 ]
 all = [
+    "torch (>=2.1.2,<3.0.0)",
+    "transformers (>=4.36.2,<5.0.0)",
+    "accelerate (>=0.25.0)",
+    "sentencepiece (>=0.1.99)",
+    "langchain-huggingface (>=0.3.1,<0.4.0)",
+    "langchain-openai (>=0.3.35,<0.4.0)",
+    "langchain-ollama (>=0.3.10,<0.4.0)",
+    "langchain-google-genai (>=2.1.12,<3.0.0)",
+    "langchain-deepseek (>=0.1.4,<1.0.0)",
     "streamlit (>=1.40.2,<2.0.0)",
     "pypdf (>=5.1.0,<7.0.0)",
     "openai (>=1.42.0,<2.0.0)",
@@ -68,6 +92,7 @@ all = [
 test = [
     "pytest (>=8.0.0,<10.0.0)",
     "pytest-cov (>=4.0.0)",
+    "hypothesis (>=6.100.0)",
 ]
 docs = [
     "mkdocs (>=1.5.0,<2.0.0)",
@@ -77,6 +102,7 @@ docs = [
 dev = [
     "pytest (>=8.0.0,<10.0.0)",
     "pytest-cov (>=4.0.0)",
+    "hypothesis (>=6.100.0)",
     "mkdocs (>=1.5.0,<2.0.0)",
     "mkdocs-material (>=9.0.0)",
     "mkdocstrings[python] (>=0.24.0)",
@@ -119,7 +145,11 @@ addopts = "-ra -m 'not integration'"
 markers = [
     "integration: tests that download and run real models (deselected by default; run with -m integration)",
 ]
-filterwarnings = ["ignore::DeprecationWarning", "ignore::FutureWarning"]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::FutureWarning",
+    "ignore:Models of type .* cannot be seeded:UserWarning",
+]
 
 [tool.coverage.run]
 source = ["rupsycho"]
@@ -168,6 +198,7 @@ exclude = ["tests/", "examples/"]
 
 [tool.semantic_release]
 version_toml = ["pyproject.toml:project.version"]
+version_variables = ["src/rupsycho/__init__.py:__version__"]
 build_command = "pip install build && python -m build"
 commit_message = "chore(release): v{version} [skip ci]"
 tag_format = "v{version}"

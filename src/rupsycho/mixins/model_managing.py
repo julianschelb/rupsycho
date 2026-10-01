@@ -11,8 +11,9 @@ from __future__ import annotations
 import warnings
 from typing import TYPE_CHECKING, Any
 
-from langchain_core.load import dumpd, load
+from langchain_core.load import dumpd
 
+from rupsycho._compat import load_serialized
 from rupsycho.models.model import LangChainModelConfig
 
 
@@ -37,7 +38,7 @@ class ModelManagementMixin:
         :return: Loaded model, or None if an error occurs.
         """
         try:
-            model = load(model_definition)
+            model = load_serialized(model_definition)
             return model
         except Exception as e:
             warnings.warn(f"Failed to load model: {e}", UserWarning, stacklevel=2)

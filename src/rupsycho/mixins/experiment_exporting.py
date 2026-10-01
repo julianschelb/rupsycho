@@ -11,7 +11,18 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING, Any
 
-import pandas as pd
+if TYPE_CHECKING:
+    import pandas as pd
+
+ANSWER_COLUMNS = [
+    "Instruction ID",
+    "Instruction Question",
+    "Model ID",
+    "Persona ID",
+    "Run Seed",
+    "Answer",
+]
+"""Columns of the DataFrame returned by ``get_answers_as_dataframe``."""
 
 
 class ExperimentExportMixin:
@@ -190,5 +201,7 @@ class ExperimentExportMixin:
                             }
                         )
 
-        # Create DataFrame from the collected data
-        return pd.DataFrame(data)
+        # Create DataFrame from the collected data (keeping the columns even when empty)
+        import pandas as pd
+
+        return pd.DataFrame(data, columns=ANSWER_COLUMNS)
