@@ -139,9 +139,16 @@ class ExperimentProcessingMixin:
         else:
             answer_options = self.questionnaire.default_answer_options.join_options()
 
+        try:
+            persona_description = profile.get_profile_desc()
+        except KeyError as e:
+            raise ValueError(
+                f"The persona template uses the attribute {e}, which the persona does not define"
+            ) from e
+
         return {
             "general_instruction": self.questionnaire.general_instruction,
-            "persona_description": profile.get_profile_desc(),
+            "persona_description": persona_description,
             "question": instruction_item.question,
             "answer_options": answer_options,
         }
@@ -239,12 +246,25 @@ class ExperimentProcessingMixin:
             raise ValueError("questionnaire has not been set.")
         if self.demographic_profiles is None:
             raise ValueError("demographic_profiles has not been set.")
+        if not self.questionnaire.instruction_items:
+            raise ValueError("The questionnaire has no instruction_items to ask.")
+        if not self.questionnaire.default_answer_options:
+            missing = [
+                position
+                for position, item in enumerate(self.questionnaire.instruction_items)
+                if not (item.answer_options and item.answer_options.options)
+            ]
+            if missing:
+                raise ValueError(
+                    f"Item(s) {missing} have no answer options and the questionnaire defines no "
+                    "default_answer_options."
+                )
 
         return True
 
     def _get_seed_values(self) -> list:
         """Return the seed values to be used in the experiment."""
-        return self.parameters.seeds if self.parameters.seeds else [DEFAULT_SEED]
+        return self.parameters.seeds if self.parameters.seeds else [str(DEFAULT_SEED)]
 
     def _calculate_total_iterations(self) -> int:
         """Calculate the total number of model calls for the progress bar."""

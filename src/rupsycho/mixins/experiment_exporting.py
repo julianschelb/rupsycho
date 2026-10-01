@@ -23,8 +23,9 @@ CONFIG_FIELDS = (
     "prompt_template",
     "demographic_profiles",
     "questionnaire",
+    "metadata",
 )
-"""Fields that make up an experiment configuration."""
+"""Fields that make up an experiment configuration (``metadata`` only when it is not empty)."""
 
 ANSWER_COLUMNS = [
     "Instruction ID",
@@ -74,6 +75,8 @@ class ExperimentExportMixin:
             exclude=None if include_answers else exclude,
             exclude_none=True,
         )
+        if not data.get("metadata"):
+            data.pop("metadata", None)
         return data
 
     def export_to_file(

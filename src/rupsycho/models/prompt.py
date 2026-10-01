@@ -3,7 +3,6 @@
 # ===========================================================================
 # This file contains the data model for the prompt templates.
 
-import warnings
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -86,9 +85,5 @@ class LangchainPromptTemplateConfig(BaseModel):
         """Method to deserialize and create the actual LangChain PromptTemplate object."""
         try:
             return load_serialized(self.definition)
-
         except Exception as e:
-            warnings.warn(
-                f"Failed to create LangChain prompt template: {e}", UserWarning, stacklevel=2
-            )
-            return None
+            raise ValueError(f"Failed to create the LangChain prompt template: {e}") from e

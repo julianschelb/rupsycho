@@ -170,18 +170,18 @@ class ExperimentDocument(
         else:
             data["models"] = {"default_model": DEFAULT_MODEL_CONFIG}
 
-        # Load models if lazy_load_models is False; otherwise, leave them for later loading
-        if not data["parameters"].lazy_load_models:
-            data["runnable_models"] = self._load_runnable_models(data["models"])
-        else:
-            # Models will be loaded later
-            data["runnable_models"] = data["models"]
+        # Models are loaded when the run reaches them (lazy_load_models) or right after validation
+        eager = not data["parameters"].lazy_load_models
+        data["runnable_models"] = data["models"]
 
         # Convert questionnaire to an instance of Questionnaire
         if "questionnaire" in data:
             data["questionnaire"] = self._convert_questionnaire(data["questionnaire"])
 
         super().__init__(**data)
+
+        if eager:  # only after everything else validated: loading may download large models
+            self.runnable_models = self._load_runnable_models(self.models)
 
     # --------------------------------- Conversion Methods --------------------------------
 

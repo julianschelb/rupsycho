@@ -14,7 +14,7 @@ import glob
 import json
 import logging
 import os
-from collections.abc import AsyncIterator, Iterator
+from collections.abc import AsyncIterator, Iterator, Mapping
 from pathlib import Path
 from typing import Any
 
@@ -40,6 +40,10 @@ logger = logging.getLogger(__name__)
 
 def _experiment_from_json(json_data: dict[str, Any]) -> ExperimentDocument:
     """Create a new experiment from a JSON dictionary."""
+    if not isinstance(json_data, Mapping):
+        raise ValueError(
+            f"An experiment configuration must be a JSON object, got {type(json_data).__name__}"
+        )
     return ExperimentDocument(**json_data)
 
 

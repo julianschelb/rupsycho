@@ -101,8 +101,9 @@ class PromptTemplateMixin:
             ValueError: If the configuration is not recognised.
         """
         config = self._convert_prompt(prompt_template)
+        runnable = config.load_prompt_template()  # build first: a failure leaves nothing half set
         self.prompt_template = config
-        self.runnable_prompt = config.load_prompt_template()
+        self.runnable_prompt = runnable
 
     def reset_prompt(self) -> None:
         """
