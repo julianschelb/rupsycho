@@ -262,6 +262,37 @@ def check_multiple_choice_answers(
     return answer_counts
 
 
+_ONES = (
+    "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+    "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen",
+    "nineteen",
+)  # fmt: skip
+_TENS = ("", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety")
+
+
+def number_to_words(n: int) -> str:
+    """Spell out an integer in British English, e.g. ``42`` -> ``"forty-two"``.
+
+    Args:
+        n: A number from 0 to 999.
+
+    Returns:
+        The number in words (``"one hundred and one"`` for 101).
+
+    Raises:
+        ValueError: If ``n`` is outside 0-999.
+    """
+    if not 0 <= n < 1000:
+        raise ValueError(f"number_to_words supports 0-999, got {n}")
+    if n < 20:
+        return _ONES[n]
+    if n < 100:
+        tens, ones = divmod(n, 10)
+        return _TENS[tens] + (f"-{_ONES[ones]}" if ones else "")
+    hundreds, rest = divmod(n, 100)
+    return f"{_ONES[hundreds]} hundred" + (f" and {number_to_words(rest)}" if rest else "")
+
+
 def mk_age_keywords(max_age: int = 100) -> list[list]:
     """
     Return a list that contains (in order) for each number in the specified range a list of all
@@ -270,16 +301,15 @@ def mk_age_keywords(max_age: int = 100) -> list[list]:
     For expample for the range 0-44:
     [['0', 'nil', 'nought', 'oh', 'zero'] ... ['44', 'forty four', 'forty-four', 'fortyfour']].
     """
-    from num2words import num2words
 
     # generate different written forms of a number
     def generate_written_forms(n):
         forms = set()
         # Basic form
-        forms.add(num2words(n))
+        forms.add(number_to_words(n))
 
         # Variations with and without hyphens for compound numbers
-        base = num2words(n)
+        base = number_to_words(n)
         if "-" in base:
             forms.add(base.replace("-", " "))
             forms.add(base.replace("-", ""))
