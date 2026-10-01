@@ -93,6 +93,7 @@ all = [
 test = [
     "pytest (>=8.0.0,<10.0.0)",
     "pytest-cov (>=4.0.0)",
+    "pytest-timeout (>=2.3.0)",
     "hypothesis (>=6.100.0)",
 ]
 docs = [
@@ -103,12 +104,13 @@ docs = [
 dev = [
     "pytest (>=8.0.0,<10.0.0)",
     "pytest-cov (>=4.0.0)",
+    "pytest-timeout (>=2.3.0)",
     "hypothesis (>=6.100.0)",
     "mkdocs (>=1.6.0,<2.0.0)",
     "mkdocs-material (>=9.0.0)",
     "mkdocstrings[python] (>=0.24.0)",
     "poethepoet (>=0.24.0)",
-    "ruff (>=0.8.0)",
+    "ruff (~=0.16.10)",
     "mypy (>=1.10.0)",
     "pandas-stubs",
     "types-tqdm (>=4.66.0)",
@@ -147,6 +149,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra -m 'not integration'"
+timeout = 300
 markers = [
     "integration: tests that download and run real models (deselected by default; run with -m integration)",
 ]
@@ -162,6 +165,10 @@ branch = true
 
 [tool.coverage.report]
 exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:", "raise NotImplementedError"]
+fail_under = 85
+
+[tool.poe]
+executor = { type = "simple" }
 
 [tool.poe.tasks]
 test = "pytest"
@@ -205,7 +212,7 @@ exclude = ["tests/", "examples/"]
 
 [tool.semantic_release]
 version_toml = ["pyproject.toml:project.version"]
-version_variables = ["src/rupsycho/__init__.py:__version__"]
+version_variables = ["src/rupsycho/__init__.py:__version__", "CITATION.cff:version"]
 build_command = "pip install build && python -m build"
 commit_message = "chore(release): v{version} [skip ci]"
 tag_format = "v{version}"

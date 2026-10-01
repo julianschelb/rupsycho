@@ -1,5 +1,11 @@
 name: Docs
 
+# Strict MkDocs build on every push and pull request; on pushes to main the built site is
+# deployed with the GitHub Pages "Actions" flow (https://julianschelb.github.io/rupsycho/).
+#
+# One-time setup (already done for this repository): Settings -> Pages -> Build and
+# deployment -> Source: GitHub Actions.
+
 on:
   push:
     branches: [main]
@@ -9,12 +15,17 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Never cancel a running deploy half-way; only superseded pull request builds.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
 
 jobs:
   build:
     name: Build docs
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -22,37 +33,38 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
+          cache-dependency-path: pyproject.toml
 
       # mkdocstrings reads the source statically, so the heavy runtime
-      # dependencies (torch, transformers, ...) are not needed here.
+      # dependencies (torch, transformers, ...) are not needed here. Keep the
+      # requirements in sync with the "docs" extra in pyproject.toml. MkDocs 2.0
+      # drops the plugin system that Material for MkDocs and mkdocstrings rely on,
+      # hence the "<2" pin.
       - name: Install documentation tooling
-        run: pip install "mkdocs>=1.5,<2" mkdocs-material "mkdocstrings[python]"
+        run: pip install "mkdocs>=1.6,<2" mkdocs-material "mkdocstrings[python]"
 
       - name: Build docs (strict)
         run: mkdocs build --strict
+
+      - name: Upload the site as Pages artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
 
   deploy:
     name: Deploy to GitHub Pages
     if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
-      contents: write
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: pip
-
-      - name: Install documentation tooling
-        run: pip install "mkdocs>=1.5,<2" mkdocs-material "mkdocstrings[python]"
-
       - name: Deploy to GitHub Pages
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          mkdocs gh-deploy --force
+        id: deployment
+        uses: actions/deploy-pages@v4

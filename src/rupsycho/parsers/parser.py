@@ -1,73 +1,28 @@
-# ===========================================================================
-#                            Output Parser Class
-# ===========================================================================
-# This module defines a custom output parser class for processing text.
-# The parser is designed to remove line breaks and non-ASCII Unicode characters
-# from a given string, returning a cleaned version of the input.
+# parser.py
+"""``BasicParser``: the original name of :class:`~rupsycho.parsers.cleaners.BasicCleaner`."""
 
-import re
+from __future__ import annotations
 
-from langchain_core.exceptions import OutputParserException
-from langchain_core.output_parsers import BaseOutputParser
+from rupsycho.parsers.cleaners import BasicCleaner
+
+__all__ = ["BasicParser"]
 
 
-class BasicParser(BaseOutputParser[str]):
+class BasicParser(BasicCleaner):
+    """Removes line breaks, unusual white space and non-ASCII characters from a text.
+
+    Identical to [`BasicCleaner`][rupsycho.parsers.cleaners.BasicCleaner]; the name is kept for
+    backwards compatibility.
+
+    Example:
+        ```python
+        from rupsycho.parsers.parser import BasicParser
+
+        BasicParser().invoke("Hello,\\nworld \U0001f60a")  # 'Hello, world'
+        ```
     """
-    A custom parser that processes and cleans text by removing line breaks
-    and non-ASCII Unicode characters.
-
-    This parser is designed to work with LangChain and can be integrated
-    into various chains or agents that require cleaned text output.
-    """
-
-    def parse(self, text: str) -> str:
-        """
-        Parses the input text to remove line breaks and non-ASCII Unicode characters.
-
-        Parameters
-        ----------
-        text : str
-            The input string to be cleaned.
-
-        Returns
-        -------
-        str
-            The cleaned string with line breaks and non-ASCII Unicode characters removed.
-
-        Raises
-        ------
-        OutputParserException
-            If an error occurs during parsing, an OutputParserException is raised with a
-            descriptive error message.
-        """
-        try:
-            # Remove line breaks and replace with a space
-            cleaned_text = text.replace("\n", " ").replace("\r", " ")
-
-            # Map typographic quotes/apostrophes and no-break spaces to ASCII before dropping the rest
-            cleaned_text = cleaned_text.translate(
-                {0x2018: "'", 0x2019: "'", 0x201C: '"', 0x201D: '"', 0x00A0: " "}
-            )
-
-            # Remove non-ASCII Unicode characters
-            cleaned_text = re.sub(r"[^\x00-\x7F]+", "", cleaned_text)
-
-            # Trim extra whitespace
-            cleaned_text = re.sub(r"\s+", " ", cleaned_text).strip()
-
-            return cleaned_text
-
-        except Exception as e:
-            raise OutputParserException(f"BasicParser encountered an error: {e}") from e
 
     @property
     def _type(self) -> str:
-        """
-        Returns the type of the parser as a string identifier.
-
-        Returns
-        -------
-        str
-            The string "basic_parser", identifying the type of this parser.
-        """
+        """Identifier of the parser type."""
         return "basic_parser"

@@ -45,12 +45,13 @@ class BasicCleaner(BaseOutputParser[str]):
             descriptive error message.
         """
         try:
-            # Remove line breaks and replace with a space
-            cleaned_text = text.replace("\n", " ").replace("\r", " ")
+            # Every kind of white space (line breaks, no-break and thin spaces, ...) becomes one
+            # space; otherwise dropping the non-ASCII characters below would glue words together
+            cleaned_text = re.sub(r"\s+", " ", text)
 
-            # Map typographic quotes/apostrophes and no-break spaces to ASCII before dropping the rest
+            # Map typographic quotes/apostrophes to ASCII before dropping the rest
             cleaned_text = cleaned_text.translate(
-                {0x2018: "'", 0x2019: "'", 0x201C: '"', 0x201D: '"', 0x00A0: " "}
+                {0x2018: "'", 0x2019: "'", 0x201C: '"', 0x201D: '"'}
             )
 
             # Remove non-ASCII Unicode characters
@@ -62,7 +63,7 @@ class BasicCleaner(BaseOutputParser[str]):
             return cleaned_text
 
         except Exception as e:
-            raise OutputParserException(f"BasicParser encountered an error: {e}") from e
+            raise OutputParserException(f"BasicCleaner encountered an error: {e}") from e
 
     @property
     def _type(self) -> str:

@@ -1,14 +1,37 @@
 version: 2
 updates:
+  # Versions of the actions used in .github/workflows
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: monthly
     commit-message:
       prefix: "ci"
+    groups:
+      github-actions:
+        patterns: ["*"]
+
+  # Python dependencies declared in pyproject.toml
   - package-ecosystem: pip
     directory: /
     schedule:
       interval: monthly
     commit-message:
       prefix: "build"
+    groups:
+      dev-tooling:
+        patterns:
+          - "ruff"
+          - "mypy"
+          - "pandas-stubs"
+          - "types-*"
+          - "pytest*"
+          - "hypothesis"
+          - "mkdocs*"
+          - "poethepoet"
+          - "pre-commit"
+          - "build"
+          - "python-semantic-release"
+          - "nbclient"
+          - "nbformat"
+          - "ipykernel"

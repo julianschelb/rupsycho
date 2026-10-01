@@ -102,7 +102,9 @@ def prompt_cleaner(
     blocks = [block for block in matcher.get_matching_blocks() if block.size > 0]
     # only strip the prompt if the completion actually starts with (a copy of) it
     if blocks and blocks[0].b == 0 and ratio >= similarity_threshold:
-        completion = completion[len(prompt) :].strip()
+        # cut after the echoed part; matches far behind it are the model's own answer
+        echo_end = max(block.b + block.size for block in blocks if block.b < 1.5 * len(prompt))
+        completion = completion[echo_end:].strip()
 
     return {
         "completion": completion,
@@ -144,7 +146,7 @@ def process_completion(
         pattern = user_input_pattern
 
     elif regex_dict_path:
-        with open(regex_dict_path) as file:
+        with open(regex_dict_path, encoding="utf-8") as file:
             patterns = json.load(file)
             if pattern_name in patterns:
                 pattern = patterns[pattern_name]
@@ -431,8 +433,9 @@ def check_age(text: str, max_age: int, ignore_case: bool = True) -> str:
     words = re.findall(r"[A-Za-z0-9]+", text)
 
     # search first instance of any form of number, longest spelling first ("twenty five" != "twenty")
+    longest = max(len(form.split()) for form in forms)
     for start in range(len(words)):
-        for length in (4, 3, 2, 1):
+        for length in range(longest, 0, -1):
             candidate = " ".join(words[start : start + length])
             if candidate in forms:
                 return forms[candidate]

@@ -11,6 +11,7 @@
 
 import csv
 import json
+import os
 from abc import ABC, abstractmethod
 
 # --------------------------------- JSONL --------------------------------
@@ -94,6 +95,17 @@ class CSVCallback(Callback):
     Callback implementation for saving answers to a CSV file.
     """
 
+    HEADER = (
+        "experiment_name",
+        "instruction_item_id",
+        "instruction_item",
+        "model_id",
+        "profile_id",
+        "random_seed",
+        "time",
+        "answer",
+    )
+
     def __init__(self, file_path="experiment_output.csv"):
         self.file_path = file_path
 
@@ -101,21 +113,13 @@ class CSVCallback(Callback):
         try:
             with open(self.file_path, "x", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
-                writer.writerow(
-                    [
-                        "experiment_name",
-                        "instruction_item_id",
-                        "instruction_item",
-                        "model_id",
-                        "profile_id",
-                        "random_seed",
-                        "time",
-                        "answer",
-                    ]
-                )
+                writer.writerow(self.HEADER)
         except FileExistsError:
-            # File already exists, do nothing
-            pass
+            # Appending to an existing file keeps it as it is - unless it is empty, in which
+            # case it still needs its header
+            if os.path.getsize(self.file_path) == 0:
+                with open(self.file_path, "a", newline="", encoding="utf-8") as f:
+                    csv.writer(f).writerow(self.HEADER)
 
     def save_answer(
         self,
@@ -244,12 +248,16 @@ class PrintTableCallback(Callback):
         )
 
         # Print each row in a fixed-width format
-        row = (
-            f"{str(instruction_item_id):<{self.column_widths['instruction_id']}} | "
-            f"{model_id:<{self.column_widths['model_id']}} | "
-            f"{profile_id:<{self.column_widths['profile_id']}} | "
-            f"{str(random_seed):<{self.column_widths['random_seed']}} | "
-            f"{clean_question:<{self.column_widths['question']}} | "
-            f"{truncated_answer:<{self.column_widths['answer']}}"
-        )
+        widths = self.column_widths
+        cells = [
+            self._truncate(str(instruction_item_id), widths["instruction_id"]).ljust(
+                widths["instruction_id"]
+            ),
+            self._truncate(str(model_id), widths["model_id"]).ljust(widths["model_id"]),
+            self._truncate(str(profile_id), widths["profile_id"]).ljust(widths["profile_id"]),
+            self._truncate(str(random_seed), widths["random_seed"]).ljust(widths["random_seed"]),
+            clean_question.ljust(widths["question"]),
+            truncated_answer.ljust(widths["answer"]),
+        ]
+        row = " | ".join(cells)
         print(row)

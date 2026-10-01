@@ -74,12 +74,15 @@ def test_unknown_attribute_raises():
 
 
 def test_version_is_exposed_and_consistent_with_the_package_metadata():
+    import re
     from pathlib import Path
-
-    import tomllib
 
     import rupsycho
 
-    pyproject = Path(__file__).parents[1] / "pyproject.toml"
-    declared = tomllib.loads(pyproject.read_text(encoding="utf-8"))["project"]["version"]
+    root = Path(__file__).parents[1]
+    pyproject = (root / "pyproject.toml").read_text(encoding="utf-8")
+    declared = re.search(r'^version = "([^"]+)"', pyproject, re.MULTILINE).group(1)
+    citation = re.search(r'^version: "?([^"\n]+)"?', (root / "CITATION.cff").read_text(), re.M)
+
     assert rupsycho.__version__ == declared
+    assert citation is not None and citation.group(1) == declared

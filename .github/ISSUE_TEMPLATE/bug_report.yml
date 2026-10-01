@@ -2,6 +2,11 @@ name: Bug report
 description: Something does not work as documented
 labels: [bug]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a problem. Experiment configurations can contain
+        API keys: **remove keys and tokens** from everything you paste below.
   - type: textarea
     id: what
     attributes:
@@ -10,20 +15,68 @@ body:
     validations:
       required: true
   - type: textarea
+    id: reproduce
+    attributes:
+      label: Minimal reproduction
+      description: >-
+        A short Python snippet or `rupsycho` command that reproduces the problem. A fake or
+        tiny model is enough whenever the bug is not specific to one model.
+      render: python
+  - type: textarea
     id: config
     attributes:
       label: Experiment configuration
-      description: The (redacted, no API keys) JSON config or Python snippet that reproduces the problem.
+      description: The redacted JSON configuration (no API keys) or the part of it that matters.
       render: json
   - type: input
     id: version
     attributes:
-      label: rupsycho version and Python version
-      placeholder: "rupsycho 0.1.0, Python 3.12"
+      label: rupsycho version
+      description: 'Output of `python -c "import rupsycho; print(rupsycho.__version__)"`.'
+      placeholder: "0.1.0"
     validations:
       required: true
+  - type: input
+    id: python
+    attributes:
+      label: Python version and operating system
+      placeholder: "Python 3.12.4, Ubuntu 24.04"
+    validations:
+      required: true
+  - type: dropdown
+    id: backend
+    attributes:
+      label: Model back-end
+      multiple: true
+      options:
+        - Local Hugging Face
+        - Remote Hugging Face (inference endpoint)
+        - Ollama
+        - OpenAI
+        - Google (Gemini)
+        - DeepSeek
+        - Serialized LangChain model
+        - No model involved
+  - type: textarea
+    id: environment
+    attributes:
+      label: Installed packages
+      description: >-
+        Output of `pip list | grep -i -E "rupsycho|torch|transformers|langchain|pydantic|pandas"`.
+        Helps to spot missing extras and version conflicts.
+      render: shell
   - type: textarea
     id: logs
     attributes:
       label: Traceback / logs
+      description: The full traceback. `RUPSYCHO_DEBUG=1` makes the command line print it.
       render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched the existing issues.
+          required: true
+        - label: I removed API keys and tokens from the configuration and the logs.
+          required: true

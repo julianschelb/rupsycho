@@ -19,6 +19,7 @@ from __future__ import annotations
 import glob
 import json
 import logging
+import os
 from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 from typing import Any, Literal
@@ -87,7 +88,7 @@ class PostprocessingPipeline:
     def __init__(
         self,
         config_file_path: str | Path | Mapping[str, Any] | ExperimentDocument,
-        results_file_patterns: str | Sequence[str],
+        results_file_patterns: str | os.PathLike[str] | Sequence[str | os.PathLike[str]],
         cleaner: Any,
         validator: Any,
         judge: Any,
@@ -99,11 +100,14 @@ class PostprocessingPipeline:
         if errors not in ("raise", "coerce"):
             raise ValueError(f"errors must be 'raise' or 'coerce', got {errors!r}")
         self.config_file_path = config_file_path
-        self.results_file_patterns = (
-            [results_file_patterns]
-            if isinstance(results_file_patterns, str)
-            else list(results_file_patterns)
-        )
+        self.results_file_patterns = [
+            os.fspath(pattern)
+            for pattern in (
+                [results_file_patterns]
+                if isinstance(results_file_patterns, (str, os.PathLike))
+                else results_file_patterns
+            )
+        ]
         self.output_path = output_path
         self.cleaner = cleaner
         self.validator = validator
@@ -146,20 +150,25 @@ class PostprocessingPipeline:
         """
         paths: list[str] = []
         for pattern in self.results_file_patterns:
-            paths.extend(sorted(glob.glob(pattern, recursive=True)))
+            # an existing file is taken literally (its name may contain glob characters)
+            matches = (
+                [pattern] if os.path.isfile(pattern) else sorted(glob.glob(pattern, recursive=True))
+            )
+            paths.extend(path for path in matches if path not in paths)  # no duplicate rows
         if not paths:
             raise FileNotFoundError(f"No result files match {self.results_file_patterns}")
 
         frames = []
         for path in paths:
-            frame = pd.read_csv(path)
+            # Only a blank cell is a missing answer: a model may literally answer "None" or "N/A"
+            frame = pd.read_csv(
+                path, dtype={"answer": "string"}, keep_default_na=False, na_values=[""]
+            )
             missing = [column for column in REQUIRED_COLUMNS if column not in frame.columns]
             if missing:
                 raise ValueError(
                     f"{path} lacks the column(s) {missing}; expected CSVCallback output"
                 )
-            # Answers that are plain numbers must stay text
-            frame["answer"] = frame["answer"].astype("string")
             frames.append(frame)
         return pd.concat(frames, ignore_index=True)
 

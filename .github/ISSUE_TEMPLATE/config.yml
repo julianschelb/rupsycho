@@ -1,5 +1,11 @@
 blank_issues_enabled: false
 contact_links:
+  - name: Documentation
+    url: https://julianschelb.github.io/rupsycho/
+    about: Getting started, tutorials, the configuration reference and the API.
+  - name: Security vulnerability
+    url: https://github.com/julianschelb/rupsycho/security/advisories/new
+    about: Please report vulnerabilities privately, not as a public issue.
   - name: Paper
     url: https://arxiv.org/abs/2503.10229
     about: Background on the framework and its design.
