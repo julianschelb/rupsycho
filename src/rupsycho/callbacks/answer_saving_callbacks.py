@@ -202,6 +202,12 @@ class PrintTableCallback(Callback):
         # Initialize a flag to track whether headers have been printed
         self.headers_printed = False
 
+    @staticmethod
+    def _truncate(text: str, width: int) -> str:
+        """Flatten line breaks and shorten ``text`` to at most ``width`` characters."""
+        text = text.replace("\n", " ").replace("\r", " ")
+        return text if len(text) <= width else text[: width - 3] + "..."
+
     def _print_headers(self):
         """Print the table headers."""
         header = (
@@ -231,16 +237,10 @@ class PrintTableCallback(Callback):
         if not self.headers_printed:
             self._print_headers()
 
-        # Limit question and answer to the first 100 characters
-        clean_question = (
-            (instruction_item.question.replace("\n", " ").replace("\r", " ")[:22] + "...")
-            if len(instruction_item.question) > 22
-            else instruction_item.question.replace("\n", " ").replace("\r", " ")
-        )
-        truncated_answer = (
-            (answer.replace("\n", " ").replace("\r", " ")[:22] + "...")
-            if len(answer) > 25
-            else answer.replace("\n", " ").replace("\r", " ")
+        clean_question = self._truncate(instruction_item.question, self.column_widths["question"])
+        # A failed call has no answer
+        truncated_answer = self._truncate(
+            "(no answer)" if answer is None else str(answer), self.column_widths["answer"]
         )
 
         # Print each row in a fixed-width format
