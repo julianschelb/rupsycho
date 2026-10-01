@@ -99,6 +99,27 @@ class AnswerOptions(BaseModel):
         return [option.text for option in self.options.values()]
 
 
+def _to_answer_options(value: Any) -> Any:
+    """Convert the configuration forms of answer options into an ``AnswerOptions`` model.
+
+    Accepted forms: a ready ``AnswerOptions``; ``{"options": {...}, "delimiter": ..,
+    "prepend_delimiter": ..}``; or just ``{id: option}``, where an option is a dictionary or an
+    ``AnswerOption``. Anything else is passed on for pydantic to validate (and reject).
+    """
+    if not isinstance(value, dict):
+        return value
+    if "options" in value:
+        options = {key: AnswerOption.model_validate(opt) for key, opt in value["options"].items()}
+        return AnswerOptions(
+            options=options,
+            delimiter=value.get("delimiter", ", "),
+            prepend_delimiter=value.get("prepend_delimiter", False),
+        )
+    return AnswerOptions(
+        options={key: AnswerOption.model_validate(opt) for key, opt in value.items()}
+    )
+
+
 class InstructionItem(BaseModel):
     """
     Represents a single question item in a psychological test, along with its answer options and specific attributes.
@@ -118,24 +139,9 @@ class InstructionItem(BaseModel):
 
     @field_validator("answer_options", mode="before")
     @classmethod
-    def ensure_answer_options_is_proper_model(cls, v):
+    def ensure_answer_options_is_proper_model(cls, v: Any) -> Any:
         """Convert a dictionary to an AnswerOptions model if necessary."""
-        # If the input `v` is a dictionary and contains keys that indicate it might be nested
-        if isinstance(v, dict):
-            if "options" in v:
-                # If the key 'options' is found, handle it as a full AnswerOptions structure
-                options = {key: AnswerOption(**option) for key, option in v["options"].items()}
-                return AnswerOptions(
-                    options=options,
-                    delimiter=v.get("delimiter", ", "),
-                    prepend_delimiter=v.get("prepend_delimiter", False),
-                )
-            else:
-                # Otherwise, assume it's just the dictionary of options
-                return AnswerOptions(
-                    options={key: AnswerOption(**option) for key, option in v.items()}
-                )
-        return v
+        return _to_answer_options(v)
 
     def update_answer(self, model_key: str, profile_key: str, run_idx: int, answer: Any) -> None:
         """Store the answer in the appropriate location."""
@@ -190,23 +196,9 @@ class Questionnaire(BaseModel):
 
     @field_validator("default_answer_options", mode="before")
     @classmethod
-    def ensure_default_answer_options_is_proper_model(cls, v):
+    def ensure_default_answer_options_is_proper_model(cls, v: Any) -> Any:
         """Convert a dictionary to an AnswerOptions model if necessary."""
-        if isinstance(v, dict):
-            if "options" in v:
-                # If the dictionary already has 'options', convert the inner dictionary properly
-                options = {key: AnswerOption(**option) for key, option in v["options"].items()}
-                return AnswerOptions(
-                    options=options,
-                    delimiter=v.get("delimiter", ", "),
-                    prepend_delimiter=v.get("prepend_delimiter", False),
-                )
-            else:
-                # If it's just a flat dictionary, convert it directly
-                return AnswerOptions(
-                    options={key: AnswerOption(**option) for key, option in v.items()}
-                )
-        return v
+        return _to_answer_options(v)
 
     def get_number_of_questions(self) -> int:
         """Returns the number of questions in the questionnaire."""

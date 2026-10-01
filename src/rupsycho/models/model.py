@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from typing import Annotated, Any
 
+from langchain_core.runnables import Runnable
 from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, SecretStr
 
 from rupsycho._compat import load_serialized, require
@@ -88,9 +89,15 @@ class LangChainModelConfig(BaseModel):
             ValueError: If the definition cannot be deserialized.
         """
         try:
-            return load_serialized(self.definition)
+            model = load_serialized(self.definition)
         except Exception as e:
             raise ValueError(f"Failed to load the LangChain model: {e}") from e
+        if not isinstance(model, Runnable):
+            raise ValueError(
+                "Failed to load the LangChain model: the definition does not describe a "
+                f"LangChain runnable (got {type(model).__name__})"
+            )
+        return model
 
 
 # ------------------------------------------------
