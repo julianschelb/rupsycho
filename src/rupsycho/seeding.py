@@ -93,7 +93,10 @@ def supports_seeding(model: Any) -> bool:
 
 def _set_global_seed(seed: int) -> Callable[[Any], Any]:
     def apply(value: Any) -> Any:
-        require("transformers", "huggingface", feature="Seeding local models").set_seed(seed)
+        # transformers.set_seed feeds numpy, which only accepts 0 <= seed < 2**32
+        require("transformers", "huggingface", feature="Seeding local models").set_seed(
+            seed % 2**32
+        )
         return value
 
     return apply

@@ -3,7 +3,6 @@
 # ===========================================================================
 # This file contains the data model for a psychological questionnaire.
 
-from collections import defaultdict
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -108,7 +107,7 @@ def _to_answer_options(value: Any) -> Any:
     """
     if not isinstance(value, dict):
         return value
-    if "options" in value:
+    if isinstance(value.get("options"), dict):
         options = {key: AnswerOption.model_validate(opt) for key, opt in value["options"].items()}
         return AnswerOptions(
             options=options,
@@ -132,8 +131,8 @@ class InstructionItem(BaseModel):
         default_factory=dict,
         description="Additional attributes related to the question, such as its dimension in a multi-dimensional test structure.",
     )
-    answers: dict[Any, dict[Any, dict[Any, str]]] | None = Field(  # type: ignore[assignment]
-        default_factory=lambda: defaultdict(lambda: defaultdict(dict)),
+    answers: dict[Any, dict[Any, dict[Any, Any]]] | None = Field(
+        default_factory=dict,
         description="A nested dictionary storing answers indexed by model, profile, and run.",
     )
 
@@ -153,8 +152,14 @@ class InstructionItem(BaseModel):
         self.answers.setdefault(model_key, {}).setdefault(profile_key, {})[run_idx] = answer
 
     def get_answer(self, model_key: str, profile_key: str, run_idx: int) -> Any:
-        """Retrieve the answer from the appropriate location."""
-        assert self.answers is not None
+        """Return the stored answer.
+
+        Raises:
+            KeyError: If there is no answer for this model, persona and seed. Reading never
+                modifies the stored answers.
+        """
+        if self.answers is None:
+            raise KeyError(model_key)
         return self.answers[model_key][profile_key][run_idx]
 
     def get_all_answers(self) -> dict[str, dict[str, dict[int, Any]]]:

@@ -205,7 +205,7 @@ class RegexExtractorCleaner(BaseOutputParser[str]):
             match = re.search(self.pattern, text)
 
             # If a match is found, return the extracted value
-            if match:
+            if match and match.group(1) is not None:
                 return match.group(1)
             else:
                 # If no match, return the original input text

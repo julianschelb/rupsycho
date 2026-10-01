@@ -134,7 +134,7 @@ class ExperimentProcessingMixin:
         """Build the template variables for asking ``instruction_item`` to ``profile``."""
 
         # Use the item's own answer options, or fall back to the questionnaire defaults
-        if instruction_item.answer_options:
+        if instruction_item.answer_options and instruction_item.answer_options.options:
             answer_options = instruction_item.answer_options.join_options()
         else:
             answer_options = self.questionnaire.default_answer_options.join_options()
@@ -408,17 +408,22 @@ class ExperimentProcessingMixin:
                 )
 
     def _memory_prompt(
-        self, history: list[tuple[str, str]], system_template: Any, user_template: Any
+        self,
+        history: list[tuple[str, str]],
+        system_template: Any,
+        user_template: Any,
+        rest: Sequence[Any] = (),
     ) -> Runnable:
         """Build the chat prompt of one persona that remembers its earlier answers.
 
         ``history`` holds the already rendered earlier user messages with the answers given.
-        They are inserted literally (braces escaped), followed by the live user template.
+        They are inserted literally (braces escaped), followed by the live user template. Any
+        messages after the user message (``rest``) are kept in place.
         """
         memory = "".join(f"{_escape(question)} {_escape(answer)}\n" for question, answer in history)
         user_text = memory + user_template.prompt.template
         return ChatPromptTemplate.from_messages(
-            [system_template, type(user_template).from_template(user_text)]
+            [system_template, type(user_template).from_template(user_text), *rest]
         )
 
     def _generate_and_process_answers_cumulative(
@@ -448,7 +453,7 @@ class ExperimentProcessingMixin:
                 "Cumulative mode needs a chat prompt template with a system message followed "
                 "by a user message."
             )
-        system_template, user_template = messages[0], messages[1]
+        system_template, user_template, rest = messages[0], messages[1], messages[2:]
         calls_by_item: dict[int, list[_Call]] = {}
         for call in grid:
             calls_by_item.setdefault(call.item_id, []).append(call)
@@ -460,7 +465,7 @@ class ExperimentProcessingMixin:
                 thunks = []
                 for call in item_calls:
                     prompt = self._memory_prompt(
-                        history[call.profile_id], system_template, user_template
+                        history[call.profile_id], system_template, user_template, rest
                     )
                     chain = self._get_chain(
                         prompt, model, self.runnable_parser, model_id, seed=int(random_seed)
@@ -586,10 +591,13 @@ class ExperimentProcessingMixin:
                     workers,
                 )
             finally:
-                # Release the loaded model but keep its definition, so the run can be repeated
+                # Release a model that was loaded for this run but keep its definition, so the
+                # experiment can be run again. Ready models handed in by the user stay alive.
+                loaded_here = model is not original
                 del model
                 self.runnable_models[model_id] = original
-                self._cleanup_memory()
+                if loaded_here:
+                    self._cleanup_memory()
 
         summary.elapsed = round(perf_counter() - start, 3)
         if own_pbar:
