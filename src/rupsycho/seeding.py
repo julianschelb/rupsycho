@@ -8,8 +8,9 @@ of a seeded experiment:
 * **Local Hugging Face pipelines** have no ``seed`` argument. Their sampling is driven by
   global random number generators, so the seed is applied with ``transformers.set_seed``
   right before every call.
-* **API / server back-ends with a ``seed`` field** (OpenAI, DeepSeek, Ollama, Hugging Face
-  endpoints, ...) receive the seed through a copy of the model with that field set.
+* **API / server back-ends with a ``seed`` field** (OpenAI, DeepSeek, Ollama, ...) receive the
+  seed through a copy of the model with that field set; chat models around a **Hugging Face
+  endpoint** receive it as a request parameter.
 * **Back-ends without any seed support** (e.g. Google Gemini) cannot be seeded. A warning is
   emitted once per model type; repetitions are then independent samples.
 
@@ -83,8 +84,11 @@ def supports_seeding(model: Any) -> bool:
     """Whether :func:`seed_model` can make ``model`` reproducible."""
     if any(isinstance(model, cls) for cls, _ in _REGISTRY):
         return True
-    llm = _inner(model)
-    return _is_local_pipeline(model) or _has_seed_field(llm) or _has_seed_field(model)
+    return (
+        _is_local_pipeline(model)
+        or type(_inner(model)).__name__ == "HuggingFaceEndpoint"
+        or _has_seed_field(model)
+    )
 
 
 def _set_global_seed(seed: int) -> Callable[[Any], Any]:
@@ -121,9 +125,11 @@ def seed_model(model: Any, seed: int) -> Runnable:
         return RunnableLambda(_set_global_seed(seed), name=f"set_seed({seed})") | model
 
     llm = _inner(model)
-    if llm is not model and _has_seed_field(llm):
-        # Chat wrapper around an endpoint with a seed field: seed the wrapped model
-        return model.model_copy(update={"llm": llm.model_copy(update={"seed": seed})})
+    if llm is not model and type(llm).__name__ == "HuggingFaceEndpoint":
+        # ChatHuggingFace builds the request from its own model_kwargs and forwards them to
+        # InferenceClient.chat_completion, which accepts ``seed``
+        model_kwargs = {**(getattr(model, "model_kwargs", None) or {}), "seed": seed}
+        return model.model_copy(update={"model_kwargs": model_kwargs})
     if _has_seed_field(model):
         return model.model_copy(update={"seed": seed})
 

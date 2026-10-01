@@ -99,6 +99,29 @@ class TestApiModels:
         assert params["options"]["seed"] == 11
         assert "seed" not in params
 
+    def test_huggingface_endpoint_receives_the_seed_in_the_request(self, monkeypatch):
+        pytest.importorskip("langchain_huggingface")
+        from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
+
+        endpoint = HuggingFaceEndpoint(
+            repo_id="org/model", task="text-generation", huggingfacehub_api_token="token"
+        )
+        chat = ChatHuggingFace(llm=endpoint)
+        seeded = seed_model(chat, 5)
+        assert supports_seeding(chat) is True
+        assert "seed" not in (chat.model_kwargs or {})  # the original is untouched
+
+        sent = {}
+
+        def fake_chat_completion(messages, **params):
+            sent.update(params)
+            raise RuntimeError("stop here")
+
+        monkeypatch.setattr(endpoint.client, "chat_completion", fake_chat_completion)
+        with pytest.raises(RuntimeError, match="stop here"):
+            seeded.invoke("hello")
+        assert sent["seed"] == 5
+
     def test_models_without_seed_support_warn_once(self):
         pytest.importorskip("langchain_google_genai")
         from langchain_google_genai import ChatGoogleGenerativeAI
