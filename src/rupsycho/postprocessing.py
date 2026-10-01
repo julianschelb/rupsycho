@@ -1,16 +1,19 @@
-import rupsycho as rup
-import pandas as pd
 import glob
+
+import pandas as pd
 from tqdm import tqdm
+
+import rupsycho as rup
+
 tqdm.pandas()
 
 
 class PostprocessingPipeline:
     """
-    A pipeline for postprocessing experiment results by cleaning responses, validating them, 
+    A pipeline for postprocessing experiment results by cleaning responses, validating them,
     and determining the best answer option.
 
-    This class loads CSV files matching specified patterns, applies text cleaning, validation, 
+    This class loads CSV files matching specified patterns, applies text cleaning, validation,
     and judgment processes, and then saves the processed results.
 
     Attributes:
@@ -21,7 +24,16 @@ class PostprocessingPipeline:
         judge (object): An instance of a judge that selects the best answer option.
         output_path (str): Path where the processed results CSV will be saved.
     """
-    def __init__(self, config_file_path, results_file_patterns, cleaner, validator, judge, output_path="processed_results.csv"):
+
+    def __init__(
+        self,
+        config_file_path,
+        results_file_patterns,
+        cleaner,
+        validator,
+        judge,
+        output_path="processed_results.csv",
+    ):
         """
         Initialize the PostprocessingPipeline.
 
@@ -56,7 +68,9 @@ class PostprocessingPipeline:
             csv_files = glob.glob(pattern)
             for csv_file in csv_files:
                 df = pd.read_csv(csv_file)
-                df['answer'] = df['answer'].astype('string') # in case model answers with just numbers
+                df["answer"] = df["answer"].astype(
+                    "string"
+                )  # in case model answers with just numbers
                 dataframes.append(df)
         return pd.concat(dataframes, ignore_index=True)
 
@@ -71,24 +85,25 @@ class PostprocessingPipeline:
             pd.DataFrame: Processed DataFrame with added columns.
         """
         # Apply cleaning
-        df['cleaned_answer'] = df['answer'].progress_apply(self.cleaner.parse)
-  
+        df["cleaned_answer"] = df["answer"].progress_apply(self.cleaner.parse)
+
         # Apply validation
-        df['validation_status'] = df['cleaned_answer'].progress_apply(
-            self.validator.parse)
+        df["validation_status"] = df["cleaned_answer"].progress_apply(self.validator.parse)
 
         # TODO: Use default answer options if not provided in the instruction item
         # possible_answers = self.experiment.questionnaire.instruction_items[0].get_answer_options_as_list()
- 
+
         # print(possible_answers)
 
         # Apply judgment
-        df['decision'] = df.progress_apply(
+        df["decision"] = df.progress_apply(
             lambda row: self.judge.parse(
-                text=row['cleaned_answer'],
-                possible_answers=self.experiment.questionnaire.instruction_items[row['instruction_item_id']].get_answer_options_as_list(
-                )
-            ), axis=1
+                text=row["cleaned_answer"],
+                possible_answers=self.experiment.questionnaire.instruction_items[  # type: ignore[index,union-attr]
+                    row["instruction_item_id"]
+                ].get_answer_options_as_list(),
+            ),
+            axis=1,
         )
 
         return df

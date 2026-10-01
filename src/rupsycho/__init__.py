@@ -2,12 +2,12 @@
 RUPsycho: A Python Package for Social Science Research Using Large Language Models (LLMs)
 =========================================================================================
 
-RUPsycho is a Python package designed to facilitate the application of large language models (LLMs) 
-in social science research. It offers tools to explore human-like behaviors through LLMs, providing 
+RUPsycho is a Python package designed to facilitate the application of large language models (LLMs)
+in social science research. It offers tools to explore human-like behaviors through LLMs, providing
 a novel approach in the field of natural language processing (NLP).
 
-This module within RUPsycho provides functions to load and validate experimental data from JSON 
-dictionaries and files. It supports both single and multiple experiment loading, making it easy 
+This module within RUPsycho provides functions to load and validate experimental data from JSON
+dictionaries and files. It supports both single and multiple experiment loading, making it easy
 to manage and analyze experiments in various formats.
 
 
@@ -53,14 +53,16 @@ After importing RUPsycho, you can start using it in your Python script or Jupyte
 For more detailed examples and usage, refer to the official RUPsycho documentation.
 """
 
+from collections.abc import Iterator
+from typing import Optional
+
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_huggingface import HuggingFacePipeline
-from rupsycho.experiment_collection import ExperimentCollection
-from rupsycho.reader import ExperimentLoader, ExperimentDocument
 from transformers import pipeline
-from typing import List, Iterator
-from typing import Optional
+
+from rupsycho.experiment_collection import ExperimentCollection
+from rupsycho.reader import ExperimentDocument, ExperimentLoader
 
 # ================================= Expose Sub Modules ================================
 
@@ -80,41 +82,41 @@ def experiment_from_dict(json_data: dict) -> ExperimentDocument:
         # Use the loader to validate and return the ExperimentDocument
         return next(loader.lazy_load_from_dicts([json_data]))
     except Exception as e:
-        raise RuntimeError(
-            f"Failed to create experiment from dict: {e}") from e
+        raise RuntimeError(f"Failed to create experiment from dict: {e}") from e
 
 
 def experiment_from_file(path: str) -> ExperimentDocument:
     """Create a new experiment from a JSON file."""
     try:
         experiments = ExperimentLoader(path_pattern=path).load()
-        return experiments[0] if len(experiments) > 0 else None
+        return experiments[0] if len(experiments) > 0 else None  # type: ignore[return-value]
     except Exception as e:
-        raise RuntimeError(
-            f"Failed to create experiment from file {path}: {e}") from e
+        raise RuntimeError(f"Failed to create experiment from file {path}: {e}") from e
+
 
 # ================================= Create Multiple Experiments ================================
 
 
-def experiments_from_dicts(json_data_list: List[dict]) -> Iterator[ExperimentDocument]:
+def experiments_from_dicts(json_data_list: list[dict]) -> Iterator[ExperimentDocument]:
     """Create multiple experiments from a list of JSON dictionaries."""
     try:
         loader = ExperimentLoader()
         # Use the loader to validate and return ExperimentDocuments
         return loader.lazy_load_from_dicts(json_data_list)
     except Exception as e:
-        raise RuntimeError(
-            f"Failed to create experiments from list of dicts: {e}") from e
+        raise RuntimeError(f"Failed to create experiments from list of dicts: {e}") from e
 
 
-def experiments_from_files(path_pattern: str) -> Iterator[ExperimentDocument]:
+def experiments_from_files(path_pattern: str) -> ExperimentCollection:
     """Create multiple experiments from a list of JSON files."""
     try:
         experiments = ExperimentLoader(path_pattern=path_pattern).load()
-        return ExperimentCollection(experiments)
+        return ExperimentCollection(experiments)  # type: ignore[arg-type]
     except Exception as e:
         raise RuntimeError(
-            f"Failed to create experiments from files matching {path_pattern}: {e}") from e
+            f"Failed to create experiments from files matching {path_pattern}: {e}"
+        ) from e
+
 
 # ================================= Create Example Experiments ================================
 
@@ -124,7 +126,7 @@ def example_experiment_bfi(
     pipeline_type: str = "text2text-generation",
     temperature: float = 0.7,
     max_new_tokens: int = 128,
-    api_key: Optional[str] = None
+    api_key: str | None = None,
 ) -> ExperimentDocument:
     """
     Create an example experiment with a specified model, pipeline type, and generative parameters.
@@ -140,6 +142,7 @@ def example_experiment_bfi(
     # Set the Hugging Face API key if provided
     if api_key:
         from huggingface_hub import login
+
         login(api_key)
 
     # Example experiment data
@@ -148,17 +151,14 @@ def example_experiment_bfi(
         "description": "Description: Testing Generative Models for BFI questionnaire using Rupsycho.",
         "demographic_profiles": {
             "Profile 1": {
-                "attributes": {
-                    "title": "Mr",
-                    "name": "Grueber"
-                },
-                "template": "{title} {name}"
+                "attributes": {"title": "Mr", "name": "Grueber"},
+                "template": "{title} {name}",
             }
         },
         "parameters": {
             "seeds": ["7"],
         },
-        "questionnaire":  {
+        "questionnaire": {
             "name": "BIG FIVE INVENTORY RESPONSE FORM AND INSTRUCTIONS TO PARTICIPANTS",
             "general_instruction": "Here are a number of characteristics that may or may not apply to you. For example, do you agree that you are someone who likes to spend time with others? Please return the number corresponding to the answer options to indicate the extent to which you agree or disagree with that statement.",
             "attributes": {
@@ -167,78 +167,51 @@ def example_experiment_bfi(
                     "2": "Agreeableness",
                     "3": "Conscientiousness",
                     "4": "Neuroticism",
-                    "5": "Openness"
+                    "5": "Openness",
                 }
             },
             "default_answer_options": {
-                "1": {
-                    "text": "1. Disagree strongly",
-                    "ignored_for_scale": False,
-                    "weight": 1
-                },
-                "2": {
-                    "text": "2. Disagree a little",
-                    "ignored_for_scale": False,
-                    "weight": 2
-                },
+                "1": {"text": "1. Disagree strongly", "ignored_for_scale": False, "weight": 1},
+                "2": {"text": "2. Disagree a little", "ignored_for_scale": False, "weight": 2},
                 "3": {
                     "text": "3. Neither agree nor disagree",
                     "ignored_for_scale": False,
-                    "weight": 3
+                    "weight": 3,
                 },
-                "4": {
-                    "text": "4. Agree a little",
-                    "ignored_for_scale": False,
-                    "weight": 4
-                },
-                "5": {
-                    "text": "5. Agree strongly",
-                    "ignored_for_scale": False,
-                    "weight": 5
-                }
+                "4": {"text": "4. Agree a little", "ignored_for_scale": False, "weight": 4},
+                "5": {"text": "5. Agree strongly", "ignored_for_scale": False, "weight": 5},
             },
             "instruction_items": [
                 {
                     "question": "I see myself as someone who...",
                     "reversed": False,
-                    "attributes": {
-                        "dimension": "1"
-                    }
+                    "attributes": {"dimension": "1"},
                 },
                 {
                     "question": "Tends to find fault with others",
                     "reversed": False,
-                    "attributes": {
-                        "dimension": "1"
-                    }
+                    "attributes": {"dimension": "1"},
                 },
                 {
                     "question": "Does a thorough job",
                     "reversed": False,
-                    "attributes": {
-                        "dimension": "1"
-                    }
+                    "attributes": {"dimension": "1"},
                 },
                 {
                     "question": "Is depressed, blue",
                     "reversed": False,
-                    "attributes": {
-                        "dimension": "1"
-                    }
-                }
-            ]
-        }
+                    "attributes": {"dimension": "1"},
+                },
+            ],
+        },
     }
 
     # Load a single experiment from the example data
     experiment = experiment_from_dict(experiment_data)
 
     # Load the specified Hugging Face generative model
-    pipe = pipeline(
-        pipeline_type,
-        model=model_name,
-        temperature=temperature,
-        max_new_tokens=max_new_tokens
+    pipe = pipeline(  # type: ignore[call-overload]
+        pipeline_type, model=model_name, temperature=temperature, max_new_tokens=max_new_tokens
     )
 
     model = HuggingFacePipeline(pipeline=pipe)
@@ -252,29 +225,28 @@ def example_experiment_bfi(
         Answer with respect to the following persona description and question.
     """
     # Create the user message template
-    user_message_template = """ 
+    user_message_template = """
         Question:
         {persona_description} was asked the following question. {question}
 
-        Answer Options: 
+        Answer Options:
         {answer_options}
 
         Instructions: Choose from the list of answer options to answer the question. Answer the question using only the provided answer options. If none of the options are correct, choose the option that is closest to being correct.
-        
+
         Answer:
     """
 
     # Create the chat prompt template
-    chat_prompt = ChatPromptTemplate.from_messages([
-        ("system", system_message_template),
-        ("user", user_message_template)
-    ])
+    chat_prompt = ChatPromptTemplate.from_messages(
+        [("system", system_message_template), ("user", user_message_template)]
+    )
 
     # Set the chat prompt for the experiment
     experiment.set_prompt(chat_prompt)
 
     # Set a simple string output parser
-    parser = StrOutputParser() # returns the input text with no changes
+    parser = StrOutputParser()  # returns the input text with no changes
     experiment.set_parser(parser)
 
     # Return the configured experiment

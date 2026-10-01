@@ -5,8 +5,8 @@
 
 
 from random import randint
-from pydantic import BaseModel, Field
-from typing import List, Optional
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ExperimentParameters(BaseModel):
@@ -14,9 +14,9 @@ class ExperimentParameters(BaseModel):
 
     # ------------------- Experiment Parameters -------------------
 
-    seeds: Optional[List[str]] = Field(
-        default=[str(randint(0, 999999))],
-        description="A list of seeds for random number generation in the experiment."
+    seeds: list[str] | None = Field(
+        default_factory=lambda: [str(randint(0, 999999))],
+        description="A list of seeds for random number generation in the experiment.",
     )
 
     # output_directory: Optional[str] = Field(
@@ -31,8 +31,7 @@ class ExperimentParameters(BaseModel):
 
     lazy_load_models: bool = Field(
         default=True,
-        description="If True, models will be loaded only when they are needed during the experiment."
+        description="If True, models will be loaded only when they are needed during the experiment.",
     )
 
-    class Config:
-        extra = 'allow'  # Allow extra fields
+    model_config = ConfigDict(extra="allow")  # allow extra fields

@@ -6,26 +6,22 @@
 
 # from langchain.llms import HuggingFacePipeline
 # import bitsandbytes as bnb  # Ensure this is installed for quantized loading
-import torch
 import warnings
-from pydantic import BaseModel, Field
-from typing import Dict, Any, Optional, Union
-from langchain_core.load import load
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline, BitsAndBytesConfig
+from typing import Any
 
-from langchain_huggingface import HuggingFaceEndpoint
-from langchain_huggingface import HuggingFacePipeline
-from langchain_huggingface import ChatHuggingFace
+from langchain_core.load import load
+from langchain_deepseek import ChatDeepSeek
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint, HuggingFacePipeline
 from langchain_ollama.llms import OllamaLLM
 from langchain_openai import ChatOpenAI
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_deepseek import ChatDeepSeek
+from pydantic import BaseModel, ConfigDict, Field
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, pipeline
 
 from .prompt import (
     ChatPromptTemplateConfig,
     LangchainPromptTemplateConfig,
 )
-
 
 # ------------------------------------------------
 #                Generic Config
@@ -56,19 +52,16 @@ from .prompt import (
 class LangChainModelConfig(BaseModel):
     """Configuration for a serialized LangChain model or any other runnable configuration."""
 
-    type: str = Field("langchain",
-                      description="The type of the model configuration.")
+    type: str = Field("langchain", description="The type of the model configuration.")
 
-    definition: Dict[str, Any] = Field(
-        ..., description="A dictionary containing the serialized LangChain model or other runnable configuration."
+    definition: dict[str, Any] = Field(
+        ...,
+        description="A dictionary containing the serialized LangChain model or other runnable configuration.",
     )
 
-    parameters: Dict = Field(
-        {},
-        description="The parameters for text generation"
-    )
+    parameters: dict = Field({}, description="The parameters for text generation")
 
-    prompt_template: LangchainPromptTemplateConfig = Field(
+    prompt_template: LangchainPromptTemplateConfig | None = Field(
         None, description="The prompt template used by the model"
     )
 
@@ -92,8 +85,9 @@ class LangChainModelConfig(BaseModel):
             return model
 
         except Exception as e:
-            warnings.warn(f"Failed to load LangChain model: {e}", UserWarning)
+            warnings.warn(f"Failed to load LangChain model: {e}", UserWarning, stacklevel=2)
             return None
+
 
 # ------------------------------------------------
 #                Local HF Config
@@ -103,53 +97,54 @@ class LangChainModelConfig(BaseModel):
 class LocalHuggingFaceModelConfig(BaseModel):
     """Configuration for a local Hugging Face model."""
 
-    type: str = Field("local_huggingface",
-                      description="The type of the model configuration.")
+    type: str = Field("local_huggingface", description="The type of the model configuration.")
 
     name_or_path: str = Field(
         ..., description="The path to the local directory or the name of the Hugging Face model."
     )
 
-    revision: Optional[str] = Field(
-        None, description="The specific model version to use (e.g., a branch name, tag, or commit hash)."
+    revision: str | None = Field(
+        None,
+        description="The specific model version to use (e.g., a branch name, tag, or commit hash).",
     )
 
-    tokenizer_name_or_path: Optional[str] = Field(
-        None, description="The name or path to the tokenizer to use. Defaults to `model_name_or_path` if not specified."
+    tokenizer_name_or_path: str | None = Field(
+        None,
+        description="The name or path to the tokenizer to use. Defaults to `model_name_or_path` if not specified.",
     )
 
-    cache_dir: Optional[str] = Field(
-        None, description="Path to the directory where the downloaded model and tokenizer files will be cached."
+    cache_dir: str | None = Field(
+        None,
+        description="Path to the directory where the downloaded model and tokenizer files will be cached.",
     )
 
-    huggingfacehub_api_token:  Optional[str] = Field(
+    huggingfacehub_api_token: str | None = Field(
         None, description="The API token for accessing Hugging Face endpoints."
     )
 
-    device_map: Optional[Any] = Field(
-        "auto", description="The device map to load the model onto ('cpu', 'cuda', or custom device map). See https://huggingface.co/docs/accelerate/concept_guides/big_model_inference#designing-a-device-map"
+    device_map: Any | None = Field(
+        "auto",
+        description="The device map to load the model onto ('cpu', 'cuda', or custom device map). See https://huggingface.co/docs/accelerate/concept_guides/big_model_inference#designing-a-device-map",
     )
 
-    task: Optional[str] = Field(
-        "text-generation", description="The type of pipeline to create (e.g., 'text-generation', 'text-classification', etc.)."
+    task: str | None = Field(
+        "text-generation",
+        description="The type of pipeline to create (e.g., 'text-generation', 'text-classification', etc.).",
     )
 
-    parameters: Dict = Field(
-        {},
-        description="The parameters for text generation (e.g., max_length, temperature, etc.)."
+    parameters: dict = Field(
+        {}, description="The parameters for text generation (e.g., max_length, temperature, etc.)."
     )
 
-    prompt_template: Optional[Union[str, BaseModel]] = Field(
+    prompt_template: str | BaseModel | None = Field(
         None, description="The prompt template used by the model, if applicable."
     )
 
-    bitsandbytes_config: Optional[Dict] = Field(
+    bitsandbytes_config: dict | None = Field(
         None, description="Optional dictionary for bitsandbytes quantization configuration."
     )
 
-    class Config:
-        """Pydantic model configuration."""
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def load_model(self):
         """
@@ -167,12 +162,12 @@ class LocalHuggingFaceModelConfig(BaseModel):
         try:
             # Load the tokenizer
             tokenizer = AutoTokenizer.from_pretrained(
-                self.tokenizer_name_or_path or self.name_or_path)
+                self.tokenizer_name_or_path or self.name_or_path
+            )
 
             # Load the model, with quantization if bitsandbytes_config is provided
             if self.bitsandbytes_config:
-                quant_config = BitsAndBytesConfig(
-                    **self.bitsandbytes_config)
+                quant_config = BitsAndBytesConfig(**self.bitsandbytes_config)
                 model = AutoModelForCausalLM.from_pretrained(
                     self.name_or_path,
                     device_map=self.device_map,  # Use the updated device_map
@@ -181,7 +176,7 @@ class LocalHuggingFaceModelConfig(BaseModel):
             else:
                 model = AutoModelForCausalLM.from_pretrained(
                     self.name_or_path,
-                    device_map=self.device_map  # Use the updated device_map
+                    device_map=self.device_map,  # Use the updated device_map
                 )
 
             # Ensure parameters are passed as keyword arguments correctly
@@ -189,19 +184,22 @@ class LocalHuggingFaceModelConfig(BaseModel):
                 "task": self.task,
                 "model": model,
                 "tokenizer": tokenizer,
-                **self.parameters  # Pass additional pipeline parameters
+                **self.parameters,  # Pass additional pipeline parameters
             }
 
             # Create the pipeline
             llm_pipeline = pipeline(**pipeline_kwargs)
 
             # Wrap the HuggingFacePipeline in a ChatHuggingFace object for LangChain integration
-            return ChatHuggingFace(llm=HuggingFacePipeline(pipeline=llm_pipeline, model_id=self.name_or_path))
+            return ChatHuggingFace(
+                llm=HuggingFacePipeline(pipeline=llm_pipeline, model_id=self.name_or_path)
+            )
 
         except Exception as e:
             raise ValueError(
                 f"Failed to load the Hugging Face model '{self.name_or_path}' with task '{self.task}': {str(e)}"
-            )
+            ) from e
+
 
 # ------------------------------------------------
 #                Remote HF Config
@@ -211,29 +209,27 @@ class LocalHuggingFaceModelConfig(BaseModel):
 class RemoteHuggingFaceModelConfig(BaseModel):
     """Configuration for a remote Hugging Face model using the Inference Endpoint API."""
 
-    type: str = Field("remote_huggingface",
-                      description="The type of the model configuration.")
+    type: str = Field("remote_huggingface", description="The type of the model configuration.")
 
     repo_id: str = Field(
-        ..., description="The repository ID of the Hugging Face model (e.g., 'HuggingFaceH4/zephyr-7b-beta')."
+        ...,
+        description="The repository ID of the Hugging Face model (e.g., 'HuggingFaceH4/zephyr-7b-beta').",
     )
 
     task: str = Field(
-        ..., description="The task for the Hugging Face pipeline (e.g., 'text-generation', 'text-classification')."
+        ...,
+        description="The task for the Hugging Face pipeline (e.g., 'text-generation', 'text-classification').",
     )
 
     # huggingfacehub_api_token: Optional[str] = Field(
     #     ..., description="The API token for accessing Hugging Face endpoints."
     # )
 
-    parameters: Dict = Field(
-        {},
-        description="The parameters for text generation (e.g., max_length, temperature, etc.)."
+    parameters: dict = Field(
+        {}, description="The parameters for text generation (e.g., max_length, temperature, etc.)."
     )
 
-    class Config:
-        """Pydantic model configuration."""
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def load_model(self):
         """
@@ -251,15 +247,15 @@ class RemoteHuggingFaceModelConfig(BaseModel):
                 repo_id=self.repo_id,
                 task=self.task,
                 # huggingfacehub_api_token=self.huggingfacehub_api_token,
-                **self.parameters  # Pass the generation parameters
+                **self.parameters,  # Pass the generation parameters
             )
 
             # Return the LangChain HuggingFacePipeline object with the endpoint
             return ChatHuggingFace(llm=endpoint)
 
         except Exception as e:
-            raise ValueError(
-                f"Failed to load the remote Hugging Face model: {str(e)}")
+            raise ValueError(f"Failed to load the remote Hugging Face model: {str(e)}") from e
+
 
 # ------------------------------------------------
 #                Ollama Config
@@ -272,28 +268,20 @@ class OllamaModelConfig(BaseModel):
     This class holds all the necessary information for configuring and loading an OllamaLLM model.
     """
 
-    type: str = Field("ollama",
-                      description="The type of the model configuration.")
+    type: str = Field("ollama", description="The type of the model configuration.")
 
-    model: str = Field(
-        ..., description="The identifier for the Ollama model (e.g., 'gemma2:2b')."
-    )
+    model: str = Field(..., description="The identifier for the Ollama model (e.g., 'gemma2:2b').")
 
     base_url: str = "http://localhost:11434"
     """Base url the model is hosted under."""
 
-    parameters: Dict = Field(
-        {},
-        description="The parameters for text generation"
-    )
+    parameters: dict = Field({}, description="The parameters for text generation")
 
-    prompt_template: ChatPromptTemplateConfig = Field(
+    prompt_template: ChatPromptTemplateConfig | None = Field(
         None, description="The prompt template used by the model"
     )
 
-    class Config:
-        """Pydantic model configuration."""
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def load_model(self):
         """
@@ -309,13 +297,14 @@ class OllamaModelConfig(BaseModel):
             model_ollama = OllamaLLM(
                 model=self.model,
                 base_url=self.base_url,
-                **self.parameters  # Pass the text generation parameters
+                **self.parameters,  # Pass the text generation parameters
             )
 
             return model_ollama
 
         except Exception as e:
-            raise ValueError(f"Failed to load the Ollama model: {str(e)}")
+            raise ValueError(f"Failed to load the Ollama model: {str(e)}") from e
+
 
 # ------------------------------------------------
 #                OpenAI Config
@@ -325,36 +314,27 @@ class OllamaModelConfig(BaseModel):
 class OpenAIModelConfig(BaseModel):
     """Configuration for an OpenAI model."""
 
-    type: str = Field(
-        "openai", description="The type of the model configuration.")
+    type: str = Field("openai", description="The type of the model configuration.")
 
     name_or_path: str = Field(
         ..., description="The identifier for the OpenAI model (e.g., 'gpt-4')."
     )
 
-    api_key: Optional[str] = Field(
-        None, description="The API key for accessing OpenAI's models."
-    )
+    api_key: str | None = Field(None, description="The API key for accessing OpenAI's models.")
 
-    base_url: Optional[str] = Field(
-        None, description="The base URL for the OpenAI API endpoint."
-    )
+    base_url: str | None = Field(None, description="The base URL for the OpenAI API endpoint.")
 
-    organization: Optional[str] = Field(
+    organization: str | None = Field(
         None, description="The organization ID associated with the OpenAI API key."
     )
 
-    parameters: Dict = Field(
-        {},
-        description="The parameters for text generation"
-    )
+    parameters: dict = Field({}, description="The parameters for text generation")
 
-    prompt_template: ChatPromptTemplateConfig = Field(
+    prompt_template: ChatPromptTemplateConfig | None = Field(
         None, description="The prompt template used by the model"
     )
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def load_model(self):
         """
@@ -377,39 +357,34 @@ class OpenAIModelConfig(BaseModel):
                 api_key=self.api_key,
                 base_url=self.base_url,
                 organization=self.organization,
-                **self.parameters  # Pass generation parameters
+                **self.parameters,  # Pass generation parameters
             )
 
             return model_openai
 
         except Exception as e:
-            raise ValueError(f"Failed to load the OpenAI model: {e}")
+            raise ValueError(f"Failed to load the OpenAI model: {e}") from e
 
 
 # ------------------------------------------------
 #               Remote Google Config
 # ------------------------------------------------
 
+
 class GoogleModelConfig(BaseModel):
     """Configuration for a Google model."""
 
-    type: str = Field(
-        "google", description="The type of the model configuration.")
+    type: str = Field("google", description="The type of the model configuration.")
 
     name_or_path: str = Field(
         ..., description="The identifier for the Google model (e.g., 'gemini-2.0-flash')."
     )
 
-    api_key: Optional[str] = Field(
-        None, description="The API key for accessing Google models."
-    )
+    api_key: str | None = Field(None, description="The API key for accessing Google models.")
 
-    parameters: Dict = Field(
-        {},
-        description="The parameters for text generation"
-    )
+    parameters: dict = Field({}, description="The parameters for text generation")
 
-    prompt_template: ChatPromptTemplateConfig = Field(
+    prompt_template: ChatPromptTemplateConfig | None = Field(
         None, description="The prompt template used by the model"
     )
 
@@ -432,40 +407,34 @@ class GoogleModelConfig(BaseModel):
             model_google = ChatGoogleGenerativeAI(
                 model=self.name_or_path,
                 api_key=self.api_key,
-                **self.parameters  # Pass generation parameters
+                **self.parameters,  # Pass generation parameters
             )
 
             return model_google
 
         except Exception as e:
-            raise ValueError(f"Failed to load the Google model: {e}")
-
+            raise ValueError(f"Failed to load the Google model: {e}") from e
 
 
 # ------------------------------------------------
 #               Remote DeepSeek Config
 # ------------------------------------------------
 
+
 class DeepSeekModelConfig(BaseModel):
     """Configuration for a DeepSeek model."""
 
-    type: str = Field(
-        "deepseek", description="The type of the model configuration.")
+    type: str = Field("deepseek", description="The type of the model configuration.")
 
     name_or_path: str = Field(
         ..., description="The identifier for the DeepSeek model (e.g. 'deepseek-chat')."
     )
 
-    api_key: Optional[str] = Field(
-        None, description="The API key for accessing DeepSeek models."
-    )
+    api_key: str | None = Field(None, description="The API key for accessing DeepSeek models.")
 
-    parameters: Dict = Field(
-        {},
-        description="The parameters for text generation"
-    )
+    parameters: dict = Field({}, description="The parameters for text generation")
 
-    prompt_template: ChatPromptTemplateConfig = Field(
+    prompt_template: ChatPromptTemplateConfig | None = Field(
         None, description="The prompt template used by the model"
     )
 
@@ -489,13 +458,13 @@ class DeepSeekModelConfig(BaseModel):
                 model=self.name_or_path,
                 # api_key=self.api_key, # key can for some reason only given explicitly or implicitly
                 # api_key=os.environ.get('DEEPSEEK_API_KEY'),
-                **self.parameters  # Pass generation parameters
+                **self.parameters,  # Pass generation parameters
             )
 
             return model_deepseek
 
         except Exception as e:
-            raise ValueError(f"Failed to load the DeepSeek model: {e}")
+            raise ValueError(f"Failed to load the DeepSeek model: {e}") from e
 
 
 # ------------------- Default Model -------------------
@@ -512,7 +481,7 @@ DEFAULT_MODEL_CONFIG_DICT = {
         "top_k": 50,
         "top_p": 0.95,
         "return_full_text": False,
-    }
+    },
 }
 
 DEFAULT_MODEL_CONFIG = LocalHuggingFaceModelConfig(**DEFAULT_MODEL_CONFIG_DICT)

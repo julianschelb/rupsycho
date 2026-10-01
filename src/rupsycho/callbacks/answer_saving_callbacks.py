@@ -13,8 +13,8 @@ import csv
 import json
 from abc import ABC, abstractmethod
 
-
 # --------------------------------- JSONL --------------------------------
+
 
 class Callback(ABC):
     """
@@ -22,7 +22,17 @@ class Callback(ABC):
     """
 
     @abstractmethod
-    def save_answer(self, experiment, instruction_item_id, instruction_item, model_id, profile_id, random_seed, answer):
+    def save_answer(
+        self,
+        experiment,
+        instruction_item_id,
+        instruction_item,
+        model_id,
+        profile_id,
+        random_seed,
+        time,
+        answer,
+    ):
         """
         Method to be implemented by subclasses to save the answer.
 
@@ -33,6 +43,7 @@ class Callback(ABC):
         - model_id: The identifier of the model used for generating the answer.
         - profile_id: The identifier of the demographic profile.
         - random_seed: The random seed used for generating the answer.
+        - time: Seconds it took to generate the answer.
         - answer: The generated answer for the instruction item.
         """
         pass
@@ -46,24 +57,36 @@ class JSONLCallback(Callback):
     def __init__(self, file_path="experiment_output.jsonl"):
         self.file_path = file_path
 
-    def save_answer(self, experiment, instruction_item_id, instruction_item, model_id, profile_id, random_seed, answer):
+    def save_answer(
+        self,
+        experiment,
+        instruction_item_id,
+        instruction_item,
+        model_id,
+        profile_id,
+        random_seed,
+        time,
+        answer,
+    ):
         output_data = {
             "experiment_name": experiment.name,  # Accessing experiment details
             "instruction_item_id": instruction_item_id,
             # Assuming instruction_item can be converted to dict
-            "instruction_item": instruction_item.model_dump(exclude=['answer']),
+            "instruction_item": instruction_item.model_dump(exclude=["answer"]),
             "model_id": model_id,
             "profile_id": profile_id,
             "random_seed": random_seed,
-            "answer": answer
+            "time": time,
+            "answer": answer,
         }
 
         # Open the JSONL file in append mode and write the data
-        with open(self.file_path, 'a') as f:
-            f.write(json.dumps(output_data) + '\n')
+        with open(self.file_path, "a") as f:
+            f.write(json.dumps(output_data) + "\n")
 
 
 # --------------------------------- CSV --------------------------------
+
 
 class CSVCallback(Callback):
     """
@@ -75,19 +98,41 @@ class CSVCallback(Callback):
 
         # Initialize the CSV file with headers if it doesn't exist
         try:
-            with open(self.file_path, 'x', newline='') as f:
+            with open(self.file_path, "x", newline="") as f:
                 writer = csv.writer(f)
-                writer.writerow(["experiment_name", "instruction_item_id", "instruction_item", "model_id",
-                                 "profile_id", "random_seed", "time", "answer"])
+                writer.writerow(
+                    [
+                        "experiment_name",
+                        "instruction_item_id",
+                        "instruction_item",
+                        "model_id",
+                        "profile_id",
+                        "random_seed",
+                        "time",
+                        "answer",
+                    ]
+                )
         except FileExistsError:
             # File already exists, do nothing
             pass
 
-    def save_answer(self, experiment, instruction_item_id, instruction_item, model_id, profile_id, random_seed, time, answer):
+    def save_answer(
+        self,
+        experiment,
+        instruction_item_id,
+        instruction_item,
+        model_id,
+        profile_id,
+        random_seed,
+        time,
+        answer,
+    ):
         output_data = [
             experiment.name,  # Accessing experiment details
             instruction_item_id,
-            instruction_item.question.replace('\n', ' '),  # Assuming instruction_item has a 'question' attribute + remove linebreaks for nicer format <-
+            instruction_item.question.replace(
+                "\n", " "
+            ),  # Assuming instruction_item has a 'question' attribute + remove linebreaks for nicer format <-
             model_id,
             profile_id,
             random_seed,
@@ -96,19 +141,30 @@ class CSVCallback(Callback):
         ]
 
         # Open the CSV file in append mode and write the data
-        with open(self.file_path, 'a', newline='') as f:
+        with open(self.file_path, "a", newline="") as f:
             writer = csv.writer(f)
             writer.writerow(output_data)
 
 
 # --------------------------------- Print --------------------------------
 
+
 class PrintCallback(Callback):
     """
     Callback implementation for printing answers to the screen.
     """
 
-    def save_answer(self, experiment, instruction_item_id, instruction_item, model_id, profile_id, random_seed, answer):
+    def save_answer(
+        self,
+        experiment,
+        instruction_item_id,
+        instruction_item,
+        model_id,
+        profile_id,
+        random_seed,
+        time,
+        answer,
+    ):
         # Accessing experiment and instruction item details
         print(f"Experiment: {experiment.name}")
         print(f"Instruction Item ID: {instruction_item_id}")
@@ -117,11 +173,13 @@ class PrintCallback(Callback):
         print(f"Model ID: {model_id}")
         print(f"Profile ID: {profile_id}")
         print(f"Random Seed: {random_seed}")
+        print(f"Time: {time}s")
         print(f"Answer: {answer}")
         print("=" * 50)  # Divider for clarity between different outputs
 
 
 # --------------------------------- Table --------------------------------
+
 
 class PrintTableCallback(Callback):
     """
@@ -137,7 +195,7 @@ class PrintTableCallback(Callback):
             "profile_id": 20,
             "random_seed": 12,
             "question": 25,
-            "answer": 25
+            "answer": 25,
         }
 
         # Initialize a flag to track whether headers have been printed
@@ -145,32 +203,52 @@ class PrintTableCallback(Callback):
 
     def _print_headers(self):
         """Print the table headers."""
-        header = (f"{'Instruction ID':<{self.column_widths['instruction_id']}} | "
-                  f"{'Model ID':<{self.column_widths['model_id']}} | "
-                  f"{'Profile ID':<{self.column_widths['profile_id']}} | "
-                  f"{'Random Seed':<{self.column_widths['random_seed']}} | "
-                  f"{'Question (truncated)':<{self.column_widths['question']}} | "
-                  f"{'Answer (truncated)':<{self.column_widths['answer']}}")
+        header = (
+            f"{'Instruction ID':<{self.column_widths['instruction_id']}} | "
+            f"{'Model ID':<{self.column_widths['model_id']}} | "
+            f"{'Profile ID':<{self.column_widths['profile_id']}} | "
+            f"{'Random Seed':<{self.column_widths['random_seed']}} | "
+            f"{'Question (truncated)':<{self.column_widths['question']}} | "
+            f"{'Answer (truncated)':<{self.column_widths['answer']}}"
+        )
         print(header)
         print("=" * len(header))  # Separator line
         self.headers_printed = True
 
-    def save_answer(self, experiment, instruction_item_id, instruction_item, model_id, profile_id, random_seed, answer):
+    def save_answer(
+        self,
+        experiment,
+        instruction_item_id,
+        instruction_item,
+        model_id,
+        profile_id,
+        random_seed,
+        time,
+        answer,
+    ):
         # Print headers the first time save_answer is called
         if not self.headers_printed:
             self._print_headers()
 
         # Limit question and answer to the first 100 characters
-        clean_question = (instruction_item.question.replace('\n', ' ').replace('\r', ' ')[:22] + '...') if len(
-            instruction_item.question) > 22 else instruction_item.question.replace('\n', ' ').replace('\r', ' ')
-        truncated_answer = (answer.replace('\n', ' ').replace('\r', ' ')[
-                            :22] + '...') if len(answer) > 25 else answer.replace('\n', ' ').replace('\r', ' ')
+        clean_question = (
+            (instruction_item.question.replace("\n", " ").replace("\r", " ")[:22] + "...")
+            if len(instruction_item.question) > 22
+            else instruction_item.question.replace("\n", " ").replace("\r", " ")
+        )
+        truncated_answer = (
+            (answer.replace("\n", " ").replace("\r", " ")[:22] + "...")
+            if len(answer) > 25
+            else answer.replace("\n", " ").replace("\r", " ")
+        )
 
         # Print each row in a fixed-width format
-        row = (f"{str(instruction_item_id):<{self.column_widths['instruction_id']}} | "
-               f"{model_id:<{self.column_widths['model_id']}} | "
-               f"{profile_id:<{self.column_widths['profile_id']}} | "
-               f"{str(random_seed):<{self.column_widths['random_seed']}} | "
-               f"{clean_question:<{self.column_widths['question']}} | "
-               f"{truncated_answer:<{self.column_widths['answer']}}")
+        row = (
+            f"{str(instruction_item_id):<{self.column_widths['instruction_id']}} | "
+            f"{model_id:<{self.column_widths['model_id']}} | "
+            f"{profile_id:<{self.column_widths['profile_id']}} | "
+            f"{str(random_seed):<{self.column_widths['random_seed']}} | "
+            f"{clean_question:<{self.column_widths['question']}} | "
+            f"{truncated_answer:<{self.column_widths['answer']}}"
+        )
         print(row)

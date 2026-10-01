@@ -1,14 +1,15 @@
 import pytest
-import rupsycho as rup
-from rupsycho.parsers.cleaners import BasicCleaner, PromptRemovalCleaner
-from rupsycho.parsers.judges import MultipleChoiceJudge, ModelBasedAnswerJudge
+
+from rupsycho.parsers.cleaners import BasicCleaner
+from rupsycho.parsers.judges import ModelBasedAnswerJudge, MultipleChoiceJudge
 from rupsycho.parsers.validators import (
     ApologiesValidatorParser,
     BeingAiValidatorParser,
+    ModelBasedValidator,
     RefusalValidatorParser,
     ValidatorParser,
-    ModelBasedValidator
 )
+
 
 def test_basic_cleaner():
     cleaner = BasicCleaner()
@@ -46,23 +47,24 @@ def test_combined_validator():
 
 
 def test_multiple_choice_judge():
-    possible_answers = ["1. strongly disagree",
-                        "2. somewhat agree", "3. agree"]
+    possible_answers = ["1. strongly disagree", "2. somewhat agree", "3. agree"]
     judge = MultipleChoiceJudge(possible_answers)
     response = "I think I would choose option 1 because I strongly disagree."
     assert judge.invoke(response) == "1. strongly disagree"
 
 
+@pytest.mark.integration
 def test_model_based_answer_judge():
     repo_id = "julian-schelb/rup-answer-option-likert-scale"
-    possible_answers = ["1. never or seldom",
-                        "2.", "3. sometimes", "4.", "5. always"]
+    possible_answers = ["1. never or seldom", "2.", "3. sometimes", "4.", "5. always"]
     judge = ModelBasedAnswerJudge(
-        possible_answers=possible_answers, model_name=repo_id, device="cpu")
+        possible_answers=possible_answers, model_name=repo_id, device="cpu"
+    )
     response = "I always do my best to be honest: 5."
     assert judge.parse(response) == "5. always"
 
 
+@pytest.mark.integration
 def test_model_based_validator():
     repo_id = "protectai/distilroberta-base-rejection-v1"
     validator = ModelBasedValidator(repo_id, device="cpu")

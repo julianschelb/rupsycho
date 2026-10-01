@@ -5,13 +5,14 @@
 #  ExperimentDocument model. Supports both synchronous and asynchronous
 #  loading of experiment data.
 
-from typing import AsyncIterator, Iterator, List, Optional
+import glob
+import json
+import os
+from collections.abc import AsyncIterator, Iterator
+
+import aiofiles
 from langchain_core.document_loaders import BaseLoader
 from pydantic import ValidationError
-import aiofiles
-import json
-import glob
-import os
 
 from .experiment import ExperimentDocument
 
@@ -49,17 +50,16 @@ async def _experiment_from_file_async(path: str) -> ExperimentDocument:
 class ExperimentLoader(BaseLoader):
     """A document loader that reads JSON files validated by the ExperimentDocument model."""
 
-    def __init__(self, path_pattern: Optional[str] = None) -> None:
+    def __init__(self, path_pattern: str | None = None) -> None:
         """
         Initialize the loader with a path pattern.
 
         Args:
             path_pattern (Optional[str]): A glob pattern or single file path to load JSON files from.
         """
-        self.file_paths = self._resolve_paths(
-            path_pattern) if path_pattern else None
+        self.file_paths = self._resolve_paths(path_pattern) if path_pattern else None
 
-    def _resolve_paths(self, path_pattern: str) -> List[str]:
+    def _resolve_paths(self, path_pattern: str) -> list[str]:
         """Resolve the provided path pattern to a list of file paths.
 
         Args:
@@ -72,7 +72,7 @@ class ExperimentLoader(BaseLoader):
             return [path_pattern]
         return glob.glob(path_pattern, recursive=True)
 
-    def lazy_load(self, path_pattern: Optional[str] = None) -> Iterator[ExperimentDocument]:
+    def lazy_load(self, path_pattern: str | None = None) -> Iterator[ExperimentDocument]:  # type: ignore[override]
         """
         A lazy loader that reads JSON files from the resolved paths and validates them
         against the ExperimentDocument model.
@@ -86,12 +86,10 @@ class ExperimentLoader(BaseLoader):
         Raises:
             ValueError: If neither constructor nor method arguments provide a valid path pattern.
         """
-        file_paths = self._resolve_paths(
-            path_pattern) if path_pattern else self.file_paths
+        file_paths = self._resolve_paths(path_pattern) if path_pattern else self.file_paths
 
         if not file_paths:
-            raise ValueError(
-                "No file paths provided. Please provide a path pattern.")
+            raise ValueError("No file paths provided. Please provide a path pattern.")
 
         for file_path in file_paths:
             try:
@@ -101,7 +99,9 @@ class ExperimentLoader(BaseLoader):
             except Exception as e:
                 print(f"Error reading file {file_path}: {e}")
 
-    async def alazy_load(self, path_pattern: Optional[str] = None) -> AsyncIterator[ExperimentDocument]:
+    async def alazy_load(  # type: ignore[override]
+        self, path_pattern: str | None = None
+    ) -> AsyncIterator[ExperimentDocument]:
         """
         An async lazy loader that reads JSON files from the resolved paths and validates them
         against the ExperimentDocument model.
@@ -115,12 +115,10 @@ class ExperimentLoader(BaseLoader):
         Raises:
             ValueError: If neither constructor nor method arguments provide a valid path pattern.
         """
-        file_paths = self._resolve_paths(
-            path_pattern) if path_pattern else self.file_paths
+        file_paths = self._resolve_paths(path_pattern) if path_pattern else self.file_paths
 
         if not file_paths:
-            raise ValueError(
-                "No file paths provided. Please provide a path pattern.")
+            raise ValueError("No file paths provided. Please provide a path pattern.")
 
         for file_path in file_paths:
             try:
@@ -130,7 +128,7 @@ class ExperimentLoader(BaseLoader):
             except Exception as e:
                 print(f"Error reading file {file_path}: {e}")
 
-    def lazy_load_from_dicts(self, dicts: List[dict]) -> Iterator[ExperimentDocument]:
+    def lazy_load_from_dicts(self, dicts: list[dict]) -> Iterator[ExperimentDocument]:
         """
         A lazy loader that reads from a list of dictionaries (JSON objects) and validates them
         against the ExperimentDocument model.
@@ -149,7 +147,7 @@ class ExperimentLoader(BaseLoader):
             except Exception as e:
                 print(f"Error processing provided dictionary: {e}")
 
-    async def alazy_load_from_dicts(self, dicts: List[dict]) -> AsyncIterator[ExperimentDocument]:
+    async def alazy_load_from_dicts(self, dicts: list[dict]) -> AsyncIterator[ExperimentDocument]:
         """
         An async lazy loader that reads from a list of dictionaries (JSON objects) and validates them
         against the ExperimentDocument model.
@@ -168,12 +166,5 @@ class ExperimentLoader(BaseLoader):
             except Exception as e:
                 print(f"Error processing provided dictionary: {e}")
 
+
 # ================================= Main ================================
-
-
-if __name__ == "__main__":
-    loader = ExperimentLoader("../examples/data/bfi_experiment*.json")
-    experiments = loader.lazy_load()
-
-    for experiment in experiments:
-        print(experiment.questionnaire)

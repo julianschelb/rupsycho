@@ -5,7 +5,11 @@
 # The templates are designed for consistent and structured interactions with
 # models, including system and user prompts tailored for various tasks.
 
-from rupsycho.models.prompt import ChatMessageConfig, ChatPromptTemplateConfig, NormalPromptTemplateConfig
+from rupsycho.models.prompt import (
+    ChatMessageConfig,
+    ChatPromptTemplateConfig,
+    NormalPromptTemplateConfig,
+)
 
 # ================================= Default Chat Template ================================
 
@@ -15,11 +19,11 @@ Objective: "{general_instruction}"
 Answer with respect to the following persona description and question.
 """
 
-user_message_template = """ 
+user_message_template = """
 Question:
 {persona_description} was asked the following question. {question}
 
-Answer Options: 
+Answer Options:
 {answer_options}
 
 Instructions: Choose from the list of answer options to answer the question. Answer the question using only the provided answer options. If none of the options are correct, choose the option that is closest to being correct.
@@ -32,8 +36,8 @@ DEFAULT_CHAT_PROMPT_TEMPLATE_CONFIG = ChatPromptTemplateConfig(
     type="chat",
     messages=[
         ChatMessageConfig(role="system", content=system_message_template),
-        ChatMessageConfig(role="user", content=user_message_template)
-    ]
+        ChatMessageConfig(role="user", content=user_message_template),
+    ],
 )
 
 # # Create the actual ChatPromptTemplate using the Pydantic model
@@ -60,18 +64,14 @@ Answer:
 """
 
 # Define Pydantic model for the Simple Prompt Template
-SIMPLE_PROMPT_TEMPLATE_CONFIG = NormalPromptTemplateConfig(
-    type="normal",
-    template=simple_template
-)
+SIMPLE_PROMPT_TEMPLATE_CONFIG = NormalPromptTemplateConfig(type="normal", template=simple_template)
 
 # Create the actual PromptTemplate using the Pydantic model
 PROMPT_TEMPLATE_SIMPLE = SIMPLE_PROMPT_TEMPLATE_CONFIG.load_prompt_template()
 
 # Define Pydantic model for the Simple Chat Prompt Template
 SIMPLE_CHAT_PROMPT_TEMPLATE_CONFIG = ChatPromptTemplateConfig(
-    type="chat",
-    messages=[ChatMessageConfig(role="user", content=simple_template)]
+    type="chat", messages=[ChatMessageConfig(role="user", content=simple_template)]
 )
 
 # Create the actual ChatPromptTemplate using the Pydantic model
@@ -97,8 +97,7 @@ Answer:
 
 # Define Pydantic model for the Optimized Prompt Template
 OPTIMIZED_PROMPT_TEMPLATE_CONFIG = NormalPromptTemplateConfig(
-    type="normal",
-    template=optimized_template
+    type="normal", template=optimized_template
 )
 
 # Create the actual PromptTemplate using the Pydantic model
@@ -108,10 +107,9 @@ PROMPT_TEMPLATE_OPTIMIZED = OPTIMIZED_PROMPT_TEMPLATE_CONFIG.load_prompt_templat
 OPTIMIZED_CHAT_PROMPT_TEMPLATE_CONFIG = ChatPromptTemplateConfig(
     type="chat",
     messages=[
-        ChatMessageConfig(
-            role="system", content="Objective: {general_instructions}"),
-        ChatMessageConfig(role="user", content=optimized_template)
-    ]
+        ChatMessageConfig(role="system", content="Objective: {general_instructions}"),
+        ChatMessageConfig(role="user", content=optimized_template),
+    ],
 )
 
 # Create the actual ChatPromptTemplate using the Pydantic model
@@ -137,8 +135,7 @@ Answer:
 
 # Define Pydantic model for the JSON Output Prompt Template
 JSON_OUTPUT_PROMPT_TEMPLATE_CONFIG = NormalPromptTemplateConfig(
-    type="normal",
-    template=json_output_template
+    type="normal", template=json_output_template
 )
 
 # Create the actual PromptTemplate using the Pydantic model
@@ -148,10 +145,9 @@ PROMPT_TEMPLATE_JSON_OUTPUT = JSON_OUTPUT_PROMPT_TEMPLATE_CONFIG.load_prompt_tem
 JSON_OUTPUT_CHAT_PROMPT_TEMPLATE_CONFIG = ChatPromptTemplateConfig(
     type="chat",
     messages=[
-        ChatMessageConfig(
-            role="system", content="Objective: {general_instructions}"),
-        ChatMessageConfig(role="user", content=json_output_template)
-    ]
+        ChatMessageConfig(role="system", content="Objective: {general_instructions}"),
+        ChatMessageConfig(role="user", content=json_output_template),
+    ],
 )
 
 # Create the actual ChatPromptTemplate using the Pydantic model

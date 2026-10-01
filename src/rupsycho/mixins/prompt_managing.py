@@ -6,9 +6,12 @@
 # that they are correctly handled and converted into runnable forms.
 
 
+from __future__ import annotations
+
 import warnings
+from typing import TYPE_CHECKING, Any
+
 from langchain_core.load import dumpd, load
-from typing import Any, Optional
 
 
 class PromptTemplateMixin:
@@ -19,7 +22,13 @@ class PromptTemplateMixin:
     into a runnable form.
     """
 
-    def load_prompt(self, prompt_template: str) -> Optional[Any]:
+    if TYPE_CHECKING:
+        # Provided by ExperimentDocument, which mixes this class in.
+        prompt_template: Any
+        runnable_prompt: Any
+        runnable_parser: Any
+
+    def load_prompt(self, prompt_template: str) -> Any | None:
         """
         Load the prompt template from its serialized definition.
 
@@ -30,7 +39,7 @@ class PromptTemplateMixin:
             prompt = load(prompt_template)
             return prompt
         except Exception as e:
-            warnings.warn(f"Failed to load prompt template: {e}", UserWarning)
+            warnings.warn(f"Failed to load prompt template: {e}", UserWarning, stacklevel=2)
             return None
 
     def set_prompt(self, prompt: Any) -> None:
@@ -42,7 +51,7 @@ class PromptTemplateMixin:
         self.prompt_template = dumpd(prompt)
         self.runnable_prompt = prompt
 
-    def get_prompt(self) -> Optional[Any]:
+    def get_prompt(self) -> Any | None:
         """
         Retrieve the current runnable prompt template if available.
 
@@ -50,7 +59,7 @@ class PromptTemplateMixin:
         """
         return getattr(self, "runnable_prompt", None)
 
-    def get_prompt_config(self) -> Optional[str]:
+    def get_prompt_config(self) -> str | None:
         """
         Retrieve the serialized prompt template configuration.
 

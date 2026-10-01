@@ -5,71 +5,72 @@
 #  data, questionnaires, and metadata. It integrates multiple mixins and
 #  extends BaseMedia and Pydantic's BaseModel.
 
-from typing import Any, Literal, Optional, Dict, Type, Union
-from langchain_core.documents.base import BaseMedia
-from pydantic import Field, BaseModel
+import warnings
+from typing import Any, Literal
 
+from langchain_core.documents.base import BaseMedia
+from pydantic import BaseModel, ConfigDict, Field
+
+from .mixins.experiment_exporting import ExperimentExportMixin
+from .mixins.experiment_processing import ExperimentProcessingMixin
+from .mixins.model_managing import ModelManagementMixin
+from .mixins.persona_managing import PersonaManagementMixin
+from .mixins.prompt_managing import PromptTemplateMixin
 from .models.model import (
     DEFAULT_MODEL_CONFIG,
+    DeepSeekModelConfig,
+    GoogleModelConfig,
     LangChainModelConfig,
     LocalHuggingFaceModelConfig,
     OllamaModelConfig,
     OpenAIModelConfig,
     RemoteHuggingFaceModelConfig,
-    GoogleModelConfig,
-    DeepSeekModelConfig
 )
-
+from .models.parameters import ExperimentParameters
 from .models.prompt import (
     ChatPromptTemplateConfig,
     LangchainPromptTemplateConfig,
-    NormalPromptTemplateConfig
+    NormalPromptTemplateConfig,
 )
-
-from .prompts import DEFAULT_CHAT_PROMPT_TEMPLATE_CONFIG
-from .models.parameters import ExperimentParameters
 from .models.questionnaire import DemographicProfile, Questionnaire
-from .mixins.experiment_processing import ExperimentProcessingMixin
-from .mixins.experiment_exporting import ExperimentExportMixin
-from .mixins.model_managing import ModelManagementMixin
-from .mixins.prompt_managing import PromptTemplateMixin
-from .mixins.persona_managing import PersonaManagementMixin
-
-import warnings
-
+from .prompts import DEFAULT_CHAT_PROMPT_TEMPLATE_CONFIG
 
 # ================================= Prompt Type Mapping ================================
 
 
-PROMPT_CONFIG_CLASSES: Dict[str, Type[BaseModel]] = {
+PROMPT_CONFIG_CLASSES: dict[str, type[BaseModel]] = {
     "normal": NormalPromptTemplateConfig,
     "chat": ChatPromptTemplateConfig,
-    "langchain": LangchainPromptTemplateConfig
+    "langchain": LangchainPromptTemplateConfig,
 }
 
 # ================================= Model Type Mapping ================================
 
 
-MODEL_CONFIG_CLASSES: Dict[str, Type[BaseModel]] = {
+MODEL_CONFIG_CLASSES: dict[str, type[BaseModel]] = {
     "local_huggingface": LocalHuggingFaceModelConfig,
     "remote_huggingface": RemoteHuggingFaceModelConfig,
     "ollama": OllamaModelConfig,
     "openai": OpenAIModelConfig,
     "langchain": LangChainModelConfig,
     "google": GoogleModelConfig,
-    "deepseek": DeepSeekModelConfig
+    "deepseek": DeepSeekModelConfig,
 }
 
 # ================================= Experiment Class ================================
 
 
-class ExperimentDocument(
-    BaseMedia, ExperimentProcessingMixin, ExperimentExportMixin,
-    ModelManagementMixin, PromptTemplateMixin, PersonaManagementMixin
+class ExperimentDocument(  # type: ignore[misc]
+    BaseMedia,
+    ExperimentProcessingMixin,
+    ExperimentExportMixin,
+    ModelManagementMixin,
+    PromptTemplateMixin,
+    PersonaManagementMixin,
 ):
     """Class for storing an experiment and associated questionnaires along with metadata.
 
-    Extends LangChain's BaseMedia and Pydantic's BaseModel, integrating data validation 
+    Extends LangChain's BaseMedia and Pydantic's BaseModel, integrating data validation
     and serialization capabilities with document handling features.
 
     Example:
@@ -90,43 +91,47 @@ class ExperimentDocument(
 
     # --------------------------------- Attributes --------------------------------
 
-    name: Optional[str] = Field(
+    name: str | None = Field(
         None,
         description="The name of the experiment",
-        example="Generative Models for Big Five Inventory",
+        examples=["Generative Models for Big Five Inventory"],
     )
-    description: Optional[str] = Field(
+    description: str | None = Field(
         None,
         description="The description of the experiment",
-        example="Testing Generative Models for BFI questionnaire using Rupsycho.",
+        examples=["Testing Generative Models for BFI questionnaire using Rupsycho."],
     )
     parameters: ExperimentParameters = Field(
         default_factory=ExperimentParameters,
-        description="The parameters for the experiment and text generation"
+        description="The parameters for the experiment and text generation",
     )
-    prompt_template: Union[NormalPromptTemplateConfig, ChatPromptTemplateConfig, LangchainPromptTemplateConfig] = Field(
-        None, description="The prompt template used by the model"
-    )
-    models: Dict[str, Union[
-        LangChainModelConfig, LocalHuggingFaceModelConfig, RemoteHuggingFaceModelConfig,
-        OllamaModelConfig, OpenAIModelConfig, GoogleModelConfig, DeepSeekModelConfig
-    ]] = Field(
-        default_factory=dict, description="The models in the experiment"
-    )
-    demographic_profiles: Dict[str, DemographicProfile] = Field(
+    prompt_template: (
+        NormalPromptTemplateConfig | ChatPromptTemplateConfig | LangchainPromptTemplateConfig
+    ) = Field(None, description="The prompt template used by the model")  # type: ignore[assignment]
+    models: dict[
+        str,
+        LangChainModelConfig
+        | LocalHuggingFaceModelConfig
+        | RemoteHuggingFaceModelConfig
+        | OllamaModelConfig
+        | OpenAIModelConfig
+        | GoogleModelConfig
+        | DeepSeekModelConfig,
+    ] = Field(default_factory=dict, description="The models in the experiment")
+    demographic_profiles: dict[str, DemographicProfile] = Field(
         default_factory=dict, description="The demographic profiles in the experiment"
     )
-    questionnaire: Optional[Questionnaire] = Field(
+    questionnaire: Questionnaire | None = Field(
         None, description="The questionnaire in the experiment"
     )
-    metadata: Dict[str, Any] = Field(
+    metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional metadata for the experiment document."
     )
     type: Literal["ExperimentDocument"] = "ExperimentDocument"
     runnable_prompt: Any = Field(
         default_factory=dict, description="The initialized prompts in the experiment"
     )
-    runnable_models: Dict[str, Any] = Field(
+    runnable_models: dict[str, Any] = Field(
         default_factory=dict, description="The initialized models in the experiment"
     )
     runnable_parser: Any = Field(
@@ -135,8 +140,7 @@ class ExperimentDocument(
 
     # --------------------------------- Config --------------------------------
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     # --------------------------------- Initialization --------------------------------
 
@@ -150,17 +154,16 @@ class ExperimentDocument(
         # Convert demographic profiles to instances
         if "demographic_profiles" in data:
             data["demographic_profiles"] = self._convert_demographic_profiles(
-                data["demographic_profiles"])
+                data["demographic_profiles"]
+            )
 
         # Convert prompt template to runnable form and load it
         if "prompt_template" in data:
-            data["prompt_template"] = self._convert_prompt(
-                data["prompt_template"])
+            data["prompt_template"] = self._convert_prompt(data["prompt_template"])
         else:
             data["prompt_template"] = DEFAULT_CHAT_PROMPT_TEMPLATE_CONFIG
 
-        data["runnable_prompt"] = self._load_runnable_prompt(
-            data["prompt_template"])
+        data["runnable_prompt"] = self._load_runnable_prompt(data["prompt_template"])
 
         # Convert models to runnable form but load them conditionally based on lazy_load_models
         if "models" in data:
@@ -169,23 +172,22 @@ class ExperimentDocument(
             data["models"] = {"default_model": DEFAULT_MODEL_CONFIG}
 
         # Load models if lazy_load_models is False; otherwise, leave them for later loading
-        if not data.get("parameters").lazy_load_models:
-            data["runnable_models"] = self._load_runnable_models(
-                data["models"])
+        if not data.get("parameters").lazy_load_models:  # type: ignore[union-attr]
+            data["runnable_models"] = self._load_runnable_models(data["models"])
         else:
             # Models will be loaded later
             data["runnable_models"] = data["models"]
 
         # Convert questionnaire to an instance of Questionnaire
         if "questionnaire" in data:
-            data["questionnaire"] = self._convert_questionnaire(
-                data["questionnaire"])
+            data["questionnaire"] = self._convert_questionnaire(data["questionnaire"])
 
         super().__init__(**data)
+
     # --------------------------------- Conversion Methods --------------------------------
 
     @staticmethod
-    def _convert_parameters(parameters: Union[ExperimentParameters, dict]) -> ExperimentParameters:
+    def _convert_parameters(parameters: ExperimentParameters | dict) -> ExperimentParameters:
         """Convert parameters to an instance of Parameters."""
         if isinstance(parameters, dict):
             return ExperimentParameters(**parameters)
@@ -193,57 +195,52 @@ class ExperimentDocument(
 
     @staticmethod
     def _convert_demographic_profiles(
-        profiles: Dict[str, Union[DemographicProfile, dict]]
-    ) -> Dict[str, DemographicProfile]:
+        profiles: dict[str, DemographicProfile | dict],
+    ) -> dict[str, DemographicProfile]:
         """Convert demographic profiles to instances of DemographicProfile."""
         return {
-            key: DemographicProfile(
-                **profile) if isinstance(profile, dict) else profile
+            key: DemographicProfile(**profile) if isinstance(profile, dict) else profile
             for key, profile in profiles.items()
         }
 
     @staticmethod
-    def _convert_prompt(prompt: Union[dict, BaseModel]) -> Union[BaseModel, dict]:
+    def _convert_prompt(prompt: dict | BaseModel) -> BaseModel | dict:
         """Convert a single prompt configuration to an instance of its respective Pydantic PromptTemplateConfig class."""
         if isinstance(prompt, dict):
             prompt_type = prompt.get("type")
             if prompt_type and prompt_type in PROMPT_CONFIG_CLASSES:
                 return PROMPT_CONFIG_CLASSES[prompt_type](**prompt)
             else:
-                raise ValueError(f"Unknown or missing prompt type.")
+                raise ValueError("Unknown or missing prompt type.")
         return prompt
 
     @staticmethod
-    def _convert_models(
-        models: Dict[str, Union[dict, BaseModel]]
-    ) -> Dict[str, Union[BaseModel, dict]]:
+    def _convert_models(models: dict[str, dict | BaseModel]) -> dict[str, BaseModel | dict]:
         """Convert model configurations to instances of their respective Pydantic ModelConfig classes."""
 
-        def convert_model(key: str, model: Union[dict, BaseModel]) -> Union[BaseModel, dict]:
+        def convert_model(key: str, model: dict | BaseModel) -> BaseModel | dict:
 
             if isinstance(model, dict):
                 model_type = model.get("type")
                 if model_type and model_type in MODEL_CONFIG_CLASSES:
                     return MODEL_CONFIG_CLASSES[model_type](**model)
                 else:
-                    raise ValueError(
-                        f"Unknown or missing model type for key: {key}")
+                    raise ValueError(f"Unknown or missing model type for key: {key}")
             return model
 
         return {key: convert_model(key, model) for key, model in models.items()}
 
     @staticmethod
-    def _convert_questionnaire(questionnaire: Union[Questionnaire, dict]) -> Questionnaire:
+    def _convert_questionnaire(questionnaire: Questionnaire | dict) -> Questionnaire:
         """Convert questionnaire to an instance of Questionnaire."""
         if isinstance(questionnaire, dict):
             return Questionnaire(**questionnaire)
         return questionnaire
 
-    def _load_runnable_models(self, models: Dict[str, Any]) -> Dict[str, Any]:
+    def _load_runnable_models(self, models: dict[str, Any]) -> dict[str, Any]:
         """Load models into runnable instances."""
         runnable_models = {}
         for key, model in models.items():
-
             try:
                 runnable_models[key] = model.load_model()
             except Exception as e:
@@ -251,17 +248,16 @@ class ExperimentDocument(
 
         return runnable_models
 
-    def _load_runnable_prompt(self, prompt_template: Union[str, BaseModel]) -> Any:
+    def _load_runnable_prompt(self, prompt_template: str | BaseModel) -> Any:
         """Load a prompt template into a runnable LangChain prompt."""
         if isinstance(prompt_template, str):
             return prompt_template  # Directly use if it's a string
 
         runnable_prompt = None
         try:
-            runnable_prompt = prompt_template.load_prompt_template()
+            runnable_prompt = prompt_template.load_prompt_template()  # type: ignore[attr-defined]
         except Exception as e:
-            warnings.warn(
-                f"Failed to load prompt template: {e}", UserWarning)
+            warnings.warn(f"Failed to load prompt template: {e}", UserWarning, stacklevel=2)
 
         return runnable_prompt
 

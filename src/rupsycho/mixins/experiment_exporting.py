@@ -6,9 +6,12 @@
 # and converting the experiment data into a pandas DataFrame.
 
 
-from typing import Dict, Any, List, Optional, Set
-import pandas as pd
+from __future__ import annotations
+
 import json
+from typing import TYPE_CHECKING, Any
+
+import pandas as pd
 
 
 class ExperimentExportMixin:
@@ -16,13 +19,17 @@ class ExperimentExportMixin:
     Mixin providing methods to export the experiment results to a file or return the answers.
     """
 
+    if TYPE_CHECKING:
+        # Provided by ExperimentDocument, which mixes this class in.
+        questionnaire: Any
+
     def model_dump(
         self,
-        include: Optional[Set[str]] = None,
-        exclude: Optional[Set[str]] = None,
+        include: set[str] | None = None,
+        exclude: set[str] | None = None,
         exclude_unset: bool = True,
-        exclude_none: bool = True
-    ) -> Dict[str, Any]:
+        exclude_none: bool = True,
+    ) -> dict[str, Any]:
         """
         Convert the ExperimentDocument instance to a dictionary, allowing for inclusion or exclusion of specific fields.
 
@@ -36,64 +43,91 @@ class ExperimentExportMixin:
         experiment_data = {}
 
         # Safely include "name"
-        if hasattr(self, 'name') and (not include or 'name' in include) and (not exclude or 'name' not in exclude):
+        if (
+            hasattr(self, "name")
+            and (not include or "name" in include)
+            and (not exclude or "name" not in exclude)
+        ):
             experiment_data["name"] = self.name
 
         # Safely include "description"
-        if hasattr(self, 'description') and (not include or 'description' in include) and (not exclude or 'description' not in exclude):
+        if (
+            hasattr(self, "description")
+            and (not include or "description" in include)
+            and (not exclude or "description" not in exclude)
+        ):
             experiment_data["description"] = self.description
 
         # Safely include "parameters"
-        if hasattr(self, 'parameters') and self.parameters is not None and \
-                (not include or 'parameters' in include) and (not exclude or 'parameters' not in exclude):
+        if (
+            hasattr(self, "parameters")
+            and self.parameters is not None
+            and (not include or "parameters" in include)
+            and (not exclude or "parameters" not in exclude)
+        ):
             experiment_data["parameters"] = (
-                self.parameters.dict(
-                    exclude_unset=exclude_unset, exclude_none=exclude_none)
-                if hasattr(self.parameters, "dict") else self.parameters
+                self.parameters.dict(exclude_unset=exclude_unset, exclude_none=exclude_none)
+                if hasattr(self.parameters, "dict")
+                else self.parameters
             )
 
         # Safely include "prompt_template"
-        if hasattr(self, 'prompt_template') and self.prompt_template is not None and \
-                (not include or 'prompt_template' in include) and (not exclude or 'prompt_template' not in exclude):
+        if (
+            hasattr(self, "prompt_template")
+            and self.prompt_template is not None
+            and (not include or "prompt_template" in include)
+            and (not exclude or "prompt_template" not in exclude)
+        ):
             experiment_data["prompt_template"] = (
-                self.prompt_template.dict(
-                    exclude_unset=exclude_unset, exclude_none=exclude_none)
-                if hasattr(self.prompt_template, "dict") else self.prompt_template
+                self.prompt_template.dict(exclude_unset=exclude_unset, exclude_none=exclude_none)
+                if hasattr(self.prompt_template, "dict")
+                else self.prompt_template
             )
 
         # Safely include "models"
-        if hasattr(self, 'models') and self.models and \
-                (not include or 'models' in include) and (not exclude or 'models' not in exclude):
+        if (
+            hasattr(self, "models")
+            and self.models
+            and (not include or "models" in include)
+            and (not exclude or "models" not in exclude)
+        ):
             experiment_data["models"] = {
-                key: model.dict(exclude_unset=exclude_unset,
-                                exclude_none=exclude_none)
-                if hasattr(model, "dict") else model
+                key: model.dict(exclude_unset=exclude_unset, exclude_none=exclude_none)
+                if hasattr(model, "dict")
+                else model
                 for key, model in self.models.items()
             }
 
         # Safely include "demographic_profiles"
-        if hasattr(self, 'demographic_profiles') and self.demographic_profiles and \
-                (not include or 'demographic_profiles' in include) and (not exclude or 'demographic_profiles' not in exclude):
+        if (
+            hasattr(self, "demographic_profiles")
+            and self.demographic_profiles
+            and (not include or "demographic_profiles" in include)
+            and (not exclude or "demographic_profiles" not in exclude)
+        ):
             experiment_data["demographic_profiles"] = {
-                key: profile.dict(exclude_unset=exclude_unset,
-                                  exclude_none=exclude_none)
-                if hasattr(profile, "dict") else profile
+                key: profile.dict(exclude_unset=exclude_unset, exclude_none=exclude_none)
+                if hasattr(profile, "dict")
+                else profile
                 for key, profile in self.demographic_profiles.items()
             }
 
         # Safely include "questionnaire"
-        if hasattr(self, 'questionnaire') and self.questionnaire is not None and \
-                (not include or 'questionnaire' in include) and (not exclude or 'questionnaire' not in exclude):
+        if (
+            hasattr(self, "questionnaire")
+            and self.questionnaire is not None
+            and (not include or "questionnaire" in include)
+            and (not exclude or "questionnaire" not in exclude)
+        ):
             experiment_data["questionnaire"] = (
-                self.questionnaire.dict(
-                    exclude_unset=exclude_unset, exclude_none=exclude_none)
-                if hasattr(self.questionnaire, "dict") else self.questionnaire
+                self.questionnaire.dict(exclude_unset=exclude_unset, exclude_none=exclude_none)
+                if hasattr(self.questionnaire, "dict")
+                else self.questionnaire
             )
 
         # Optionally exclude None values
         if exclude_none:
-            experiment_data = {k: v for k,
-                               v in experiment_data.items() if v is not None}
+            experiment_data = {k: v for k, v in experiment_data.items() if v is not None}
 
         return experiment_data
 
@@ -103,10 +137,10 @@ class ExperimentExportMixin:
             data = self.model_dump()
             with open(filename, "w") as file:
                 json.dump(data, file, indent=4, ensure_ascii=False)
-        except IOError as e:
+        except OSError as e:
             print(f"Error saving to file: {e}")
 
-    def get_answers(self) -> List[Dict[str, Any]]:
+    def get_answers(self) -> list[dict[str, Any]]:
         """
         Extracts and returns the answers from the experiment in a list holding the nested answer structure.
 
@@ -145,14 +179,16 @@ class ExperimentExportMixin:
                     # Loop through seeds (runs)
                     for run_seed, answer in persona_answers.items():
                         # Append the row to data
-                        data.append({
-                            "Instruction ID": instruction_id,
-                            "Instruction Question": question,
-                            "Model ID": model_id,
-                            "Persona ID": persona_id,
-                            "Run Seed": run_seed,
-                            "Answer": answer
-                        })
+                        data.append(
+                            {
+                                "Instruction ID": instruction_id,
+                                "Instruction Question": question,
+                                "Model ID": model_id,
+                                "Persona ID": persona_id,
+                                "Run Seed": run_seed,
+                                "Answer": answer,
+                            }
+                        )
 
         # Create DataFrame from the collected data
         return pd.DataFrame(data)

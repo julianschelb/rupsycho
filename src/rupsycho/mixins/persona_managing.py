@@ -6,9 +6,12 @@
 # that they are correctly handled, stored, and accessed.
 
 
+from __future__ import annotations
+
 import warnings
+from typing import TYPE_CHECKING, Any
+
 from rupsycho.models.questionnaire import DemographicProfile
-from typing import Optional
 
 
 class PersonaManagementMixin:
@@ -19,7 +22,11 @@ class PersonaManagementMixin:
     stored in a dictionary with unique identifiers.
     """
 
-    def add_persona(self, persona: DemographicProfile, identifier: Optional[str] = None) -> None:
+    if TYPE_CHECKING:
+        # Provided by ExperimentDocument, which mixes this class in.
+        demographic_profiles: dict[str, Any]
+
+    def add_persona(self, persona: DemographicProfile, identifier: str | None = None) -> None:
         """
         Adds a demographic profile (persona) to the experiment.
 
@@ -30,11 +37,12 @@ class PersonaManagementMixin:
         key = identifier if identifier else str(id(persona))
         if key in self.demographic_profiles:
             warnings.warn(
-                f"A persona with the identifier '{key}' already exists.", UserWarning)
+                f"A persona with the identifier '{key}' already exists.", UserWarning, stacklevel=2
+            )
         else:
             self.demographic_profiles[key] = persona
 
-    def get_persona(self, identifier: str) -> Optional[DemographicProfile]:
+    def get_persona(self, identifier: str) -> DemographicProfile | None:
         """
         Retrieves a persona by its identifier.
 
@@ -53,7 +61,8 @@ class PersonaManagementMixin:
             del self.demographic_profiles[identifier]
         else:
             warnings.warn(
-                f"No persona found with the identifier '{identifier}'.", UserWarning)
+                f"No persona found with the identifier '{identifier}'.", UserWarning, stacklevel=2
+            )
 
     def list_personas(self) -> list:
         """

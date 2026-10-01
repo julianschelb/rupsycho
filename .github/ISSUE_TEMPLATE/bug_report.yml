@@ -1,0 +1,29 @@
+name: Bug report
+description: Something does not work as documented
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: config
+    attributes:
+      label: Experiment configuration
+      description: The (redacted, no API keys) JSON config or Python snippet that reproduces the problem.
+      render: json
+  - type: input
+    id: version
+    attributes:
+      label: rupsycho version and Python version
+      placeholder: "rupsycho 0.1.0, Python 3.12"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Traceback / logs
+      render: shell

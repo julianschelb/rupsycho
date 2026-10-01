@@ -5,9 +5,10 @@
 # The parser is designed to remove line breaks and non-ASCII Unicode characters
 # from a given string, returning a cleaned version of the input.
 
+import re
+
 from langchain_core.exceptions import OutputParserException
 from langchain_core.output_parsers import BaseOutputParser
-import re
 
 
 class BasicParser(BaseOutputParser[str]):
@@ -41,19 +42,18 @@ class BasicParser(BaseOutputParser[str]):
         """
         try:
             # Remove line breaks and replace with a space
-            cleaned_text = text.replace('\n', ' ').replace('\r', ' ')
+            cleaned_text = text.replace("\n", " ").replace("\r", " ")
 
             # Remove non-ASCII Unicode characters
-            cleaned_text = re.sub(r'[^\x00-\x7F]+', '', cleaned_text)
+            cleaned_text = re.sub(r"[^\x00-\x7F]+", "", cleaned_text)
 
             # Trim extra whitespace
-            cleaned_text = re.sub(r'\s+', ' ', cleaned_text).strip()
+            cleaned_text = re.sub(r"\s+", " ", cleaned_text).strip()
 
             return cleaned_text
 
         except Exception as e:
-            raise OutputParserException(
-                f"BasicParser encountered an error: {e}")
+            raise OutputParserException(f"BasicParser encountered an error: {e}") from e
 
     @property
     def _type(self) -> str:
@@ -66,19 +66,3 @@ class BasicParser(BaseOutputParser[str]):
             The string "basic_parser", identifying the type of this parser.
         """
         return "basic_parser"
-
-
-if __name__ == "__main__":
-    # Example usage of the BasicParser class.
-
-    # Instantiate the custom parser
-    basic_parser = BasicParser()
-
-    # Example text to parse
-    raw_output = "Hello, world!\nThis is a test text with some emojis 😊 and line breaks.\n"
-
-    # Parse the output
-    parsed_output = basic_parser.parse(raw_output)
-
-    # Print the cleaned output
-    print("Cleaned output:", parsed_output)

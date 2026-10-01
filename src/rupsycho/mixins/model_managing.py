@@ -6,10 +6,14 @@
 # as well as convert model definitions into runnable models.
 
 
-from langchain_core.load import dumpd, load
-from rupsycho.models.model import LangChainModelConfig
-from typing import Any, Dict, List, Optional
+from __future__ import annotations
+
 import warnings
+from typing import TYPE_CHECKING, Any
+
+from langchain_core.load import dumpd, load
+
+from rupsycho.models.model import LangChainModelConfig
 
 
 class ModelManagementMixin:
@@ -19,6 +23,11 @@ class ModelManagementMixin:
     This includes adding models, setting models, and handling the conversion
     of model definitions into runnable models.
     """
+
+    if TYPE_CHECKING:
+        # Provided by ExperimentDocument, which mixes this class in.
+        models: dict[str, Any]
+        runnable_models: dict[str, Any]
 
     def load_model(self, model_definition):
         """
@@ -31,10 +40,12 @@ class ModelManagementMixin:
             model = load(model_definition)
             return model
         except Exception as e:
-            warnings.warn(f"Failed to load model: {e}", UserWarning)
+            warnings.warn(f"Failed to load model: {e}", UserWarning, stacklevel=2)
             return None
 
-    def add_model(self, model: Any, identifier: Optional[str] = None) -> None: # bug when running exp with model that was added as a dict
+    def add_model(
+        self, model: Any, identifier: str | None = None
+    ) -> None:  # bug when running exp with model that was added as a dict
         """
         Adds a model to the experiment.
 
@@ -45,7 +56,8 @@ class ModelManagementMixin:
 
         if key in self.models:
             warnings.warn(
-                f"A model with the identifier '{key}' already exists.", UserWarning)
+                f"A model with the identifier '{key}' already exists.", UserWarning, stacklevel=2
+            )
         else:
             self.models[key] = LangChainModelConfig(definition=dumpd(model))
 
@@ -64,7 +76,7 @@ class ModelManagementMixin:
             if runnable_model:
                 self.runnable_models[key] = runnable_model
 
-    def get_model(self, identifier: str) -> Optional[Any]:
+    def get_model(self, identifier: str) -> Any | None:
         """
         Retrieves a model by its identifier.
 
@@ -85,9 +97,10 @@ class ModelManagementMixin:
                 del self.runnable_models[identifier]
         else:
             warnings.warn(
-                f"No model found with the identifier '{identifier}'.", UserWarning)
+                f"No model found with the identifier '{identifier}'.", UserWarning, stacklevel=2
+            )
 
-    def list_models(self) -> List[str]:
+    def list_models(self) -> list[str]:
         """
         Lists all model identifiers in the experiment.
 
@@ -112,12 +125,12 @@ class ModelManagementMixin:
         :param new_model: The new model to replace the old one.
         """
         if identifier in self.models:
-            self.models[identifier] = LangChainModelConfig(
-                definition=dumpd(new_model))
+            self.models[identifier] = LangChainModelConfig(definition=dumpd(new_model))
             self.set_runnable_models()  # Refresh the runnable models dictionary
         else:
             warnings.warn(
-                f"No model found with the identifier '{identifier}'.", UserWarning)
+                f"No model found with the identifier '{identifier}'.", UserWarning, stacklevel=2
+            )
 
     # def get_model_config(self, identifier: str) -> Optional[Dict[str, Any]]:
     #     """
@@ -144,7 +157,7 @@ class ModelManagementMixin:
         """
         return len(self.models)
 
-    def get_all_runnable_models(self) -> Dict[str, Any]:
+    def get_all_runnable_models(self) -> dict[str, Any]:
         """
         Retrieves a dictionary of all runnable models.
 
