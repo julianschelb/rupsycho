@@ -127,6 +127,7 @@ Changelog = "https://github.com/julianschelb/rupsycho/blob/main/CHANGELOG.md"
 Paper = "https://arxiv.org/abs/2503.10229"
 
 [project.scripts]
+rupsycho = "rupsycho.cli:main"
 rup-configurator = "rupsycho_configurator.launcher:main"
 
 [tool.poetry]
@@ -168,6 +169,8 @@ format-check = "ruff format --check src/ tests/"
 typecheck = "mypy src/rupsycho/"
 docs = "mkdocs serve"
 docs-build = "mkdocs build --strict"
+docs-deploy = "mkdocs gh-deploy --force"
+bench = "python benchmarks/bench_run_loop.py"
 check = ["lint", "format-check", "typecheck", "test"]
 
 [tool.ruff]
