@@ -27,11 +27,11 @@ helps you turn the free-text answers into scorable responses.
 ## Features
 
 - **Declarative experiments** in a single, shareable JSON file
-- **Many back-ends:** local & remote Hugging Face, Ollama, OpenAI, Google, DeepSeek, any LangChain runnable
+- **Many back-ends:** local & remote Hugging Face, Ollama, OpenAI, Google, DeepSeek, or any LangChain chat model or LLM
 - **Personas** via demographic profile templates
 - **Post-processing:** cleaners, refusal / "as an AI" validators, rule- and model-based judges
 - **Callbacks** that stream answers to JSONL / CSV / console while the experiment runs
-- **Configurator app** (`rup-configurator`) with LLM-assisted questionnaire import from PDF
+- **Configurator app** (`rup-configurator`) with LLM-assisted questionnaire import from PDF or pasted text
 
 ## Installation
 
@@ -42,15 +42,25 @@ pip install git+https://github.com/julianschelb/rupsycho.git
 pip install "rupsycho[configurator] @ git+https://github.com/julianschelb/rupsycho.git"
 ```
 
-Requires Python 3.10 – 3.13.
+Requires Python 3.10 – 3.13. The package depends on PyTorch and Transformers, so the installation
+is large. For a CPU-only environment, install PyTorch from the CPU index first
+(`pip install torch --index-url https://download.pytorch.org/whl/cpu`).
 
 ## Quick start
+
+The example configurations live in the repository and are not part of the installed package.
+Download the demo configuration (or clone the repository and use
+`examples/data/bfi_demo_config.json`):
+
+```bash
+curl -O https://raw.githubusercontent.com/julianschelb/rupsycho/main/examples/data/bfi_demo_config.json
+```
 
 ```python
 import rupsycho as rup
 
 # Load a configuration (questionnaire, personas, models, prompt, seeds)
-experiment = rup.experiment_from_file("examples/data/bfi_demo_config.json")
+experiment = rup.experiment_from_file("bfi_demo_config.json")
 
 # Inspect exactly what the model will see
 experiment.print_assembled_prompt(item_idx=0, persona_idx=0)
@@ -58,12 +68,28 @@ experiment.print_assembled_prompt(item_idx=0, persona_idx=0)
 # Run every model × seed × persona × item combination
 experiment.run()
 
-# One row per combination
+# One row per generated answer
 answers = experiment.get_answers_as_dataframe()
 ```
 
+The demo configuration runs `HuggingFaceTB/SmolLM-1.7b-Instruct` on the CPU. The model (several GB)
+is downloaded from the Hugging Face Hub when `run()` first needs it.
+
 See the [Getting Started guide](https://julianschelb.github.io/rupsycho/getting-started/) and the
 notebooks in [`examples/`](examples) for more.
+
+## Using the Configurator App
+
+The configurator is a Streamlit app for building the personas and the questionnaire of a
+configuration without writing JSON, including an LLM-assisted import of a questionnaire from a PDF
+or from pasted text. Install the `configurator` extra (see above) and start it with
+
+```bash
+rup-configurator
+```
+
+The [Configurator App guide](https://julianschelb.github.io/rupsycho/tutorials/configurator/)
+describes the tabs and workflows.
 
 ## Development
 

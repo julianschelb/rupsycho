@@ -65,6 +65,9 @@ plugins:
             separate_signature: true
             line_length: 60
             docstring_style: google
+            docstring_options:
+              warn_missing_types: false
+              returns_named_value: false
             docstring_section_style: spacy
             merge_init_into_class: true
 
@@ -74,6 +77,7 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets:
       base_path: .
+      check_paths: true
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
@@ -84,6 +88,13 @@ markdown_extensions:
   - tables
   - toc:
       permalink: true
+
+validation:
+  nav:
+    omitted_files: warn
+  links:
+    unrecognized_links: warn
+    anchors: warn
 
 nav:
   - Home: index.md

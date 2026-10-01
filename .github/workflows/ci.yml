@@ -67,7 +67,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install torch --index-url https://download.pytorch.org/whl/cpu
-          pip install -e ".[dev]"
+          pip install -e ".[dev,configurator]"
 
       - name: Run tests
         # Integration tests (real model downloads) are deselected by default.

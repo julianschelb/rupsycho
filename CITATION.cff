@@ -36,6 +36,6 @@ preferred-citation:
     - family-names: Spitz
       given-names: Andreas
   year: 2025
-  journal: "arXiv preprint"
-  notes: "arXiv:2503.10229"
+  journal: "arXiv preprint arXiv:2503.10229"
+  doi: "10.48550/arXiv.2503.10229"
   url: "https://arxiv.org/abs/2503.10229"
