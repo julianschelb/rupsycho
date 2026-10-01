@@ -71,8 +71,9 @@ class JSONLCallback(Callback):
         output_data = {
             "experiment_name": experiment.name,  # Accessing experiment details
             "instruction_item_id": instruction_item_id,
-            # Assuming instruction_item can be converted to dict
-            "instruction_item": instruction_item.model_dump(exclude=["answer"]),
+            # The accumulated answers of the item are left out: every row carries its own
+            # answer, and including them made each row (and the file) grow with the run
+            "instruction_item": instruction_item.model_dump(exclude={"answers"}),
             "model_id": model_id,
             "profile_id": profile_id,
             "random_seed": random_seed,
@@ -81,7 +82,7 @@ class JSONLCallback(Callback):
         }
 
         # Open the JSONL file in append mode and write the data
-        with open(self.file_path, "a") as f:
+        with open(self.file_path, "a", encoding="utf-8") as f:
             f.write(json.dumps(output_data) + "\n")
 
 
@@ -98,7 +99,7 @@ class CSVCallback(Callback):
 
         # Initialize the CSV file with headers if it doesn't exist
         try:
-            with open(self.file_path, "x", newline="") as f:
+            with open(self.file_path, "x", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
                 writer.writerow(
                     [
@@ -141,7 +142,7 @@ class CSVCallback(Callback):
         ]
 
         # Open the CSV file in append mode and write the data
-        with open(self.file_path, "a", newline="") as f:
+        with open(self.file_path, "a", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow(output_data)
 
