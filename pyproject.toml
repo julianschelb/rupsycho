@@ -116,6 +116,9 @@ dev = [
     "pre-commit (>=3.5.0)",
     "build (>=1.0.0)",
     "python-semantic-release (>=9.0.0)",
+    "nbclient (>=0.10.0)",
+    "nbformat (>=5.9.0)",
+    "ipykernel (>=6.29.0)",
 ]
 
 [project.urls]
