@@ -1,28 +1,87 @@
-# See https://pre-commit.com for more information
+# See https://pre-commit.com for more information.
+#
+#   pre-commit install            installs the pre-commit AND the commit-msg hook
+#   pre-commit run --all-files    runs every hook on the whole repository
+#
+# Run git commit from the activated virtual environment: the local mypy hook uses the
+# mypy of that environment (pip install -e ".[dev]"). CI does not run pre-commit; it runs
+# ruff, mypy and the tests in their own jobs (.github/workflows/ci.yml).
+minimum_pre_commit_version: "3.5.0"
+default_install_hook_types: [pre-commit, commit-msg]
+
 repos:
+  # ── Ruff: lint + format ───────────────────────────────────────────
+  # Keep rev equal to RUFF_VERSION in .github/workflows/ci.yml (CI fails on a mismatch).
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.9
+    rev: v0.16.10
     hooks:
-      - id: ruff
+      - id: ruff-check
         args: [--fix]
         files: ^(src|tests)/
       - id: ruff-format
         files: ^(src|tests)/
 
+  # ── mypy: the whole package, with the project's own environment ───
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy
+        entry: mypy src/rupsycho
+        language: system
+        types: [python]
+        files: ^src/rupsycho/
+        pass_filenames: false
+
+  # ── General file hygiene ──────────────────────────────────────────
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
+        exclude: \.(ipynb|csv|jsonl)$
       - id: end-of-file-fixer
         exclude: \.(ipynb|csv|jsonl)$
+      - id: mixed-line-ending
+        args: [--fix=lf]
+        exclude: \.(ipynb|csv|jsonl)$
       - id: check-yaml
+        args: [--unsafe] # mkdocs.yml uses !!python/name tags, so only check the syntax
       - id: check-toml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-case-conflict
       - id: check-added-large-files
         args: [--maxkb=1000]
+      - id: detect-private-key
 
+  # ── Experiment configurations are shared: no API keys in them ─────
+  - repo: local
+    hooks:
+      - id: no-api-keys-in-configs
+        name: no API keys in JSON configurations
+        description: >-
+          Read keys from the environment instead (OPENAI_API_KEY, DEEPSEEK_API_KEY,
+          HUGGINGFACEHUB_API_TOKEN, ...). Empty values, the mask ********** that exports
+          write, and <placeholders> are allowed.
+        language: pygrep
+        entry: '"(api_key|huggingfacehub_api_token)"\s*:\s*"(?![<$"*])[^"]+"'
+        types: [json]
+
+  # ── GitHub configuration: schema checks, every workflow job needs a timeout ──
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.38.2
+    hooks:
+      - id: check-github-workflows
+      - id: check-github-workflows-require-timeout
+      - id: check-dependabot
+      - id: check-github-issue-forms
+      - id: check-github-issue-config
+      - id: check-citation-file-format
+
+  # ── Conventional Commits (commit message lint) ────────────────────
+  # Releases and the changelog are generated from the commit messages.
   - repo: https://github.com/compilerla/conventional-pre-commit
-    rev: v4.0.0
+    rev: v4.4.0
     hooks:
       - id: conventional-pre-commit
         stages: [commit-msg]

@@ -1,8 +1,8 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite the accompanying paper."
+message: "If you use this software, please cite the accompanying paper (preferred citation) and, for reproducibility, the version of the package you used."
 type: software
 title: "R.U.Psycho"
-abstract: "A framework for designing and running robust and reproducible psychometric experiments on generative language models."
+abstract: "R.U.Psycho is a framework for designing and running robust and reproducible psychometric experiments on generative language models."
 authors:
   - family-names: Schelb
     given-names: Julian
@@ -16,6 +16,9 @@ authors:
     given-names: Andreas
     affiliation: University of Konstanz
 license: MIT
+# version is kept in step with pyproject.toml by the release tooling;
+# date-released is deliberately left out until a release is published.
+version: "0.1.0"
 repository-code: "https://github.com/julianschelb/rupsycho"
 url: "https://julianschelb.github.io/rupsycho/"
 keywords:
@@ -36,6 +39,6 @@ preferred-citation:
     - family-names: Spitz
       given-names: Andreas
   year: 2025
-  journal: "arXiv preprint"
-  notes: "arXiv:2503.10229"
+  journal: "arXiv preprint arXiv:2503.10229"
+  doi: "10.48550/arXiv.2503.10229"
   url: "https://arxiv.org/abs/2503.10229"
