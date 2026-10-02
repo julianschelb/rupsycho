@@ -11,7 +11,7 @@ written by ``CSVCallback`` and adds, for every answer,
   shortcut for it,
 * ``decision`` - the answer option chosen by the *judge*.
 
-All three stages are LangChain output parsers from [`rupsycho.parsers`][rupsycho.parsers].
+All three stages are LangChain output parsers from ``rupsycho.parsers``.
 """
 
 from __future__ import annotations
