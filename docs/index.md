@@ -1,7 +1,7 @@
 # R.U.Psycho
 
 **R.U.Psycho** (*Robust Unified Psychometric Testing of Language Models*) is a Python
-framework for designing and running **reproducible psychometric experiments on
+framework for designing and running **robust and reproducible psychometric experiments on
 generative language models**, with limited coding expertise required.
 
 It accompanies the paper
@@ -19,13 +19,13 @@ comparable.
 R.U.Psycho addresses this by making a whole experiment **one declarative,
 shareable configuration**:
 
-| You declare …                          | … in the config section |
-| -------------------------------------- | ----------------------- |
+| You declare …                           | … in the config section |
+| --------------------------------------- | ----------------------- |
 | the questionnaire, items, answer scales | `questionnaire`         |
-| who the model should answer *as*       | `demographic_profiles`  |
-| which model(s) and generation settings | `models`                |
-| how the question is phrased            | `prompt_template`       |
-| which random seeds to use              | `parameters`            |
+| who the model should answer *as*        | `demographic_profiles`  |
+| which model(s) and generation settings  | `models`                |
+| how the question is phrased             | `prompt_template`       |
+| which random seeds to use               | `parameters`            |
 
 The package runs every combination of *model × seed × persona × item*, collects the
 free-text answers, and provides cleaners, validators and judges to turn them into
@@ -36,29 +36,36 @@ valid, scorable responses.
 - **Declarative experiments** – questionnaire, personas, models, prompt and seeds live
   in a single JSON file that doubles as documentation.
 - **Many model back-ends** – local and remote Hugging Face, Ollama, OpenAI, Google
-  Gemini, DeepSeek, or any LangChain runnable.
+  Gemini, DeepSeek, or any LangChain chat model or LLM.
 - **Systematic robustness checks** – vary seeds, prompts, personas and models without
   touching code.
 - **Answer post-processing** – cleaners, refusal / "as an AI" validators and
   rule-based or model-based judges map free text to answer options.
 - **Callbacks** – stream answers to JSONL / CSV or the console as they are generated.
-- **Configurator app** – a Streamlit GUI (`rup-configurator`) to build configs, with
-  optional LLM-assisted questionnaire import from PDF.
+- **Configurator app** – a Streamlit GUI (`rup-configurator`) to build personas and
+  questionnaires, with optional LLM-assisted questionnaire import from PDF or pasted text.
 
 ## Quick start
 
 ```bash
-pip install git+https://github.com/julianschelb/rupsycho.git
+pip install "rupsycho[huggingface] @ git+https://github.com/julianschelb/rupsycho.git"
+
+# the example configurations are not part of the installed package
+curl -O https://raw.githubusercontent.com/julianschelb/rupsycho/main/examples/data/bfi_demo_config.json
 ```
 
 ```python
 import rupsycho as rup
 
-experiment = rup.experiment_from_file("examples/data/bfi_demo_config.json")
+experiment = rup.experiment_from_file("bfi_demo_config.json")
 experiment.run()
 
 answers = experiment.get_answers_as_dataframe()
 ```
+
+!!! note "Model download"
+    The demo configuration runs `HuggingFaceTB/SmolLM-1.7b-Instruct` on the CPU. The model
+    (several GB) is downloaded from the Hugging Face Hub when `run()` first needs it.
 
 Continue with [Getting Started](getting-started.md), or read about the
 [core concepts](concepts.md).

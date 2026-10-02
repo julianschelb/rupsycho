@@ -65,6 +65,9 @@ plugins:
             separate_signature: true
             line_length: 60
             docstring_style: google
+            docstring_options:
+              warn_missing_types: false
+              returns_named_value: false
             docstring_section_style: spacy
             merge_init_into_class: true
 
@@ -74,6 +77,7 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets:
       base_path: .
+      check_paths: true
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
@@ -85,16 +89,27 @@ markdown_extensions:
   - toc:
       permalink: true
 
+validation:
+  nav:
+    omitted_files: warn
+  links:
+    unrecognized_links: warn
+    anchors: warn
+
 nav:
   - Home: index.md
   - Getting Started: getting-started.md
   - Concepts: concepts.md
   - Configuration Reference: configuration.md
+  - CLI Reference: cli.md
   - Tutorials:
     - Running Experiments: tutorials/running-experiments.md
     - Models: tutorials/models.md
     - Parsing & Postprocessing: tutorials/postprocessing.md
+    - Scoring: tutorials/scoring.md
+    - Reproducibility: tutorials/reproducibility.md
     - Callbacks: tutorials/callbacks.md
+    - Performance & Scaling: tutorials/performance.md
     - Configurator App: tutorials/configurator.md
   - Examples: examples.md
   - API Reference:
@@ -105,5 +120,8 @@ nav:
     - Parsers: api/parsers.md
     - Callbacks: api/callbacks.md
     - Postprocessing: api/postprocessing.md
+    - Scoring: api/scoring.md
+    - Seeding: api/seeding.md
+  - Migration: migration.md
   - Development: development.md
   - Changelog: changelog.md

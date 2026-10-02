@@ -15,3 +15,10 @@
 ## Parser utilities
 
 ::: rupsycho.parsers.parser_utils
+
+## Legacy parser
+
+`BasicParser` is the former name of `BasicCleaner`. It is also importable from the
+backwards-compatible module `rupsycho.parser`.
+
+::: rupsycho.parsers.parser

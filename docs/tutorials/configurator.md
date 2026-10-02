@@ -1,43 +1,96 @@
 # Configurator App
 
-The configurator is a [Streamlit](https://streamlit.io) app for building experiment
-configurations without writing JSON.
+The configurator is a [Streamlit](https://streamlit.io) app for building the personas and the
+questionnaire of an experiment configuration without writing JSON. It is meant to be run
+locally.
 
 ```bash
 pip install "rupsycho[configurator] @ git+https://github.com/julianschelb/rupsycho.git"
 rup-configurator
 ```
 
-The page has two parts: the **Configurator** with a tab for each part of the experiment,
-and **Input/Output** showing the questionnaire text and the resulting configuration.
+The command starts Streamlit and the app opens in your browser (by default at
+`http://localhost:8501`); stop it with `Ctrl+C` in the terminal.
 
-| Tab                    | Purpose                                                          |
-| ---------------------- | ---------------------------------------------------------------- |
-| Experiment Info        | Name and description                                             |
-| Demographic Profiles   | Add, edit, delete and duplicate personas                         |
-| Questionnaire Info     | Name and instruction                                             |
-| Questionnaire Items    | Items and answer options, optionally with a global answer set    |
-| Tools                  | LLM-assisted import, configuration import                        |
+The page has two parts. The **Configurator** (left) has a tab for each part of the experiment.
+**Input / Output** (right) has two tabs: **Questionnaire Text**, the text that the
+LLM-assisted import reads, and **Resulting Configuration**, the JSON that the app builds, which
+is updated continuously. At any time the **Download** button saves the current configuration as
+`rupsycho_experiment_config.json`.
 
-At any time the **download** button saves the current configuration as JSON.
+| Tab                  | Purpose                                                                            |
+| -------------------- | ---------------------------------------------------------------------------------- |
+| Tools                | *Language Model*: LLM-assisted questionnaire import. *Import Configuration*: load an existing configuration. *Help* |
+| Experiment Info      | Name and description of the experiment                                             |
+| Demographic Profiles | Add, edit, delete and duplicate personas (title, name, ethnicity); import them from a CSV file |
+| Questionnaire Info   | Name and general instruction of the questionnaire                                  |
+| Questionnaire Items  | Add, edit, delete and duplicate items and their answer options, optionally with one global answer set |
 
 ## Workflows
 
-**Manual** – fill in the tabs. The *Resulting Configuration* updates continuously.
+**Manual** – fill in the tabs; you can ignore *Tools* and *Questionnaire Text*. The
+*Resulting Configuration* updates as you type. With many profiles the app needs a moment to
+respond to changes. If all items share the same answer options, switch on *Global answer set*
+in *Questionnaire Items*: you enter the options once (and can mark all items as reverse-scored)
+and they are applied to every item.
 
-**LLM-assisted questionnaire import** – in *Tools*, enter an OpenAI API key and either
-upload the questionnaire as PDF or paste its text. Select the relevant page range to
-reduce noise, then run. GPT-4o mini fills the questionnaire section (a run costs a
-fraction of a cent) and you continue editing as usual. A run **overwrites** the
-questionnaire section, so do it first.
+**LLM-assisted questionnaire import** – in *Tools* → *Language Model*:
 
-**Import an existing configuration** – upload a JSON file. It is accepted only if all
-expected keys are present; unsupported sections (`parameters`, `prompt_template`,
-`models`, `attributes`) pass through unchanged.
+1. Enter an OpenAI API key. It is checked immediately and, if valid, kept in the running app
+   (as `OPENAI_API_KEY` in its process environment); it is not written to the configuration.
+2. Provide the questionnaire: upload a PDF, or paste or edit the text in *Questionnaire Text*.
+   Cleaning the text (removing irrelevant parts, fixing broken formatting) improves the result,
+   especially for lists of answer options that PDF extraction tends to scramble. For a PDF with
+   several pages, a slider selects the range of pages that is used.
+3. Press **Run**. It is enabled once the key is valid and there is text. The text is sent to
+   OpenAI GPT-4o mini in one request (double quotes, slashes and backslashes are removed from
+   the text first), which can take a moment for a long questionnaire; a run typically costs a
+   fraction of a cent.
+4. The model's output replaces the questionnaire name, the instruction and all items. A single
+   answer set in the text is applied to every item; otherwise the answer sets are matched
+   to the questions by position. Continue editing as usual, or press **Run** again; the text
+   stays in its field.
 
-**Import personas from CSV** – the header must contain `title`, `name` and `ethnicity`, and
-no value may be empty. The profiles replace the current ones.
+A run **overwrites** the questionnaire part of the configuration, so do it first. If the model
+does not return a usable result ("Model error, please try again"), the whole configuration is
+reset to its empty initial state.
 
-!!! note
-    The app edits the questionnaire and personas. Models, prompt template and parameters are
-    not editable in the app – add them to the downloaded JSON.
+**Import an existing configuration** – in *Tools* → *Import Configuration*, upload a JSON
+file. A successful import replaces the entire current configuration; a rejected file
+("Invalid configuration") resets the app to its empty initial state. The file is accepted only if
+all of these keys are present:
+
+- top level: `name`, `description`, `parameters`, `prompt_template`, `models`,
+  `demographic_profiles`, `questionnaire`
+- every persona: `attributes` with `title`, `name` and `ethnicity`
+- `questionnaire`: `name`, `general_instruction`, `attributes`, `instruction_items`
+- every item: `question`, `reversed`, `answer_options` (each option with `text`, `weight` and
+  `ignored_for_scale`) and `attributes`
+
+Other keys are ignored.
+
+The app does not support `default_answer_options`, so configurations that use them (such as
+`bfi_demo_config.json`) are rejected; give every item its own `answer_options` instead. The
+sections `parameters`, `prompt_template`, `models` and the questionnaire `attributes` cannot be
+edited in the app. They are imported as they are and written back unchanged on download. Of the
+configurations in `examples/data/`, `bdi_qwen72.json` and the three `rfq_*_small.json` files
+can be imported.
+
+**Import personas from CSV** – in *Demographic Profiles* → *Import from CSV*. The header must
+contain `title`, `name` and `ethnicity`, and no value may be empty. The profiles replace the
+current ones; a rejected file ("Invalid file structure") leaves a single empty profile.
+
+## Things to know
+
+- **Weights and reverse keying.** Imported answer weights and *Reversed scoring* switches are
+  kept (and duplicating an item keeps its switch). New answer options continue the scale of
+  their item (`1`, `2`, `3`, … ) and `ignored_for_scale` is always `false` for options created in
+  the app; adjust other values in the downloaded JSON if your scoring needs them.
+- **Personas.** The app writes each persona with the template `{title} {name}` and the
+  attributes `title`, `name`, `ethnicity` and `id`. Other attributes of imported personas
+  (for example `age`) and their templates are dropped. `ethnicity` is only stored: add
+  `{ethnicity}` to the persona `template` in the JSON if the prompt should mention it.
+- **Models, seeds and prompt.** The downloaded configuration has `"parameters": {}` (a random
+  seed is drawn per experiment), `"models": {}` and a default chat `prompt_template` that asks
+  the model to answer in the format `{"answer": "answer option"}`. Add a model and, if you
+  like, seeds before running the experiment.
