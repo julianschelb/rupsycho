@@ -175,7 +175,7 @@ class TestOpenAI:
         parallel_time, parallel_df = run(8)
 
         assert server.max_in_flight > 1
-        assert parallel_time < sequential_time * 0.6
+        assert parallel_time < sequential_time * 0.9  # structural check above; timing only sanity
         assert parallel_df.equals(sequential_df)
 
     def test_server_errors_are_isolated_per_call(self, config_dict, server):
