@@ -16,6 +16,9 @@ updates:
     directory: /
     schedule:
       interval: monthly
+    # Widen the declared ranges to admit newer releases instead of raising the lower bounds:
+    # the floors are what the package is tested to work with, and CI decides about the caps.
+    versioning-strategy: widen
     commit-message:
       prefix: "build"
     groups:
