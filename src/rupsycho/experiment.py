@@ -5,71 +5,72 @@
 #  data, questionnaires, and metadata. It integrates multiple mixins and
 #  extends BaseMedia and Pydantic's BaseModel.
 
-from typing import Any, Literal, Optional, Dict, Type, Union
-from langchain_core.documents.base import BaseMedia
-from pydantic import Field, BaseModel
+from collections.abc import Mapping
+from typing import Any, Literal
 
+from langchain_core.documents.base import BaseMedia
+from pydantic import BaseModel, ConfigDict, Field
+
+from .mixins.experiment_exporting import ExperimentExportMixin
+from .mixins.experiment_processing import ExperimentProcessingMixin
+from .mixins.model_managing import ModelManagementMixin
+from .mixins.persona_managing import PersonaManagementMixin
+from .mixins.prompt_managing import PromptTemplateMixin
 from .models.model import (
     DEFAULT_MODEL_CONFIG,
+    DeepSeekModelConfig,
+    GoogleModelConfig,
     LangChainModelConfig,
     LocalHuggingFaceModelConfig,
     OllamaModelConfig,
     OpenAIModelConfig,
     RemoteHuggingFaceModelConfig,
-    GoogleModelConfig,
-    DeepSeekModelConfig
 )
-
+from .models.parameters import ExperimentParameters
 from .models.prompt import (
     ChatPromptTemplateConfig,
     LangchainPromptTemplateConfig,
-    NormalPromptTemplateConfig
+    NormalPromptTemplateConfig,
 )
-
-from .prompts import DEFAULT_CHAT_PROMPT_TEMPLATE_CONFIG
-from .models.parameters import ExperimentParameters
 from .models.questionnaire import DemographicProfile, Questionnaire
-from .mixins.experiment_processing import ExperimentProcessingMixin
-from .mixins.experiment_exporting import ExperimentExportMixin
-from .mixins.model_managing import ModelManagementMixin
-from .mixins.prompt_managing import PromptTemplateMixin
-from .mixins.persona_managing import PersonaManagementMixin
-
-import warnings
-
+from .prompts import DEFAULT_CHAT_PROMPT_TEMPLATE_CONFIG
 
 # ================================= Prompt Type Mapping ================================
 
 
-PROMPT_CONFIG_CLASSES: Dict[str, Type[BaseModel]] = {
+PROMPT_CONFIG_CLASSES: dict[str, type[BaseModel]] = {
     "normal": NormalPromptTemplateConfig,
     "chat": ChatPromptTemplateConfig,
-    "langchain": LangchainPromptTemplateConfig
+    "langchain": LangchainPromptTemplateConfig,
 }
 
 # ================================= Model Type Mapping ================================
 
 
-MODEL_CONFIG_CLASSES: Dict[str, Type[BaseModel]] = {
+MODEL_CONFIG_CLASSES: dict[str, type[BaseModel]] = {
     "local_huggingface": LocalHuggingFaceModelConfig,
     "remote_huggingface": RemoteHuggingFaceModelConfig,
     "ollama": OllamaModelConfig,
     "openai": OpenAIModelConfig,
     "langchain": LangChainModelConfig,
     "google": GoogleModelConfig,
-    "deepseek": DeepSeekModelConfig
+    "deepseek": DeepSeekModelConfig,
 }
 
 # ================================= Experiment Class ================================
 
 
 class ExperimentDocument(
-    BaseMedia, ExperimentProcessingMixin, ExperimentExportMixin,
-    ModelManagementMixin, PromptTemplateMixin, PersonaManagementMixin
+    BaseMedia,
+    ExperimentProcessingMixin,
+    ExperimentExportMixin,
+    ModelManagementMixin,
+    PromptTemplateMixin,
+    PersonaManagementMixin,
 ):
     """Class for storing an experiment and associated questionnaires along with metadata.
 
-    Extends LangChain's BaseMedia and Pydantic's BaseModel, integrating data validation 
+    Extends LangChain's BaseMedia and Pydantic's BaseModel, integrating data validation
     and serialization capabilities with document handling features.
 
     Example:
@@ -90,43 +91,47 @@ class ExperimentDocument(
 
     # --------------------------------- Attributes --------------------------------
 
-    name: Optional[str] = Field(
+    name: str | None = Field(
         None,
         description="The name of the experiment",
-        example="Generative Models for Big Five Inventory",
+        examples=["Generative Models for Big Five Inventory"],
     )
-    description: Optional[str] = Field(
+    description: str | None = Field(
         None,
         description="The description of the experiment",
-        example="Testing Generative Models for BFI questionnaire using Rupsycho.",
+        examples=["Testing Generative Models for BFI questionnaire using Rupsycho."],
     )
     parameters: ExperimentParameters = Field(
         default_factory=ExperimentParameters,
-        description="The parameters for the experiment and text generation"
+        description="The parameters for the experiment and text generation",
     )
-    prompt_template: Union[NormalPromptTemplateConfig, ChatPromptTemplateConfig, LangchainPromptTemplateConfig] = Field(
-        None, description="The prompt template used by the model"
-    )
-    models: Dict[str, Union[
-        LangChainModelConfig, LocalHuggingFaceModelConfig, RemoteHuggingFaceModelConfig,
-        OllamaModelConfig, OpenAIModelConfig, GoogleModelConfig, DeepSeekModelConfig
-    ]] = Field(
-        default_factory=dict, description="The models in the experiment"
-    )
-    demographic_profiles: Dict[str, DemographicProfile] = Field(
+    prompt_template: (
+        NormalPromptTemplateConfig | ChatPromptTemplateConfig | LangchainPromptTemplateConfig
+    ) = Field(None, description="The prompt template used by the model")  # type: ignore[assignment]
+    models: dict[
+        str,
+        LangChainModelConfig
+        | LocalHuggingFaceModelConfig
+        | RemoteHuggingFaceModelConfig
+        | OllamaModelConfig
+        | OpenAIModelConfig
+        | GoogleModelConfig
+        | DeepSeekModelConfig,
+    ] = Field(default_factory=dict, description="The models in the experiment")
+    demographic_profiles: dict[str, DemographicProfile] = Field(
         default_factory=dict, description="The demographic profiles in the experiment"
     )
-    questionnaire: Optional[Questionnaire] = Field(
+    questionnaire: Questionnaire | None = Field(
         None, description="The questionnaire in the experiment"
     )
-    metadata: Dict[str, Any] = Field(
+    metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional metadata for the experiment document."
     )
     type: Literal["ExperimentDocument"] = "ExperimentDocument"
     runnable_prompt: Any = Field(
         default_factory=dict, description="The initialized prompts in the experiment"
     )
-    runnable_models: Dict[str, Any] = Field(
+    runnable_models: dict[str, Any] = Field(
         default_factory=dict, description="The initialized models in the experiment"
     )
     runnable_parser: Any = Field(
@@ -135,32 +140,29 @@ class ExperimentDocument(
 
     # --------------------------------- Config --------------------------------
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     # --------------------------------- Initialization --------------------------------
 
     def __init__(self, **data: Any):
         """Initialize ExperimentDocument with optional conversions for nested data."""
 
-        # Handle nested data conversions for parameters
-        if "parameters" in data:
-            data["parameters"] = self._convert_parameters(data["parameters"])
+        # Handle nested data conversions for parameters (optional section)
+        data["parameters"] = self._convert_parameters(data.get("parameters") or {})
 
         # Convert demographic profiles to instances
         if "demographic_profiles" in data:
             data["demographic_profiles"] = self._convert_demographic_profiles(
-                data["demographic_profiles"])
+                data["demographic_profiles"]
+            )
 
         # Convert prompt template to runnable form and load it
         if "prompt_template" in data:
-            data["prompt_template"] = self._convert_prompt(
-                data["prompt_template"])
+            data["prompt_template"] = self._convert_prompt(data["prompt_template"])
         else:
             data["prompt_template"] = DEFAULT_CHAT_PROMPT_TEMPLATE_CONFIG
 
-        data["runnable_prompt"] = self._load_runnable_prompt(
-            data["prompt_template"])
+        data["runnable_prompt"] = self._load_runnable_prompt(data["prompt_template"])
 
         # Convert models to runnable form but load them conditionally based on lazy_load_models
         if "models" in data:
@@ -168,102 +170,101 @@ class ExperimentDocument(
         else:
             data["models"] = {"default_model": DEFAULT_MODEL_CONFIG}
 
-        # Load models if lazy_load_models is False; otherwise, leave them for later loading
-        if not data.get("parameters").lazy_load_models:
-            data["runnable_models"] = self._load_runnable_models(
-                data["models"])
-        else:
-            # Models will be loaded later
-            data["runnable_models"] = data["models"]
+        # Models are loaded when the run reaches them (lazy_load_models) or right after validation
+        eager = not data["parameters"].lazy_load_models
+        data["runnable_models"] = data["models"]
 
         # Convert questionnaire to an instance of Questionnaire
         if "questionnaire" in data:
-            data["questionnaire"] = self._convert_questionnaire(
-                data["questionnaire"])
+            data["questionnaire"] = self._convert_questionnaire(data["questionnaire"])
 
         super().__init__(**data)
+
+        if eager:  # only after everything else validated: loading may download large models
+            self.runnable_models = self._load_runnable_models(self.models)
+
     # --------------------------------- Conversion Methods --------------------------------
 
     @staticmethod
-    def _convert_parameters(parameters: Union[ExperimentParameters, dict]) -> ExperimentParameters:
-        """Convert parameters to an instance of Parameters."""
-        if isinstance(parameters, dict):
-            return ExperimentParameters(**parameters)
-        return parameters
+    def _require_mapping(value: Any, section: str) -> Mapping[str, Any]:
+        """Return ``value`` if it is a dictionary, else raise a ``ValueError`` naming the section."""
+        if not isinstance(value, Mapping):
+            raise ValueError(
+                f"'{section}' must be an object (a dictionary), got {type(value).__name__}"
+            )
+        return value
 
-    @staticmethod
+    @classmethod
+    def _convert_parameters(cls, parameters: ExperimentParameters | dict) -> ExperimentParameters:
+        """Convert parameters to an instance of ExperimentParameters."""
+        if isinstance(parameters, ExperimentParameters):
+            return parameters
+        return ExperimentParameters(**cls._require_mapping(parameters, "parameters"))
+
+    @classmethod
     def _convert_demographic_profiles(
-        profiles: Dict[str, Union[DemographicProfile, dict]]
-    ) -> Dict[str, DemographicProfile]:
+        cls, profiles: dict[str, DemographicProfile | dict]
+    ) -> dict[str, DemographicProfile]:
         """Convert demographic profiles to instances of DemographicProfile."""
         return {
-            key: DemographicProfile(
-                **profile) if isinstance(profile, dict) else profile
-            for key, profile in profiles.items()
+            key: DemographicProfile(**cls._require_mapping(profile, f"demographic_profiles.{key}"))
+            if not isinstance(profile, DemographicProfile)
+            else profile
+            for key, profile in cls._require_mapping(profiles, "demographic_profiles").items()
         }
 
-    @staticmethod
-    def _convert_prompt(prompt: Union[dict, BaseModel]) -> Union[BaseModel, dict]:
-        """Convert a single prompt configuration to an instance of its respective Pydantic PromptTemplateConfig class."""
-        if isinstance(prompt, dict):
-            prompt_type = prompt.get("type")
-            if prompt_type and prompt_type in PROMPT_CONFIG_CLASSES:
-                return PROMPT_CONFIG_CLASSES[prompt_type](**prompt)
-            else:
-                raise ValueError(f"Unknown or missing prompt type.")
-        return prompt
+    @classmethod
+    def _convert_prompt(cls, prompt: dict | BaseModel) -> BaseModel:
+        """Convert a prompt configuration to its Pydantic PromptTemplateConfig class."""
+        if isinstance(prompt, BaseModel):
+            return prompt
+        prompt = dict(cls._require_mapping(prompt, "prompt_template"))
+        prompt_type = prompt.get("type")
+        if prompt_type and prompt_type in PROMPT_CONFIG_CLASSES:
+            return PROMPT_CONFIG_CLASSES[prompt_type](**prompt)
+        if prompt.get("lc") == 1:
+            # LangChain's own serialisation, as stored by set_prompt() and written by exports
+            return LangchainPromptTemplateConfig(definition=prompt)
+        raise ValueError("Unknown or missing prompt type.")
 
-    @staticmethod
-    def _convert_models(
-        models: Dict[str, Union[dict, BaseModel]]
-    ) -> Dict[str, Union[BaseModel, dict]]:
-        """Convert model configurations to instances of their respective Pydantic ModelConfig classes."""
+    @classmethod
+    def _convert_models(cls, models: dict[str, dict | BaseModel]) -> dict[str, BaseModel]:
+        """Convert model configurations to instances of their respective Pydantic classes."""
 
-        def convert_model(key: str, model: Union[dict, BaseModel]) -> Union[BaseModel, dict]:
+        def convert_model(key: str, model: dict | BaseModel) -> BaseModel:
+            if isinstance(model, BaseModel):
+                return model
+            model = dict(cls._require_mapping(model, f"models.{key}"))
+            model_type = model.get("type")
+            if model_type and model_type in MODEL_CONFIG_CLASSES:
+                return MODEL_CONFIG_CLASSES[model_type](**model)
+            raise ValueError(f"Unknown or missing model type for key: {key}")
 
-            if isinstance(model, dict):
-                model_type = model.get("type")
-                if model_type and model_type in MODEL_CONFIG_CLASSES:
-                    return MODEL_CONFIG_CLASSES[model_type](**model)
-                else:
-                    raise ValueError(
-                        f"Unknown or missing model type for key: {key}")
-            return model
+        return {
+            key: convert_model(key, model)
+            for key, model in cls._require_mapping(models, "models").items()
+        }
 
-        return {key: convert_model(key, model) for key, model in models.items()}
-
-    @staticmethod
-    def _convert_questionnaire(questionnaire: Union[Questionnaire, dict]) -> Questionnaire:
+    @classmethod
+    def _convert_questionnaire(cls, questionnaire: Questionnaire | dict) -> Questionnaire:
         """Convert questionnaire to an instance of Questionnaire."""
-        if isinstance(questionnaire, dict):
-            return Questionnaire(**questionnaire)
-        return questionnaire
+        if isinstance(questionnaire, Questionnaire):
+            return questionnaire
+        return Questionnaire(**cls._require_mapping(questionnaire, "questionnaire"))
 
-    def _load_runnable_models(self, models: Dict[str, Any]) -> Dict[str, Any]:
+    def _load_runnable_models(self, models: dict[str, Any]) -> dict[str, Any]:
         """Load models into runnable instances."""
-        runnable_models = {}
-        for key, model in models.items():
+        return {key: model.load_model() for key, model in models.items()}
 
-            try:
-                runnable_models[key] = model.load_model()
-            except Exception as e:
-                print(f"Failed to load model: {e}")
-
-        return runnable_models
-
-    def _load_runnable_prompt(self, prompt_template: Union[str, BaseModel]) -> Any:
+    def _load_runnable_prompt(self, prompt_template: str | BaseModel) -> Any:
         """Load a prompt template into a runnable LangChain prompt."""
         if isinstance(prompt_template, str):
             return prompt_template  # Directly use if it's a string
 
-        runnable_prompt = None
         try:
-            runnable_prompt = prompt_template.load_prompt_template()
+            return prompt_template.load_prompt_template()  # type: ignore[attr-defined]
         except Exception as e:
-            warnings.warn(
-                f"Failed to load prompt template: {e}", UserWarning)
-
-        return runnable_prompt
+            raise ValueError(f"Invalid prompt template: {e}") from e
 
     # --------------------------------- String Representation --------------------------------
 

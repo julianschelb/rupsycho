@@ -1,0 +1,33 @@
+# https://editorconfig.org
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{py,pyi}]
+max_line_length = 100
+
+[*.{yml,yaml,json,toml,cff}]
+indent_size = 2
+
+[*.md]
+indent_size = 2
+# Two trailing spaces are a Markdown line break
+trim_trailing_whitespace = false
+
+# Jupyter writes notebooks with one space of indentation
+[*.ipynb]
+indent_size = 1
+
+# Generated experiment results: editors must not touch them
+[*.{csv,jsonl}]
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+
+[Makefile]
+indent_style = tab

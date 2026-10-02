@@ -1,133 +1,133 @@
+# R.U.Psycho
 
-# RUPsycho Python Package
+[![CI](https://github.com/julianschelb/rupsycho/actions/workflows/ci.yml/badge.svg)](https://github.com/julianschelb/rupsycho/actions/workflows/ci.yml)
+[![Docs](https://github.com/julianschelb/rupsycho/actions/workflows/docs.yml/badge.svg)](https://julianschelb.github.io/rupsycho/)
+[![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](https://github.com/julianschelb/rupsycho/blob/main/pyproject.toml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/julianschelb/rupsycho/blob/main/LICENSE)
+[![arXiv](https://img.shields.io/badge/arXiv-2503.10229-b31b1b.svg)](https://arxiv.org/abs/2503.10229)
 
-## Introduction
-RUPsycho is a Python package designed for the application of large language models (LLMs) in social science research. It facilitates exploring humanlike behaviors through LLMs, offering a unique perspective in the field of natural language processing (NLP).
+**R.U.Psycho** (*Robust Unified Psychometric Testing of Language Models*) is a framework for
+designing and running **robust and reproducible psychometric experiments on generative language
+models**, with limited coding expertise required.
+
+Documentation: <https://julianschelb.github.io/rupsycho/>
+
+Paper: [*R.U.Psycho? Robust Unified Psychometric Testing of Language Models*](https://arxiv.org/abs/2503.10229)
+(Schelb, Borin, Garcia & Spitz, 2025)
+
+## Why?
+
+Instabilities in model outputs, sensitivity to prompt design and generation parameters, and the
+sheer number of model versions make psychometric studies of language models hard to reproduce.
+R.U.Psycho turns a whole study into **one declarative configuration**: the questionnaire, the
+personas the model answers as, the models and their parameters, the prompt template and the
+random seeds. The package runs every *model × seed × persona × item* combination, turns the
+free-text answers into scorable responses and computes item and scale scores.
+
+## Features
+
+- **Declarative experiments** in a single, shareable JSON file (secrets are never exported)
+- **Seeds that work**: every back-end receives the seed in the way it supports (see
+  [Reproducibility](https://julianschelb.github.io/rupsycho/tutorials/reproducibility/))
+- **Many back-ends:** local & remote Hugging Face, Ollama, OpenAI, Google, DeepSeek, any LangChain runnable
+- **Robust runs:** a `RunSummary` instead of silent failures, an error policy, opt-in concurrency for
+  API models with a deterministic result order, re-runnable experiments
+- **Post-processing and scoring:** cleaners, refusal / "as an AI" validators, rule- and model-based
+  judges, then weights, reverse-keyed items and per-trait scale scores
+- **Command line:** `rupsycho run | validate | prompt | postprocess | examples | configurator`
+- **Configurator app** with LLM-assisted questionnaire import from PDF
+- **Light core:** `import rupsycho` takes milliseconds; model back-ends are optional extras
 
 ## Installation
 
-To install RUPsycho, run the following command in your Python environment:
-
 ```bash
-pip install git+https://github.com/julianschelb/rupsycho.git
+pip install git+https://github.com/julianschelb/rupsycho.git          # core: configs, run loop, parsers, scoring
+pip install "rupsycho[huggingface] @ git+https://github.com/julianschelb/rupsycho.git"   # + local Hugging Face models
 ```
 
-## Example Usage
+Extras: `huggingface` (PyTorch, Transformers), `openai`, `ollama`, `google`, `deepseek`, `models`
+(all back-ends), `configurator` (Streamlit app), `notebook`, `quantization`, `all`. Using a
+back-end whose extra is missing raises an error that names the extra to install.
 
-After installation, import RUPsycho in your Python script or Jupyter notebook to begin. Here's a simple example to get you started:
+Requires Python 3.10 or newer (tested on 3.10 – 3.14).
+
+## Quick start
 
 ```python
 import rupsycho as rup
 
-# Load experiment data
-config_file_path = "./data/bfi_demo_config.json"
-experiment = rup.experiment_from_file(config_file_path)
+# A bundled example: five Big Five items answered by two personas
+experiment = rup.load_example_experiment("bfi", seeds=[1, 2, 3])
+experiment.print_assembled_prompt(item_idx=1, persona_idx=0)   # exactly what the model sees
 
-# Run the experiment
-experiment.run()
-
-# Save the results
-answers = experiment.get_answers_as_dataframe()
+summary = experiment.run()                      # needs the huggingface extra for the example model
+print(summary)                                  # e.g. "30 model calls in 41.2s"
+answers = experiment.get_answers_as_dataframe() # one row per model x seed x persona x item
 ```
 
-## For Devs
+Use your own model instead of the example's:
 
-### Install Dependencies
-After cloning this repository, use Poetry to manage dependencies and install the necessary packages for development.
+```python
+from langchain_openai import ChatOpenAI          # pip install "rupsycho[openai]"
 
-1. Install Poetry:
-   ```
-   pip install poetry
-   ```
-
-2. Install dependencies:
-   ```
-   poetry install
-   ```
-
-## Build and Install the Package
-
-You can build the package by running:
-
-```
-poetry build
+experiment = rup.load_example_experiment("bfi", models={}, seeds=[1, 2, 3])
+experiment.add_model(ChatOpenAI(model="gpt-4o-mini"), identifier="gpt-4o-mini")
+experiment.run(max_concurrency=8)                # API calls run in parallel, order is preserved
 ```
 
-After building the package, you can install it locally using pip. Navigate to the root directory of your project (where the dist/ folder is located) and run:
-
-```
-pip install dist/rupsycho-0.1.0-py3-none-any
-```
-
-Alternatively, you can install the package directly from the project directory without building it by running:
-
-```
-pip install .
-```
-
-Or, you can install it directly from GitHub using pip:
-
-```
-pip install git+https://github.com/julianschelb/rupsycho.git
-```
-
-
-### Generating Documentation
-Navigate to the `docs/` directory and run:
+From the shell:
 
 ```bash
-make html
+rupsycho examples copy bfi bfi.json
+rupsycho validate bfi.json
+rupsycho run bfi.json -o results.csv --seeds 1 2 3
+rupsycho postprocess bfi.json results.csv -o processed.csv
 ```
 
-This will generate HTML documentation in the `docs/_build/html` directory.
+Then score the judged answers:
 
-### Running Tests
+```python
+import pandas as pd
+from rupsycho import scoring
 
-To ensure everything is working correctly, run the test cases using pytest:
+processed = pd.read_csv("processed.csv")
+scored = scoring.score_answers(processed, experiment)
+print(scoring.scale_scores(scored))              # mean score per model, persona, seed and trait
+```
+
+See the [Getting Started guide](https://julianschelb.github.io/rupsycho/getting-started/), the
+[tutorials](https://julianschelb.github.io/rupsycho/tutorials/running-experiments/) and the
+notebooks in [`examples/`](https://github.com/julianschelb/rupsycho/tree/main/examples).
+
+## Development
 
 ```bash
-pytest -v 
+pip install -e ".[dev,models,configurator]"
+pre-commit install --hook-type pre-commit --hook-type commit-msg
+
+poe check              # lint + format check + mypy + offline tests
+poe docs               # serve the docs locally
+poe test-integration   # tests that download real models
 ```
 
-### Using the Configurator App
-To open the R.U.Psycho experiment configurator web-app in your browser, navigate to the project folder and run:
+See [CONTRIBUTING.md](https://github.com/julianschelb/rupsycho/blob/main/CONTRIBUTING.md) and the
+[development guide](https://julianschelb.github.io/rupsycho/development/).
 
+## Citation
+
+If you use R.U.Psycho, please cite the paper (see also [CITATION.cff](https://github.com/julianschelb/rupsycho/blob/main/CITATION.cff)):
+
+```bibtex
+@misc{schelb2025rupsycho,
+  title         = {R.U.Psycho? Robust Unified Psychometric Testing of Language Models},
+  author        = {Schelb, Julian and Borin, Orr and Garcia, David and Spitz, Andreas},
+  year          = {2025},
+  eprint        = {2503.10229},
+  archivePrefix = {arXiv},
+  url           = {https://arxiv.org/abs/2503.10229}
+}
 ```
-rup-configurator
-```
 
-The configurator web-app is split into two sections: The 'Configurator' section contains text fields where you can manually enter the content of different parts of the experiment. It also contains tools to facilitate this process. The 'Input/Output' section contains a text field where you can enter the text of your questionnaire as input to a language model. It also contains the experiment configuration in its current state.
+## License
 
-To create a R.U.Psycho experiment configuration in the configurator there are different workflows and tools at your disposal.
-
-A purely ```manual configuration``` is the most straight forward method. For this you can ignore the 'Tools' and 'Questionnaire Text' tabs in the configurator and manually put in the entire content of the experiment via the remaining four tabs.
-
-- `Experiment Info` contains the basic administrative information about the experiment. 
-- `Demographic Profiles` allows you to add the personas to the configuration that can later in the experiment be imitated by a language model. You can add, edit, delete and duplicate personas to you liking here. 
-- Note that when the configurator is loaded with large amounts of data e.g. a lot of profiles, it is normal that it takes a moment to respond to changes.
-- `Questionnaire Info` contains the basic information about the questionnaire.
-- `Questionnaire Items` allows you to add  the questionnaire itself to the configuration as a collection of its items. A questionnaire item is a question and its set of answer options. You can add, edit, delete and duplicate items to you liking here. 
-- If your questionnaire uses the same set of answer options for all questions, then you can switch on the `Global answer set` option. This allows you to put in this answer set only once instead of putting it in for every question. It is then automatically applied to all your added questions in the configuration.
-- As you add content, the 'Resulting Configuration' is updated constantly. At any point during the process you can download the configuration in its current state as a JSON file with the `download` button.
-- The configurator currently does not support the editing of the sections 'parameters', 'prompt_template', 'models' and 'attributes' of a configuration due to their variable structure.
-
-You can use the built in `Language Model` (OpenAI GPT-4o mini) to facilitate this process. This function is located in the 'Tools' tab and it automatically creates the questionnaire-section of the configuration for you as you would do it manually. Especially on larger questionnaires this can safe a lot of time. After the language model is done, you can seamlessly continue editing the results as usual. It works as follows:
-
-- Put in an `OpenAI API-key` in the corresponding field. The average devaluation of the API-key from one run of the model currently is a fraction of a cent. 
-- `Put in the questionnaire` either by uploading it as a PDF in the file browser function or by directly pasting its text into the Questionnaire Text input field. This textfield is editable.
-- `Cleaning the text` can significantly improve the output quality of the language model. During the extraction of the text from the pdf, the formatting can get mixed up. Especially listings of answer options are susceptible to this. Although the model displays a strong resilience to noise, it can help to remove irrelevant sections from the text. For this you can use the slider to select a range of relevant pages from the questionnaire.
-- You can now `run` the model. Depending on the size and complexity of your questionnaire this might take a moment. This will overwrite all content from the questionnaire part of the configuration that you previously put in. If the model fails to produce a valid output then the entire config is reset to its empty initial state. So it is advisable to run the model at the beginning of the configuration.
-- After the model successfully finished you can continue with `editing and downloading` the results as you like. You will find the questionnaire part of the configuration filled out as if you had done it manually.
-- You can `rerun` the model as often as you like. The text of the questionnaire remains in its input field for any further runs of the model. But there is not need to do anything with it.
-
-You can `import a configuration` that already exists and that you want to further edit. This function is located in the 'Tools' tab.
-
-- `Upload the configuration` as a JSON file. The configuration is accepted if ALL expected keys ('name', 'attributes', 'parameters', items, answers etc.) are found in the correct positions. Any other keys are ignored. If the configuration is accepted it will overwrite the entire current configuration. If it is not accepted then the entire current configuration is reset to its empty initial state.
-- `Edit the configuration` as you like. You will find that the configurator has automatically taken on the state that corresponds to the imported configuration.
-- Note that attributes whose editing is not supported ('parameters', 'prompt_template', 'models' and 'attributes') will be imported regardless and will just 'pass through' the editing process into the downloaded configuration.
-
-You can `import demographic profiles` that are stored as a CSV file into the current configuration. This function is located in the 'Demographic Profiles' tab. 
-
-- `Create a CSV file` with all your profiles. Its header has to contain 'title', 'name' and 'ethnicity' and no value can be left empty.
-- `Upload the file`. If it follows the required structure then it is accepted and the profiles contained in the file will replace the profiles that are currently in the configuration. If the file is rejected at any point, all current profile elements are deleted.
-
+[MIT](https://github.com/julianschelb/rupsycho/blob/main/LICENSE)

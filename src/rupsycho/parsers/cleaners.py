@@ -7,9 +7,11 @@
 
 
 import re
+
 from langchain_core.exceptions import OutputParserException
 from langchain_core.output_parsers import BaseOutputParser
 from pydantic import Field
+
 from rupsycho.parsers.parser_utils import prompt_cleaner
 
 
@@ -43,20 +45,25 @@ class BasicCleaner(BaseOutputParser[str]):
             descriptive error message.
         """
         try:
-            # Remove line breaks and replace with a space
-            cleaned_text = text.replace('\n', ' ').replace('\r', ' ')
+            # Every kind of white space (line breaks, no-break and thin spaces, ...) becomes one
+            # space; otherwise dropping the non-ASCII characters below would glue words together
+            cleaned_text = re.sub(r"\s+", " ", text)
+
+            # Map typographic quotes/apostrophes to ASCII before dropping the rest
+            cleaned_text = cleaned_text.translate(
+                {0x2018: "'", 0x2019: "'", 0x201C: '"', 0x201D: '"'}
+            )
 
             # Remove non-ASCII Unicode characters
-            cleaned_text = re.sub(r'[^\x00-\x7F]+', '', cleaned_text)
+            cleaned_text = re.sub(r"[^\x00-\x7F]+", "", cleaned_text)
 
             # Trim extra whitespace
-            cleaned_text = re.sub(r'\s+', ' ', cleaned_text).strip()
+            cleaned_text = re.sub(r"\s+", " ", cleaned_text).strip()
 
             return cleaned_text
 
         except Exception as e:
-            raise OutputParserException(
-                f"BasicParser encountered an error: {e}")
+            raise OutputParserException(f"BasicCleaner encountered an error: {e}") from e
 
     @property
     def _type(self) -> str:
@@ -129,13 +136,14 @@ class PromptRemovalCleaner(BaseOutputParser[str]):
                 prompt=self.prompt,
                 completion=completion,
                 similarity_threshold=self.similarity_threshold,
-                fast=self.fast
+                fast=self.fast,
             )
-            return cleaned_completion
+            return cleaned_completion["completion"]
 
         except Exception as e:
             raise OutputParserException(
-                f"PromptRemovalCleanerParser encountered an error: {e}")
+                f"PromptRemovalCleanerParser encountered an error: {e}"
+            ) from e
 
     @property
     def _type(self) -> str:
@@ -198,16 +206,14 @@ class RegexExtractorCleaner(BaseOutputParser[str]):
             match = re.search(self.pattern, text)
 
             # If a match is found, return the extracted value
-            if match:
+            if match and match.group(1) is not None:
                 return match.group(1)
             else:
                 # If no match, return the original input text
                 return text
 
         except Exception as e:
-            raise OutputParserException(
-                f"RegexExtractorCleaner encountered an error: {e}"
-            )
+            raise OutputParserException(f"RegexExtractorCleaner encountered an error: {e}") from e
 
     @property
     def _type(self) -> str:
@@ -220,30 +226,3 @@ class RegexExtractorCleaner(BaseOutputParser[str]):
             The string "regex_extractor_cleaner", identifying the type of this parser.
         """
         return "regex_extractor_cleaner"
-
-
-if __name__ == "__main__":
-    # Example usage of the BasicParser class.
-
-    # Instantiate the custom parser
-    basic_parser = BasicCleaner()
-
-    # Example text to parse
-    raw_output = "Hello, world!\nThis is a test text with some emojis 😊 and line breaks.\n"
-
-    # Parse the output
-    parsed_output = basic_parser.parse(raw_output)
-
-    # Print the cleaned output
-    print("Cleaned output:", parsed_output)
-
-    # Example prompt and completion
-    prompt_example = "Once upon a time, there was a brave knight."
-    completion_example = "Once upon a time, there was a brave knight. He fought valiantly against the dragon."
-
-    # Instantiate the PromptRemovalCleanerParser
-    prompt_cleaner_parser = PromptRemovalCleaner(prompt=prompt_example)
-
-    # Parse the completion to clean it from the prompt
-    cleaned_completion = prompt_cleaner_parser.parse(completion_example)
-    print(f'Cleaned completion: {cleaned_completion}')

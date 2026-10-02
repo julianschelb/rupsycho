@@ -1,0 +1,40 @@
+name: Feature request
+description: Suggest an improvement, a new model back-end, parser or questionnaire feature
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: What are you trying to do that is hard or impossible today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: An API sketch, a configuration example or references (papers, other tools).
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Experiment configuration
+        - Model back-end
+        - Seeding and reproducibility
+        - Parsers and post-processing
+        - Callbacks and export
+        - Command line interface
+        - Configurator app
+        - Documentation
+        - Other
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Contribution
+      options:
+        - label: I would be willing to open a pull request for this.

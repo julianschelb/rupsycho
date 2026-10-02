@@ -1,179 +1,242 @@
-# ===========================================================================
-#                            Experiment Reader Class
-# ===========================================================================
-#  A document loader class for reading and validating JSON files against the
-#  ExperimentDocument model. Supports both synchronous and asynchronous
-#  loading of experiment data.
+# reader.py
+"""Load experiments from JSON files or dictionaries.
 
-from typing import AsyncIterator, Iterator, List, Optional
+``ExperimentLoader`` is a LangChain document loader that validates configurations against
+[`ExperimentDocument`][rupsycho.experiment.ExperimentDocument]. When loading *several*
+experiments, invalid ones are skipped and reported through the ``rupsycho.reader`` logger
+(pass ``strict=True`` to raise instead). The convenience functions
+``experiment_from_file`` / ``experiment_from_dict`` always raise on invalid input.
+"""
+
+from __future__ import annotations
+
+import glob
+import json
+import logging
+import os
+from collections.abc import AsyncIterator, Iterator, Mapping
+from pathlib import Path
+from typing import Any
+
+import aiofiles
 from langchain_core.document_loaders import BaseLoader
 from pydantic import ValidationError
-import aiofiles
-import json
-import glob
-import os
 
-from .experiment import ExperimentDocument
+from rupsycho.experiment import ExperimentDocument
+from rupsycho.experiment_collection import ExperimentCollection
+
+__all__ = [
+    "ExperimentLoader",
+    "experiment_from_dict",
+    "experiment_from_file",
+    "experiments_from_dicts",
+    "experiments_from_files",
+]
+
+logger = logging.getLogger(__name__)
 
 # ================================= Helpers ================================
 
 
-def _experiment_from_json(json_data: dict) -> ExperimentDocument:
+def _experiment_from_json(json_data: dict[str, Any]) -> ExperimentDocument:
     """Create a new experiment from a JSON dictionary."""
+    if not isinstance(json_data, Mapping):
+        raise ValueError(
+            f"An experiment configuration must be a JSON object, got {type(json_data).__name__}"
+        )
     return ExperimentDocument(**json_data)
 
 
-async def _experiment_from_json_async(json_data: dict) -> ExperimentDocument:
-    """Asynchronously create a new experiment from a JSON dictionary."""
-    # Simulating an async operation, even though this operation is synchronous
-    return ExperimentDocument(**json_data)
-
-
-def _experiment_from_file(path: str) -> ExperimentDocument:
+def _experiment_from_file(path: str | os.PathLike[str]) -> ExperimentDocument:
     """Create a new experiment from a JSON file."""
     with open(path, encoding="utf-8") as json_file:
-        json_data = json.load(json_file)
-        return _experiment_from_json(json_data)
+        return _experiment_from_json(json.load(json_file))
 
 
-async def _experiment_from_file_async(path: str) -> ExperimentDocument:
+async def _experiment_from_file_async(path: str | os.PathLike[str]) -> ExperimentDocument:
     """Create a new experiment from a JSON file asynchronously."""
     async with aiofiles.open(path, encoding="utf-8") as json_file:
-        json_data = json.loads(await json_file.read())
-        return _experiment_from_json(json_data)
+        return _experiment_from_json(json.loads(await json_file.read()))
 
 
 # ================================= Loader Class ================================
 
 
 class ExperimentLoader(BaseLoader):
-    """A document loader that reads JSON files validated by the ExperimentDocument model."""
+    """A document loader that reads JSON files validated by the ExperimentDocument model.
 
-    def __init__(self, path_pattern: Optional[str] = None) -> None:
-        """
-        Initialize the loader with a path pattern.
+    Args:
+        path_pattern: A file path or glob pattern (``**`` is supported) of JSON files.
+        strict: Raise on the first invalid experiment instead of logging and skipping it.
+
+    Example:
+        ```python
+        from rupsycho.reader import ExperimentLoader
+
+        experiments = ExperimentLoader("configs/*.json").load()
+        ```
+    """
+
+    def __init__(self, path_pattern: str | None = None, *, strict: bool = False) -> None:
+        self.strict = strict
+        self.file_paths = self._resolve_paths(path_pattern) if path_pattern else None
+
+    def _resolve_paths(self, path_pattern: str) -> list[str]:
+        """Resolve a path or glob pattern to a sorted list of file paths.
 
         Args:
-            path_pattern (Optional[str]): A glob pattern or single file path to load JSON files from.
-        """
-        self.file_paths = self._resolve_paths(
-            path_pattern) if path_pattern else None
-
-    def _resolve_paths(self, path_pattern: str) -> List[str]:
-        """Resolve the provided path pattern to a list of file paths.
-
-        Args:
-            path_pattern (str): A glob pattern or single file path.
+            path_pattern: A glob pattern or single file path.
 
         Returns:
-            List[str]: A list of resolved file paths.
+            The matching files in alphabetical order (deterministic across platforms).
         """
         if os.path.isfile(path_pattern):
             return [path_pattern]
-        return glob.glob(path_pattern, recursive=True)
+        return sorted(glob.glob(path_pattern, recursive=True))
 
-    def lazy_load(self, path_pattern: Optional[str] = None) -> Iterator[ExperimentDocument]:
-        """
-        A lazy loader that reads JSON files from the resolved paths and validates them
-        against the ExperimentDocument model.
+    def _skip_or_raise(self, error: Exception, source: str) -> None:
+        if self.strict:
+            raise error
+        kind = "Invalid experiment" if isinstance(error, ValidationError) else "Cannot read"
+        logger.warning("%s %s: %s", kind, source, error)
+
+    def lazy_load(  # type: ignore[override]  # yields ExperimentDocument, not langchain Document
+        self, path_pattern: str | None = None
+    ) -> Iterator[ExperimentDocument]:
+        """Lazily load and validate the experiments in the resolved files.
 
         Args:
-            path_pattern (Optional[str]): A glob pattern or single file path to load JSON files from.
+            path_pattern: A glob pattern or single file path; defaults to the pattern the
+                loader was created with.
 
         Yields:
-            ExperimentDocument: A document object with the validated JSON content.
+            One validated experiment per readable, valid file.
 
         Raises:
-            ValueError: If neither constructor nor method arguments provide a valid path pattern.
+            ValueError: If no file paths are available.
         """
-        file_paths = self._resolve_paths(
-            path_pattern) if path_pattern else self.file_paths
-
+        file_paths = self._resolve_paths(path_pattern) if path_pattern else self.file_paths
         if not file_paths:
-            raise ValueError(
-                "No file paths provided. Please provide a path pattern.")
+            raise ValueError("No file paths provided. Please provide a path pattern.")
 
         for file_path in file_paths:
             try:
                 yield _experiment_from_file(file_path)
-            except ValidationError as e:
-                print(f"Validation error in file {file_path}: {e}")
-            except Exception as e:
-                print(f"Error reading file {file_path}: {e}")
+            except (ValidationError, ValueError, OSError) as e:
+                self._skip_or_raise(e, file_path)
 
-    async def alazy_load(self, path_pattern: Optional[str] = None) -> AsyncIterator[ExperimentDocument]:
-        """
-        An async lazy loader that reads JSON files from the resolved paths and validates them
-        against the ExperimentDocument model.
-
-        Args:
-            path_pattern (Optional[str]): A glob pattern or single file path to load JSON files from.
-
-        Yields:
-            ExperimentDocument: A document object with the validated JSON content.
-
-        Raises:
-            ValueError: If neither constructor nor method arguments provide a valid path pattern.
-        """
-        file_paths = self._resolve_paths(
-            path_pattern) if path_pattern else self.file_paths
-
+    async def alazy_load(  # type: ignore[override]  # yields ExperimentDocument, not langchain Document
+        self, path_pattern: str | None = None
+    ) -> AsyncIterator[ExperimentDocument]:
+        """Asynchronous version of [`lazy_load`][rupsycho.reader.ExperimentLoader.lazy_load]."""
+        file_paths = self._resolve_paths(path_pattern) if path_pattern else self.file_paths
         if not file_paths:
-            raise ValueError(
-                "No file paths provided. Please provide a path pattern.")
+            raise ValueError("No file paths provided. Please provide a path pattern.")
 
         for file_path in file_paths:
             try:
                 yield await _experiment_from_file_async(file_path)
-            except ValidationError as e:
-                print(f"Validation error in file {file_path}: {e}")
-            except Exception as e:
-                print(f"Error reading file {file_path}: {e}")
+            except (ValidationError, ValueError, OSError) as e:
+                self._skip_or_raise(e, file_path)
 
-    def lazy_load_from_dicts(self, dicts: List[dict]) -> Iterator[ExperimentDocument]:
-        """
-        A lazy loader that reads from a list of dictionaries (JSON objects) and validates them
-        against the ExperimentDocument model.
+    def lazy_load_from_dicts(self, dicts: list[dict[str, Any]]) -> Iterator[ExperimentDocument]:
+        """Lazily validate dictionaries as experiments.
 
         Args:
-            dicts (List[dict]): A list of dictionaries representing experiments.
+            dicts: Experiment configurations.
 
         Yields:
-            ExperimentDocument: A document object with the validated JSON content.
+            One validated experiment per valid dictionary.
         """
-        for json_data in dicts:
+        for index, json_data in enumerate(dicts):
             try:
                 yield _experiment_from_json(json_data)
-            except ValidationError as e:
-                print(f"Validation error in provided dictionary: {e}")
-            except Exception as e:
-                print(f"Error processing provided dictionary: {e}")
+            except (ValidationError, ValueError, TypeError) as e:
+                self._skip_or_raise(e, f"dictionary #{index}")
 
-    async def alazy_load_from_dicts(self, dicts: List[dict]) -> AsyncIterator[ExperimentDocument]:
-        """
-        An async lazy loader that reads from a list of dictionaries (JSON objects) and validates them
-        against the ExperimentDocument model.
-
-        Args:
-            dicts (List[dict]): A list of dictionaries representing experiments.
-
-        Yields:
-            ExperimentDocument: A document object with the validated JSON content.
-        """
-        for json_data in dicts:
+    async def alazy_load_from_dicts(
+        self, dicts: list[dict[str, Any]]
+    ) -> AsyncIterator[ExperimentDocument]:
+        """Asynchronous version of
+        [`lazy_load_from_dicts`][rupsycho.reader.ExperimentLoader.lazy_load_from_dicts]."""
+        for index, json_data in enumerate(dicts):
             try:
-                yield await _experiment_from_json_async(json_data)
-            except ValidationError as e:
-                print(f"Validation error in provided dictionary: {e}")
-            except Exception as e:
-                print(f"Error processing provided dictionary: {e}")
-
-# ================================= Main ================================
+                yield _experiment_from_json(json_data)
+            except (ValidationError, ValueError, TypeError) as e:
+                self._skip_or_raise(e, f"dictionary #{index}")
 
 
-if __name__ == "__main__":
-    loader = ExperimentLoader("../examples/data/bfi_experiment*.json")
-    experiments = loader.lazy_load()
+def experiment_from_file(path: str | os.PathLike[str]) -> ExperimentDocument:
+    """Load one experiment from a JSON file.
 
-    for experiment in experiments:
-        print(experiment.questionnaire)
+    Args:
+        path: Path of the JSON file.
+
+    Returns:
+        The validated experiment.
+
+    Raises:
+        FileNotFoundError: If the file does not exist.
+        ValueError: If the file is not valid JSON or not a valid experiment (pydantic's
+            ``ValidationError`` is a ``ValueError``).
+
+    Example:
+        ```python
+        import rupsycho as rup
+
+        experiment = rup.experiment_from_file("config.json")
+        ```
+    """
+    if not Path(path).is_file():
+        raise FileNotFoundError(f"Experiment configuration not found: {path}")
+    return _experiment_from_file(path)
+
+
+def experiment_from_dict(json_data: dict[str, Any]) -> ExperimentDocument:
+    """Create one experiment from a configuration dictionary.
+
+    Args:
+        json_data: The experiment configuration (see the configuration reference).
+
+    Returns:
+        The validated experiment.
+
+    Raises:
+        ValueError: If the configuration is invalid (pydantic's ``ValidationError`` is a
+            ``ValueError``).
+    """
+    return _experiment_from_json(json_data)
+
+
+def experiments_from_dicts(
+    json_data_list: list[dict[str, Any]], *, strict: bool = False
+) -> Iterator[ExperimentDocument]:
+    """Lazily create experiments from configuration dictionaries.
+
+    Args:
+        json_data_list: The experiment configurations.
+        strict: Raise on the first invalid configuration instead of logging and skipping it.
+
+    Returns:
+        An iterator over the valid experiments.
+    """
+    return ExperimentLoader(strict=strict).lazy_load_from_dicts(json_data_list)
+
+
+def experiments_from_files(path_pattern: str, *, strict: bool = False) -> ExperimentCollection:
+    """Load all experiments matching a path or glob pattern.
+
+    Args:
+        path_pattern: A JSON file or glob pattern such as ``"configs/*.json"``.
+        strict: Raise on the first invalid file instead of logging and skipping it.
+
+    Returns:
+        A collection of the valid experiments, ordered by file name.
+
+    Raises:
+        ValueError: If no file matches the pattern.
+    """
+    loader = ExperimentLoader(path_pattern, strict=strict)
+    if not loader.file_paths:
+        raise ValueError(f"No experiment files match {path_pattern!r}")
+    return ExperimentCollection(list(loader.lazy_load()))

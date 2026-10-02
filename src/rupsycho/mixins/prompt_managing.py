@@ -6,9 +6,16 @@
 # that they are correctly handled and converted into runnable forms.
 
 
+from __future__ import annotations
+
 import warnings
-from langchain_core.load import dumpd, load
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any
+
+from langchain_core.load import dumpd
+from pydantic import BaseModel
+
+from rupsycho._compat import load_serialized
+from rupsycho.models.prompt import LangchainPromptTemplateConfig
 
 
 class PromptTemplateMixin:
@@ -19,7 +26,16 @@ class PromptTemplateMixin:
     into a runnable form.
     """
 
-    def load_prompt(self, prompt_template: str) -> Optional[Any]:
+    if TYPE_CHECKING:
+        # Provided by ExperimentDocument, which mixes this class in.
+        prompt_template: Any
+        runnable_prompt: Any
+        runnable_parser: Any
+
+        @staticmethod
+        def _convert_prompt(prompt: dict[str, Any] | BaseModel) -> Any: ...
+
+    def load_prompt(self, prompt_template: dict[str, Any]) -> Any | None:
         """
         Load the prompt template from its serialized definition.
 
@@ -27,45 +43,67 @@ class PromptTemplateMixin:
         :return: Loaded prompt, or None if an error occurs.
         """
         try:
-            prompt = load(prompt_template)
+            prompt = load_serialized(prompt_template)
             return prompt
         except Exception as e:
-            warnings.warn(f"Failed to load prompt template: {e}", UserWarning)
+            warnings.warn(f"Failed to load prompt template: {e}", UserWarning, stacklevel=2)
             return None
 
     def set_prompt(self, prompt: Any) -> None:
-        """
-        Adds a prompt to the experiment and converts it into its runnable form.
+        """Use a ready-made LangChain prompt for this experiment.
 
-        :param prompt: The prompt to be set.
+        The prompt is kept as a serialized ``langchain`` prompt configuration, so it survives
+        ``export_to_file`` and can be loaded again.
+
+        Args:
+            prompt: A LangChain prompt template such as ``ChatPromptTemplate``. Its input
+                variables may be ``general_instruction``, ``persona_description``,
+                ``question`` and ``answer_options``.
+
+        Example:
+            ```python
+            from langchain_core.prompts import ChatPromptTemplate
+
+            experiment.set_prompt(ChatPromptTemplate.from_messages([
+                ("system", "Answer as {persona_description}."),
+                ("user", "{question}\\n{answer_options}"),
+            ]))
+            ```
         """
-        self.prompt_template = dumpd(prompt)
+        self.prompt_template = LangchainPromptTemplateConfig(definition=dumpd(prompt))
         self.runnable_prompt = prompt
 
-    def get_prompt(self) -> Optional[Any]:
-        """
-        Retrieve the current runnable prompt template if available.
+    def get_prompt(self) -> Any | None:
+        """Return the current runnable prompt template.
 
-        :return: The current runnable prompt, or None if not set.
+        Returns:
+            The LangChain prompt, or ``None`` if none is set.
         """
         return getattr(self, "runnable_prompt", None)
 
-    def get_prompt_config(self) -> Optional[str]:
-        """
-        Retrieve the serialized prompt template configuration.
+    def get_prompt_config(self) -> Any | None:
+        """Return the prompt template configuration (``normal``, ``chat`` or ``langchain``).
 
-        :return: Serialized prompt template or None if not set.
+        Returns:
+            The configuration object, or ``None`` if none is set.
         """
         return getattr(self, "prompt_template", None)
 
-    def set_prompt_config(self, prompt_template: str) -> None:
-        """
-        Set the prompt template configuration by loading its serialized form.
+    def set_prompt_config(self, prompt_template: dict[str, Any] | BaseModel) -> None:
+        """Set the prompt from a configuration, as it would appear in a JSON file.
 
-        :param prompt_template: Serialized prompt template configuration.
+        Args:
+            prompt_template: A configuration dictionary (``{"type": "chat", "messages": [...]}``,
+                ``{"type": "normal", "template": "..."}``) or LangChain's own serialization of a
+                prompt (as produced by ``langchain_core.load.dumpd``), or a config object.
+
+        Raises:
+            ValueError: If the configuration is not recognised.
         """
-        self.prompt_template = prompt_template
-        self.runnable_prompt = self.load_prompt(prompt_template)
+        config = self._convert_prompt(prompt_template)
+        runnable = config.load_prompt_template()  # build first: a failure leaves nothing half set
+        self.prompt_template = config
+        self.runnable_prompt = runnable
 
     def reset_prompt(self) -> None:
         """

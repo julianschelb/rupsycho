@@ -1,0 +1,4 @@
+# Files that the notebooks and scripts write when you run them
+/output/
+/*_answers.csv
+/*.db

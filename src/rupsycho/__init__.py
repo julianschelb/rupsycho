@@ -1,122 +1,104 @@
-"""
-RUPsycho: A Python Package for Social Science Research Using Large Language Models (LLMs)
-=========================================================================================
+"""R.U.Psycho: robust, unified and reproducible psychometric testing of language models.
 
-RUPsycho is a Python package designed to facilitate the application of large language models (LLMs) 
-in social science research. It offers tools to explore human-like behaviors through LLMs, providing 
-a novel approach in the field of natural language processing (NLP).
+Describe an experiment (questionnaire, personas, models, prompt, seeds) in one JSON file or
+dictionary, load it, run it and collect the answers:
 
-This module within RUPsycho provides functions to load and validate experimental data from JSON 
-dictionaries and files. It supports both single and multiple experiment loading, making it easy 
-to manage and analyze experiments in various formats.
+```python
+import rupsycho as rup
 
+experiment = rup.experiment_from_file("config.json")
+experiment.run()
+answers = experiment.get_answers_as_dataframe()
+```
 
-Functions
----------
-- `experiment_from_dict(json_data: dict) -> ExperimentDocument`:
-    Load a single experiment from a JSON dictionary.
-
-- `experiment_from_file(path: str) -> ExperimentDocument`:
-    Load a single experiment from a JSON file.
-
-- `experiments_from_dicts(json_data_list: List[dict]) -> Iterator[ExperimentDocument]`:
-    Load multiple experiments from a list of JSON dictionaries.
-
-- `experiments_from_files(paths: List[str]) -> Iterator[ExperimentDocument]`:
-    Load multiple experiments from a list of JSON files.
-
-Usage
------
-- **Single Experiment Loading**:
-    - Use `experiment_from_dict` for loading an experiment from an in-memory JSON dictionary.
-    - Use `experiment_from_file` for loading an experiment from a JSON file.
-
-- **Multiple Experiments Loading**:
-    - Use `experiments_from_dicts` to load multiple experiments from a list of JSON dictionaries.
-    - Use `experiments_from_files` to load multiple experiments from a list of JSON files.
-
-Example
--------
-After importing RUPsycho, you can start using it in your Python script or Jupyter notebook:
-
-    import rupsycho as rup
-
-    # Load experiment data
-    experiment = rup.experiment_from_file("bfi.json")
-
-    # Run the experiment
-    experiment.run()
-
-    # Save the results
-    experiment.export_to_file("results.json")
-
-For more detailed examples and usage, refer to the official RUPsycho documentation.
+``import rupsycho`` is deliberately cheap: the public names and the sub-packages
+(``rup.parsers``, ``rup.callbacks``, ``rup.postprocessing``, ``rup.seeding``, ``rup.models``)
+are imported on first access, so the command line starts instantly and no model back-end is
+loaded until it is needed.
 """
 
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_huggingface import HuggingFacePipeline
-from rupsycho.experiment_collection import ExperimentCollection
-from rupsycho.reader import ExperimentLoader, ExperimentDocument
-from transformers import pipeline
-from typing import List, Iterator
-from typing import Optional
+from __future__ import annotations
 
-# ================================= Expose Sub Modules ================================
+import importlib
+import warnings
+from typing import TYPE_CHECKING, Any
 
-# from rupsycho import callbacks
-# from rupsycho import models
-# from rupsycho import parsers
-# from rupsycho import postprocessing
-# from rupsycho import parsers
+__version__ = "0.1.0"
 
-# ================================= Create Single Experiment ================================
+if TYPE_CHECKING:  # pragma: no cover - for type checkers and IDEs only
+    from rupsycho import callbacks, models, parsers, postprocessing, scoring, seeding
+    from rupsycho.datasets import list_examples, load_example_config, load_example_experiment
+    from rupsycho.experiment import ExperimentDocument
+    from rupsycho.experiment_collection import ExperimentCollection
+    from rupsycho.mixins.experiment_processing import RunSummary
+    from rupsycho.reader import (
+        ExperimentLoader,
+        experiment_from_dict,
+        experiment_from_file,
+        experiments_from_dicts,
+        experiments_from_files,
+    )
+
+__all__ = [
+    "__version__",
+    # Loading
+    "experiment_from_file",
+    "experiment_from_dict",
+    "experiments_from_files",
+    "experiments_from_dicts",
+    "ExperimentLoader",
+    # Experiments
+    "ExperimentDocument",
+    "ExperimentCollection",
+    "RunSummary",
+    # Bundled examples
+    "list_examples",
+    "load_example_config",
+    "load_example_experiment",
+]
+
+# public name -> module that defines it (resolved on first access)
+_LAZY_ATTRIBUTES = {
+    "experiment_from_file": "rupsycho.reader",
+    "experiment_from_dict": "rupsycho.reader",
+    "experiments_from_files": "rupsycho.reader",
+    "experiments_from_dicts": "rupsycho.reader",
+    "ExperimentLoader": "rupsycho.reader",
+    "ExperimentDocument": "rupsycho.experiment",
+    "ExperimentCollection": "rupsycho.experiment_collection",
+    "RunSummary": "rupsycho.mixins.experiment_processing",
+    "list_examples": "rupsycho.datasets",
+    "load_example_config": "rupsycho.datasets",
+    "load_example_experiment": "rupsycho.datasets",
+}
+
+_LAZY_SUBMODULES = frozenset(
+    {
+        "callbacks",
+        "datasets",
+        "models",
+        "parsers",
+        "postprocessing",
+        "scoring",
+        "seeding",
+        "utils",
+    }
+)
 
 
-def experiment_from_dict(json_data: dict) -> ExperimentDocument:
-    """Create a new experiment from a JSON dictionary."""
-    try:
-        loader = ExperimentLoader()
-        # Use the loader to validate and return the ExperimentDocument
-        return next(loader.lazy_load_from_dicts([json_data]))
-    except Exception as e:
-        raise RuntimeError(
-            f"Failed to create experiment from dict: {e}") from e
+def __getattr__(name: str) -> Any:
+    """Resolve public names and sub-packages on first access (PEP 562)."""
+    if name in _LAZY_ATTRIBUTES:
+        value = getattr(importlib.import_module(_LAZY_ATTRIBUTES[name]), name)
+        globals()[name] = value  # cache: later lookups bypass this function
+        return value
+    if name in _LAZY_SUBMODULES:
+        return importlib.import_module(f"rupsycho.{name}")
+    raise AttributeError(f"module 'rupsycho' has no attribute {name!r}")
 
 
-def experiment_from_file(path: str) -> ExperimentDocument:
-    """Create a new experiment from a JSON file."""
-    try:
-        experiments = ExperimentLoader(path_pattern=path).load()
-        return experiments[0] if len(experiments) > 0 else None
-    except Exception as e:
-        raise RuntimeError(
-            f"Failed to create experiment from file {path}: {e}") from e
-
-# ================================= Create Multiple Experiments ================================
-
-
-def experiments_from_dicts(json_data_list: List[dict]) -> Iterator[ExperimentDocument]:
-    """Create multiple experiments from a list of JSON dictionaries."""
-    try:
-        loader = ExperimentLoader()
-        # Use the loader to validate and return ExperimentDocuments
-        return loader.lazy_load_from_dicts(json_data_list)
-    except Exception as e:
-        raise RuntimeError(
-            f"Failed to create experiments from list of dicts: {e}") from e
-
-
-def experiments_from_files(path_pattern: str) -> Iterator[ExperimentDocument]:
-    """Create multiple experiments from a list of JSON files."""
-    try:
-        experiments = ExperimentLoader(path_pattern=path_pattern).load()
-        return ExperimentCollection(experiments)
-    except Exception as e:
-        raise RuntimeError(
-            f"Failed to create experiments from files matching {path_pattern}: {e}") from e
-
-# ================================= Create Example Experiments ================================
+def __dir__() -> list[str]:
+    return sorted(set(globals()) | set(_LAZY_ATTRIBUTES) | _LAZY_SUBMODULES)
 
 
 def example_experiment_bfi(
@@ -124,158 +106,48 @@ def example_experiment_bfi(
     pipeline_type: str = "text2text-generation",
     temperature: float = 0.7,
     max_new_tokens: int = 128,
-    api_key: Optional[str] = None
+    api_key: str | None = None,
 ) -> ExperimentDocument:
-    """
-    Create an example experiment with a specified model, pipeline type, and generative parameters.
+    """Create a tiny Big Five experiment around a Hugging Face pipeline.
 
-    :param model_name: Name of the Hugging Face model to use.
-    :param pipeline_type: Type of pipeline to use (e.g., 'text2text-generation').
-    :param temperature: Temperature setting for the generative model.
-    :param max_new_tokens: Maximum number of new tokens to generate.
-    :param api_key: Optional Hugging Face API key for accessing gated models.
-    :return: Configured ExperimentDocument.
-    """
+    Deprecated:
+        Use [`load_example_experiment`][rupsycho.datasets.load_example_experiment] and add your
+        model with ``experiment.add_model``.
 
-    # Set the Hugging Face API key if provided
+    Args:
+        model_name: Name of the Hugging Face model to use.
+        pipeline_type: Pipeline task, e.g. ``"text2text-generation"``.
+        temperature: Sampling temperature.
+        max_new_tokens: Maximum number of generated tokens.
+        api_key: Optional Hugging Face token for gated models.
+
+    Returns:
+        A configured experiment with the model already added.
+
+    Raises:
+        ImportError: If the ``huggingface`` extra is not installed.
+    """
+    warnings.warn(
+        "example_experiment_bfi is deprecated; use load_example_experiment('bfi', models={}) "
+        "and experiment.add_model(...)",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    from rupsycho._compat import require
+    from rupsycho.datasets import load_example_experiment
+
+    transformers = require("transformers", "huggingface", feature="example_experiment_bfi")
+    lc_hf = require("langchain_huggingface", "huggingface", feature="example_experiment_bfi")
+
     if api_key:
-        from huggingface_hub import login
-        login(api_key)
+        require("huggingface_hub", "huggingface").login(api_key)
 
-    # Example experiment data
-    experiment_data = {
-        "name": "Generative Models for Big Five Inventory",
-        "description": "Description: Testing Generative Models for BFI questionnaire using Rupsycho.",
-        "demographic_profiles": {
-            "Profile 1": {
-                "attributes": {
-                    "title": "Mr",
-                    "name": "Grueber"
-                },
-                "template": "{title} {name}"
-            }
-        },
-        "parameters": {
-            "seeds": ["7"],
-        },
-        "questionnaire":  {
-            "name": "BIG FIVE INVENTORY RESPONSE FORM AND INSTRUCTIONS TO PARTICIPANTS",
-            "general_instruction": "Here are a number of characteristics that may or may not apply to you. For example, do you agree that you are someone who likes to spend time with others? Please return the number corresponding to the answer options to indicate the extent to which you agree or disagree with that statement.",
-            "attributes": {
-                "dimension": {
-                    "1": "Extraversion",
-                    "2": "Agreeableness",
-                    "3": "Conscientiousness",
-                    "4": "Neuroticism",
-                    "5": "Openness"
-                }
-            },
-            "default_answer_options": {
-                "1": {
-                    "text": "1. Disagree strongly",
-                    "ignored_for_scale": False,
-                    "weight": 1
-                },
-                "2": {
-                    "text": "2. Disagree a little",
-                    "ignored_for_scale": False,
-                    "weight": 2
-                },
-                "3": {
-                    "text": "3. Neither agree nor disagree",
-                    "ignored_for_scale": False,
-                    "weight": 3
-                },
-                "4": {
-                    "text": "4. Agree a little",
-                    "ignored_for_scale": False,
-                    "weight": 4
-                },
-                "5": {
-                    "text": "5. Agree strongly",
-                    "ignored_for_scale": False,
-                    "weight": 5
-                }
-            },
-            "instruction_items": [
-                {
-                    "question": "I see myself as someone who...",
-                    "reversed": False,
-                    "attributes": {
-                        "dimension": "1"
-                    }
-                },
-                {
-                    "question": "Tends to find fault with others",
-                    "reversed": False,
-                    "attributes": {
-                        "dimension": "1"
-                    }
-                },
-                {
-                    "question": "Does a thorough job",
-                    "reversed": False,
-                    "attributes": {
-                        "dimension": "1"
-                    }
-                },
-                {
-                    "question": "Is depressed, blue",
-                    "reversed": False,
-                    "attributes": {
-                        "dimension": "1"
-                    }
-                }
-            ]
-        }
-    }
-
-    # Load a single experiment from the example data
-    experiment = experiment_from_dict(experiment_data)
-
-    # Load the specified Hugging Face generative model
-    pipe = pipeline(
+    experiment = load_example_experiment("bfi", models={})
+    pipe = transformers.pipeline(
         pipeline_type,
         model=model_name,
         temperature=temperature,
-        max_new_tokens=max_new_tokens
+        max_new_tokens=max_new_tokens,
     )
-
-    model = HuggingFacePipeline(pipeline=pipe)
-
-    # Add the model to the experiment
-    experiment.add_model(model, identifier="hf_generative_model")
-
-    # Create the provided ChatPromptTemplate for the experiment
-    system_message_template = """
-        Objective: "{general_instruction}"
-        Answer with respect to the following persona description and question.
-    """
-    # Create the user message template
-    user_message_template = """ 
-        Question:
-        {persona_description} was asked the following question. {question}
-
-        Answer Options: 
-        {answer_options}
-
-        Instructions: Choose from the list of answer options to answer the question. Answer the question using only the provided answer options. If none of the options are correct, choose the option that is closest to being correct.
-        
-        Answer:
-    """
-
-    # Create the chat prompt template
-    chat_prompt = ChatPromptTemplate.from_messages([
-        ("system", system_message_template),
-        ("user", user_message_template)
-    ])
-
-    # Set the chat prompt for the experiment
-    experiment.set_prompt(chat_prompt)
-
-    # Set a simple string output parser
-    parser = StrOutputParser() # returns the input text with no changes
-    experiment.set_parser(parser)
-
-    # Return the configured experiment
+    experiment.add_model(lc_hf.HuggingFacePipeline(pipeline=pipe), identifier="hf_generative_model")
     return experiment

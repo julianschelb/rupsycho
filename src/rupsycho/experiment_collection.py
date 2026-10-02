@@ -7,11 +7,13 @@
 # metadata associated with the collection.
 
 
-from typing import List, Any, Literal
+from typing import Any, Literal
+
 from langchain_core.documents.base import BaseMedia
+from pydantic import ConfigDict
+
 from rupsycho.experiment import ExperimentDocument
-from rupsycho.utils import import_tqdm
-tqdm = import_tqdm()  # Import tqdm based on the environment
+from rupsycho.mixins.experiment_processing import RunSummary
 
 # ================================= Experiments Class ================================
 
@@ -51,18 +53,17 @@ class ExperimentCollection(BaseMedia):
 
     # --------------------------------- Attributes --------------------------------
 
-    experiments: List[ExperimentDocument]
+    experiments: list[ExperimentDocument]
     """List of ExperimentDocument objects representing the experiments."""
     type: Literal["ExperimentCollection"] = "ExperimentCollection"
 
     # --------------------------------- Config --------------------------------
     # Adding Pydantic Config to allow custom types
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     # --------------------------------- Initialization --------------------------------
 
-    def __init__(self, experiments: List[ExperimentDocument], **kwargs: Any) -> None:
+    def __init__(self, experiments: list[ExperimentDocument], **kwargs: Any) -> None:
         """Initialize an ExperimentCollection with a list of ExperimentDocument objects."""
         super().__init__(experiments=experiments, **kwargs)
 
@@ -82,16 +83,20 @@ class ExperimentCollection(BaseMedia):
         return True
 
     @classmethod
-    def get_lc_namespace(cls) -> List[str]:
+    def get_lc_namespace(cls) -> list[str]:
         """Get the namespace of the LangChain object."""
         return ["langchain", "schema", "experiment_collection"]
 
     # --------------------------------- Run Experiments --------------------------------
 
-    def run_all(self) -> None:
-        """
-        Run the experiment processing for all ExperimentDocuments in the collection.
-        """
+    def run_all(self, **run_kwargs: Any) -> list[RunSummary]:
+        """Run every experiment of the collection, one after another.
 
-        for experiment_doc in self.experiments:
-            experiment_doc.run()
+        Args:
+            **run_kwargs: Passed to [`run`][rupsycho.mixins.experiment_processing.ExperimentProcessingMixin.run]
+                (``callbacks``, ``cumulative``, ``max_concurrency``, ``on_error``, ...).
+
+        Returns:
+            One [`RunSummary`][rupsycho.mixins.experiment_processing.RunSummary] per experiment.
+        """
+        return [experiment.run(**run_kwargs) for experiment in self.experiments]

@@ -11,10 +11,11 @@
 
 import csv
 import json
+import os
 from abc import ABC, abstractmethod
 
-
 # --------------------------------- JSONL --------------------------------
+
 
 class Callback(ABC):
     """
@@ -22,7 +23,17 @@ class Callback(ABC):
     """
 
     @abstractmethod
-    def save_answer(self, experiment, instruction_item_id, instruction_item, model_id, profile_id, random_seed, answer):
+    def save_answer(
+        self,
+        experiment,
+        instruction_item_id,
+        instruction_item,
+        model_id,
+        profile_id,
+        random_seed,
+        time,
+        answer,
+    ):
         """
         Method to be implemented by subclasses to save the answer.
 
@@ -33,6 +44,7 @@ class Callback(ABC):
         - model_id: The identifier of the model used for generating the answer.
         - profile_id: The identifier of the demographic profile.
         - random_seed: The random seed used for generating the answer.
+        - time: Seconds it took to generate the answer.
         - answer: The generated answer for the instruction item.
         """
         pass
@@ -46,48 +58,86 @@ class JSONLCallback(Callback):
     def __init__(self, file_path="experiment_output.jsonl"):
         self.file_path = file_path
 
-    def save_answer(self, experiment, instruction_item_id, instruction_item, model_id, profile_id, random_seed, answer):
+    def save_answer(
+        self,
+        experiment,
+        instruction_item_id,
+        instruction_item,
+        model_id,
+        profile_id,
+        random_seed,
+        time,
+        answer,
+    ):
         output_data = {
             "experiment_name": experiment.name,  # Accessing experiment details
             "instruction_item_id": instruction_item_id,
-            # Assuming instruction_item can be converted to dict
-            "instruction_item": instruction_item.model_dump(exclude=['answer']),
+            # The accumulated answers of the item are left out: every row carries its own
+            # answer, and including them made each row (and the file) grow with the run
+            "instruction_item": instruction_item.model_dump(exclude={"answers"}),
             "model_id": model_id,
             "profile_id": profile_id,
             "random_seed": random_seed,
-            "answer": answer
+            "time": time,
+            "answer": answer,
         }
 
         # Open the JSONL file in append mode and write the data
-        with open(self.file_path, 'a') as f:
-            f.write(json.dumps(output_data) + '\n')
+        with open(self.file_path, "a", encoding="utf-8") as f:
+            f.write(json.dumps(output_data) + "\n")
 
 
 # --------------------------------- CSV --------------------------------
+
 
 class CSVCallback(Callback):
     """
     Callback implementation for saving answers to a CSV file.
     """
 
+    HEADER = (
+        "experiment_name",
+        "instruction_item_id",
+        "instruction_item",
+        "model_id",
+        "profile_id",
+        "random_seed",
+        "time",
+        "answer",
+    )
+
     def __init__(self, file_path="experiment_output.csv"):
         self.file_path = file_path
 
         # Initialize the CSV file with headers if it doesn't exist
         try:
-            with open(self.file_path, 'x', newline='') as f:
+            with open(self.file_path, "x", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
-                writer.writerow(["experiment_name", "instruction_item_id", "instruction_item", "model_id",
-                                 "profile_id", "random_seed", "time", "answer"])
+                writer.writerow(self.HEADER)
         except FileExistsError:
-            # File already exists, do nothing
-            pass
+            # Appending to an existing file keeps it as it is - unless it is empty, in which
+            # case it still needs its header
+            if os.path.getsize(self.file_path) == 0:
+                with open(self.file_path, "a", newline="", encoding="utf-8") as f:
+                    csv.writer(f).writerow(self.HEADER)
 
-    def save_answer(self, experiment, instruction_item_id, instruction_item, model_id, profile_id, random_seed, time, answer):
+    def save_answer(
+        self,
+        experiment,
+        instruction_item_id,
+        instruction_item,
+        model_id,
+        profile_id,
+        random_seed,
+        time,
+        answer,
+    ):
         output_data = [
             experiment.name,  # Accessing experiment details
             instruction_item_id,
-            instruction_item.question.replace('\n', ' '),  # Assuming instruction_item has a 'question' attribute + remove linebreaks for nicer format <-
+            instruction_item.question.replace(
+                "\n", " "
+            ),  # Assuming instruction_item has a 'question' attribute + remove linebreaks for nicer format <-
             model_id,
             profile_id,
             random_seed,
@@ -96,19 +146,30 @@ class CSVCallback(Callback):
         ]
 
         # Open the CSV file in append mode and write the data
-        with open(self.file_path, 'a', newline='') as f:
+        with open(self.file_path, "a", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow(output_data)
 
 
 # --------------------------------- Print --------------------------------
 
+
 class PrintCallback(Callback):
     """
     Callback implementation for printing answers to the screen.
     """
 
-    def save_answer(self, experiment, instruction_item_id, instruction_item, model_id, profile_id, random_seed, answer):
+    def save_answer(
+        self,
+        experiment,
+        instruction_item_id,
+        instruction_item,
+        model_id,
+        profile_id,
+        random_seed,
+        time,
+        answer,
+    ):
         # Accessing experiment and instruction item details
         print(f"Experiment: {experiment.name}")
         print(f"Instruction Item ID: {instruction_item_id}")
@@ -117,11 +178,13 @@ class PrintCallback(Callback):
         print(f"Model ID: {model_id}")
         print(f"Profile ID: {profile_id}")
         print(f"Random Seed: {random_seed}")
+        print(f"Time: {time}s")
         print(f"Answer: {answer}")
         print("=" * 50)  # Divider for clarity between different outputs
 
 
 # --------------------------------- Table --------------------------------
+
 
 class PrintTableCallback(Callback):
     """
@@ -137,40 +200,64 @@ class PrintTableCallback(Callback):
             "profile_id": 20,
             "random_seed": 12,
             "question": 25,
-            "answer": 25
+            "answer": 25,
         }
 
         # Initialize a flag to track whether headers have been printed
         self.headers_printed = False
 
+    @staticmethod
+    def _truncate(text: str, width: int) -> str:
+        """Flatten line breaks and shorten ``text`` to at most ``width`` characters."""
+        text = text.replace("\n", " ").replace("\r", " ")
+        return text if len(text) <= width else text[: width - 3] + "..."
+
     def _print_headers(self):
         """Print the table headers."""
-        header = (f"{'Instruction ID':<{self.column_widths['instruction_id']}} | "
-                  f"{'Model ID':<{self.column_widths['model_id']}} | "
-                  f"{'Profile ID':<{self.column_widths['profile_id']}} | "
-                  f"{'Random Seed':<{self.column_widths['random_seed']}} | "
-                  f"{'Question (truncated)':<{self.column_widths['question']}} | "
-                  f"{'Answer (truncated)':<{self.column_widths['answer']}}")
+        header = (
+            f"{'Instruction ID':<{self.column_widths['instruction_id']}} | "
+            f"{'Model ID':<{self.column_widths['model_id']}} | "
+            f"{'Profile ID':<{self.column_widths['profile_id']}} | "
+            f"{'Random Seed':<{self.column_widths['random_seed']}} | "
+            f"{'Question (truncated)':<{self.column_widths['question']}} | "
+            f"{'Answer (truncated)':<{self.column_widths['answer']}}"
+        )
         print(header)
         print("=" * len(header))  # Separator line
         self.headers_printed = True
 
-    def save_answer(self, experiment, instruction_item_id, instruction_item, model_id, profile_id, random_seed, answer):
+    def save_answer(
+        self,
+        experiment,
+        instruction_item_id,
+        instruction_item,
+        model_id,
+        profile_id,
+        random_seed,
+        time,
+        answer,
+    ):
         # Print headers the first time save_answer is called
         if not self.headers_printed:
             self._print_headers()
 
-        # Limit question and answer to the first 100 characters
-        clean_question = (instruction_item.question.replace('\n', ' ').replace('\r', ' ')[:22] + '...') if len(
-            instruction_item.question) > 22 else instruction_item.question.replace('\n', ' ').replace('\r', ' ')
-        truncated_answer = (answer.replace('\n', ' ').replace('\r', ' ')[
-                            :22] + '...') if len(answer) > 25 else answer.replace('\n', ' ').replace('\r', ' ')
+        clean_question = self._truncate(instruction_item.question, self.column_widths["question"])
+        # A failed call has no answer
+        truncated_answer = self._truncate(
+            "(no answer)" if answer is None else str(answer), self.column_widths["answer"]
+        )
 
         # Print each row in a fixed-width format
-        row = (f"{str(instruction_item_id):<{self.column_widths['instruction_id']}} | "
-               f"{model_id:<{self.column_widths['model_id']}} | "
-               f"{profile_id:<{self.column_widths['profile_id']}} | "
-               f"{str(random_seed):<{self.column_widths['random_seed']}} | "
-               f"{clean_question:<{self.column_widths['question']}} | "
-               f"{truncated_answer:<{self.column_widths['answer']}}")
+        widths = self.column_widths
+        cells = [
+            self._truncate(str(instruction_item_id), widths["instruction_id"]).ljust(
+                widths["instruction_id"]
+            ),
+            self._truncate(str(model_id), widths["model_id"]).ljust(widths["model_id"]),
+            self._truncate(str(profile_id), widths["profile_id"]).ljust(widths["profile_id"]),
+            self._truncate(str(random_seed), widths["random_seed"]).ljust(widths["random_seed"]),
+            clean_question.ljust(widths["question"]),
+            truncated_answer.ljust(widths["answer"]),
+        ]
+        row = " | ".join(cells)
         print(row)

@@ -3,9 +3,9 @@
 # ===========================================================================
 # This file contains the data model for a psychological questionnaire.
 
-from collections import defaultdict
-from typing import Any, List, Dict, Optional
-from pydantic import BaseModel, Field, validator
+from typing import Any
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from tabulate import tabulate
 
 
@@ -23,12 +23,11 @@ class DemographicAttributes(BaseModel):
     The model is flexible to accept additional fields beyond the ones specified.
     """
 
-    age: Optional[Any] = None
-    title: Optional[Any] = None
-    name: Optional[Any] = None
+    age: Any | None = None
+    title: Any | None = None
+    name: Any | None = None
 
-    class Config:
-        extra = "allow"
+    model_config = ConfigDict(extra="allow")
 
 
 class DemographicProfile(BaseModel):
@@ -51,17 +50,17 @@ class DemographicProfile(BaseModel):
         return self.template.format(**self.attributes.model_dump())
 
     def get_profile_desc(self):
-        """ Returns a string representation of the profile. """
+        """Returns a string representation of the profile."""
         return self.__str__()
 
-    class Config:
-        extra = "allow"
+    model_config = ConfigDict(extra="allow")
 
 
 class AnswerOption(BaseModel):
     """
     Represents an answer option in a psychological test.
     """
+
     text: str = "Choose an option"
     ignored_for_scale: bool = False
     weight: int = 0
@@ -72,17 +71,16 @@ class AnswerOptions(BaseModel):
     Represents a collection of answer options in a psychological test along with a delimiter for joining them.
     """
 
-    options: Dict[str, AnswerOption] = Field(
-        default_factory=dict,
-        description="A dictionary of answer options."
+    options: dict[str, AnswerOption] = Field(
+        default_factory=dict, description="A dictionary of answer options."
     )
     delimiter: str = Field(
         default=", ",
-        description="The delimiter used to join the answer options when displayed as a string. Default is ', '. Insert a line break '\\n' for a new line."
+        description="The delimiter used to join the answer options when displayed as a string. Default is ', '. Insert a line break '\\n' for a new line.",
     )
     prepend_delimiter: bool = Field(
         default=False,
-        description="If True, the delimiter will be added before the first answer option as well."
+        description="If True, the delimiter will be added before the first answer option as well.",
     )
 
     def join_options(self) -> str:
@@ -94,10 +92,31 @@ class AnswerOptions(BaseModel):
             return self.delimiter + self.delimiter.join(option_texts)
         else:
             return self.delimiter.join(option_texts)
-        
-    def get_options_as_list(self) -> List[str]:
+
+    def get_options_as_list(self) -> list[str]:
         """Return the list of answer options' text."""
         return [option.text for option in self.options.values()]
+
+
+def _to_answer_options(value: Any) -> Any:
+    """Convert the configuration forms of answer options into an ``AnswerOptions`` model.
+
+    Accepted forms: a ready ``AnswerOptions``; ``{"options": {...}, "delimiter": ..,
+    "prepend_delimiter": ..}``; or just ``{id: option}``, where an option is a dictionary or an
+    ``AnswerOption``. Anything else is passed on for pydantic to validate (and reject).
+    """
+    if not isinstance(value, dict):
+        return value
+    if isinstance(value.get("options"), dict):
+        options = {key: AnswerOption.model_validate(opt) for key, opt in value["options"].items()}
+        return AnswerOptions(
+            options=options,
+            delimiter=value.get("delimiter", ", "),
+            prepend_delimiter=value.get("prepend_delimiter", False),
+        )
+    return AnswerOptions(
+        options={key: AnswerOption.model_validate(opt) for key, opt in value.items()}
+    )
 
 
 class InstructionItem(BaseModel):
@@ -107,46 +126,47 @@ class InstructionItem(BaseModel):
 
     question: str = "Enter question text here"
     reversed: bool = False
-    answer_options: Optional[AnswerOptions] = None
-    attributes: Dict = Field(
+    answer_options: AnswerOptions | None = None
+    attributes: dict = Field(
         default_factory=dict,
         description="Additional attributes related to the question, such as its dimension in a multi-dimensional test structure.",
     )
-    answers: Optional[Dict[Any, Dict[Any, Dict[Any, str]]]] = Field(
-        default_factory=lambda: defaultdict(
-            lambda: defaultdict(lambda: defaultdict(dict))),
+    answers: dict[Any, dict[Any, dict[Any, Any]]] | None = Field(
+        default_factory=dict,
         description="A nested dictionary storing answers indexed by model, profile, and run.",
     )
 
-    @validator('answer_options', pre=True, always=True)
-    def ensure_answer_options_is_proper_model(cls, v):
+    @field_validator("answer_options", mode="before")
+    @classmethod
+    def ensure_answer_options_is_proper_model(cls, v: Any) -> Any:
         """Convert a dictionary to an AnswerOptions model if necessary."""
-        # If the input `v` is a dictionary and contains keys that indicate it might be nested
-        if isinstance(v, dict):
-            if 'options' in v:
-                # If the key 'options' is found, handle it as a full AnswerOptions structure
-                options = {key: AnswerOption(**option)
-                           for key, option in v['options'].items()}
-                return AnswerOptions(options=options, delimiter=v.get('delimiter', ', '), prepend_delimiter=v.get('prepend_delimiter', False))
-            else:
-                # Otherwise, assume it's just the dictionary of options
-                return AnswerOptions(options={key: AnswerOption(**option) for key, option in v.items()})
-        return v
+        return _to_answer_options(v)
 
     def update_answer(self, model_key: str, profile_key: str, run_idx: int, answer: Any) -> None:
         """Store the answer in the appropriate location."""
-        if answer is not None:
-            self.answers[model_key][profile_key][run_idx] = answer
+        if answer is None:
+            return
+        if self.answers is None:
+            self.answers = {}
+        # setdefault keeps this working for plain dicts, e.g. after loading an exported experiment
+        self.answers.setdefault(model_key, {}).setdefault(profile_key, {})[run_idx] = answer
 
     def get_answer(self, model_key: str, profile_key: str, run_idx: int) -> Any:
-        """Retrieve the answer from the appropriate location."""
+        """Return the stored answer.
+
+        Raises:
+            KeyError: If there is no answer for this model, persona and seed. Reading never
+                modifies the stored answers.
+        """
+        if self.answers is None:
+            raise KeyError(model_key)
         return self.answers[model_key][profile_key][run_idx]
 
-    def get_all_answers(self) -> Dict[str, Dict[str, Dict[int, Any]]]:
+    def get_all_answers(self) -> dict[str, dict[str, dict[int, Any]]]:
         """Retrieve all answers."""
-        return self.answers
+        return self.answers  # type: ignore[return-value]
 
-    def get_answer_options_as_list(self) -> List[str]:
+    def get_answer_options_as_list(self) -> list[str]:
         """Return the list of answer options' text."""
         if self.answer_options:
             return self.answer_options.get_options_as_list()
@@ -170,28 +190,20 @@ class Questionnaire(BaseModel):
 
     name: str
     general_instruction: str
-    demographic_profiles: Optional[List[DemographicProfile]] = None
-    attributes: Dict = Field(
+    demographic_profiles: list[DemographicProfile] | None = None
+    attributes: dict = Field(
         default_factory=dict,
         description="Additional attributes related to the question, such as its dimension in a multi-dimensional test structure.",
     )
     # Dict[str, AnswerOption]
-    default_answer_options: Optional[AnswerOptions] = None
-    instruction_items: Optional[List[InstructionItem]] = None
+    default_answer_options: AnswerOptions | None = None
+    instruction_items: list[InstructionItem] | None = None
 
-    @validator('default_answer_options', pre=True, always=True)
-    def ensure_default_answer_options_is_proper_model(cls, v):
+    @field_validator("default_answer_options", mode="before")
+    @classmethod
+    def ensure_default_answer_options_is_proper_model(cls, v: Any) -> Any:
         """Convert a dictionary to an AnswerOptions model if necessary."""
-        if isinstance(v, dict):
-            if 'options' in v:
-                # If the dictionary already has 'options', convert the inner dictionary properly
-                options = {key: AnswerOption(**option)
-                           for key, option in v['options'].items()}
-                return AnswerOptions(options=options, delimiter=v.get('delimiter', ', '), prepend_delimiter=v.get('prepend_delimiter', False))
-            else:
-                # If it's just a flat dictionary, convert it directly
-                return AnswerOptions(options={key: AnswerOption(**option) for key, option in v.items()})
-        return v
+        return _to_answer_options(v)
 
     def get_number_of_questions(self) -> int:
         """Returns the number of questions in the questionnaire."""
@@ -214,7 +226,7 @@ class Questionnaire(BaseModel):
             print("\nDefault Answer Options:")
             answer_options_table = [
                 [key, opt.text, opt.ignored_for_scale, opt.weight]
-                for key, opt in self.default_answer_options.items()
+                for key, opt in self.default_answer_options.options.items()
             ]
             print(
                 tabulate(
@@ -228,9 +240,12 @@ class Questionnaire(BaseModel):
             for item in self.instruction_items:
                 print(f"- Question: {item.question}")
                 print("  Answer Options:")
-                if item.answer_options:
+                if not item.answer_options:
+                    print("    (questionnaire defaults)")
+                else:
                     answer_options_table = [
-                        [opt[1].text, opt[1].ignored_for_scale, opt[1].weight] for opt in item.answer_options.items()
+                        [opt.text, opt.ignored_for_scale, opt.weight]
+                        for opt in item.answer_options.options.values()
                     ]
                     print(
                         tabulate(

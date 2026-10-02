@@ -6,16 +6,19 @@
 # answer and applies a series of checks and transformations to determine a
 # final prediction or verdict.
 
-from pydantic import Field
 from typing import Any
+
+import numpy as np
 from langchain_core.exceptions import OutputParserException
 from langchain_core.output_parsers import BaseOutputParser
-from rupsycho.parsers.parser_utils import check_multiple_choice_answers, mk_age_keywords, check_gender, check_age
-from transformers import RobertaTokenizer, RobertaForSequenceClassification
-from scipy.stats import entropy
-import numpy as np
-import torch
+from pydantic import ConfigDict, Field
 
+from rupsycho._compat import default_device, require
+from rupsycho.parsers.parser_utils import (
+    check_age,
+    check_gender,
+    check_multiple_choice_answers,
+)
 
 # ========================== Multiple Choice Parser ========================
 
@@ -41,7 +44,6 @@ class MultipleChoiceJudge(BaseOutputParser[str]):
             **kwargs,
         )
 
-
     def parse(self, text: str, possible_answers=None) -> str:
         """
         Parses the input text to determine the most likely answer from the
@@ -54,24 +56,21 @@ class MultipleChoiceJudge(BaseOutputParser[str]):
                     raise ValueError("No possible answers provided")
 
             # Use the check_multiple_choice_answers function to analyze the text
-            results = check_multiple_choice_answers(
-                text, possible_answers, self.ignore_case)
+            results = check_multiple_choice_answers(text, possible_answers, self.ignore_case)
             max_value = max(results.values())
 
             if max_value == 0:
                 return "not present"
             else:
                 # Find all options with the max_value
-                max_keys = [key for key, value in results.items()
-                            if value == max_value]
+                max_keys = [key for key, value in results.items() if value == max_value]
                 if len(max_keys) > 1:
                     return "inconclusive"
                 else:
                     return max_keys[0]
 
         except Exception as e:
-            raise OutputParserException(
-                f"MultipleChoiceJudge encountered an error: {e}")
+            raise OutputParserException(f"MultipleChoiceJudge encountered an error: {e}") from e
 
     @property
     def _type(self) -> str:
@@ -81,49 +80,50 @@ class MultipleChoiceJudge(BaseOutputParser[str]):
         return "multiple_choice_parser"
 
 
-
 # ---------------------- Demographic Judge ---------------------
 
-class DemographicsJudge(BaseOutputParser[str]): # <-
+
+class DemographicsJudge(BaseOutputParser[str]):  # <-
     """
     Custom parser for demographic questionnaires that can either judge statements on
-    age or on gender. Which of the two tasks is required has to be specified by a 
-    keyword ('gender' or 'age') in a single answer option for each item in the 
+    age or on gender. Which of the two tasks is required has to be specified by a
+    keyword ('gender' or 'age') in a single answer option for each item in the
     experiment config file.
 
     """
+
     ignore_case: bool = Field(True)
     max_age: int = Field(100)
 
-    def parse(self, text: str, possible_answers: list=None) -> str:
+    def parse(self, text: str, possible_answers: list | None = None) -> str:
         try:
-            if possible_answers is None:
+            if not possible_answers:
                 raise ValueError("No possible answer/question-type provided")
-            
+
             type_of_question = possible_answers[0]
 
             # decide task (gender or age)
-            if type_of_question == 'gender':
+            if type_of_question == "gender":
                 ans = check_gender(text=text, ignore_case=self.ignore_case)
-            elif type_of_question == 'age':
-                ans  = check_age(text=text, max_age=self.max_age, ignore_case=self.ignore_case)
+            elif type_of_question == "age":
+                ans = check_age(text=text, max_age=self.max_age, ignore_case=self.ignore_case)
             else:
                 raise ValueError("Unknown question type")
             return ans
-        
+
         except Exception as e:
-            raise OutputParserException(f"DemographicsJudge encountered an error: {e}")
-        
+            raise OutputParserException(f"DemographicsJudge encountered an error: {e}") from e
+
     @property
     def _type(self) -> str:
         """
         Returns the type of the parser as a string identifier.
         """
         return "demographic_parser"
-    
 
 
 # ---------------------- Model-Based Answer Judge ---------------------
+
 
 class ModelBasedAnswerJudge(BaseOutputParser[str]):
     """
@@ -134,42 +134,35 @@ class ModelBasedAnswerJudge(BaseOutputParser[str]):
 
     model_name: str = Field(
         ...,
-        description="The Hugging Face model name or path for the sequence classification model."
+        description="The Hugging Face model name or path for the sequence classification model.",
     )
     possible_answers: list[str] = Field(
-        ...,
-        description="A list of possible answers to be considered during prediction."
+        ..., description="A list of possible answers to be considered during prediction."
     )
     device: str = Field(
-        'cuda:0',
-        description="The device to run the model on (e.g., 'cuda:0' for GPU or 'cpu')."
+        default_factory=default_device,
+        description="The device to run the model on (e.g., 'cuda:0' for GPU or 'cpu').",
     )
-    model: Any = Field(
-        default=None,
-        init=False,
-        description="The model that is used as a judge."
-        
-    )
+    model: Any = Field(default=None, init=False, description="The model that is used as a judge.")
     tokenizer: Any = Field(
-        default=None,
-        init=False,
-        description="The tokenizer for the model that is used as a judge"
+        default=None, init=False, description="The tokenizer for the model that is used as a judge"
     )
     entropy_threshold: float = Field(
-        0.359, # Default entropy threshold
-        description="The threshold for entropy above which the result is considered inconclusive."
+        0.359,  # Default entropy threshold
+        description="The threshold for entropy above which the result is considered inconclusive.",
     )
 
-    class Config:
-        arbitrary_types_allowed = True
-
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def model_post_init(self, __context):
         """Set up LLM."""
+        transformers = require("transformers", "huggingface", feature="ModelBasedAnswerJudge")
+
         # Load the tokenizer and model from Hugging Face
-        tokenizer = RobertaTokenizer.from_pretrained(self.model_name)
-        model = RobertaForSequenceClassification.from_pretrained(
-            self.model_name, num_labels=2)
+        tokenizer = transformers.RobertaTokenizer.from_pretrained(self.model_name)
+        model = transformers.RobertaForSequenceClassification.from_pretrained(
+            self.model_name, num_labels=2
+        )
 
         # Move model to the specified device
         model.to(self.device)
@@ -178,16 +171,17 @@ class ModelBasedAnswerJudge(BaseOutputParser[str]):
         self.model = model
         self.tokenizer = tokenizer
 
-
     def calculate_entropy(self, decision_list):
         """
         Calculates entropy from a list of decision probabilities.
         """
         probabilities = np.array(
-            [item.get('positive_probability', 0.0) for item in decision_list])
-        probabilities /= np.sum(probabilities) if np.sum(
-            probabilities) > 0 else 1e-12
-        return entropy(probabilities, base=2)
+            [item.get("positive_probability", 0.0) for item in decision_list], dtype=float
+        )
+        total = probabilities.sum()
+        probabilities = probabilities / (total if total > 0 else 1e-12)
+        nonzero = probabilities[probabilities > 0]
+        return float(-(nonzero * np.log2(nonzero)).sum())
 
     def predict_answer(self, answer_option: str, answer: str):
         """
@@ -195,14 +189,11 @@ class ModelBasedAnswerJudge(BaseOutputParser[str]):
         """
         self.model.eval()
         inputs = self.tokenizer(
-            answer_option,
-            answer,
-            return_tensors="pt",
-            padding=True,
-            truncation=True
+            answer_option, answer, return_tensors="pt", padding=True, truncation=True
         )
         inputs = inputs.to(self.device)
 
+        torch = require("torch", "huggingface", feature="ModelBasedAnswerJudge")
         with torch.no_grad():
             outputs = self.model(**inputs)
             logits = outputs.logits
@@ -226,13 +217,14 @@ class ModelBasedAnswerJudge(BaseOutputParser[str]):
 
         results = []
         for answer_option in answer_options:
-            predicted_label, positive_probability = self.predict_answer(
-                answer_option, answer)
-            results.append({
-                'answer_option': answer_option,
-                'predicted_label': predicted_label,
-                'positive_probability': positive_probability
-            })
+            predicted_label, positive_probability = self.predict_answer(answer_option, answer)
+            results.append(
+                {
+                    "answer_option": answer_option,
+                    "predicted_label": predicted_label,
+                    "positive_probability": positive_probability,
+                }
+            )
         return results
 
     def parse(self, text: str, possible_answers=None) -> str:
@@ -249,35 +241,11 @@ class ModelBasedAnswerJudge(BaseOutputParser[str]):
                 return "inconclusive"
 
             # Sort results by probability of the positive class
-            best_option = max(results, key=lambda x: x['positive_probability'])
-            return best_option['answer_option']
+            best_option = max(results, key=lambda x: x["positive_probability"])
+            return best_option["answer_option"]
         except Exception as e:
-            raise OutputParserException(
-                f"ModelBasedAnswerJudge encountered an error: {e}")
+            raise OutputParserException(f"ModelBasedAnswerJudge encountered an error: {e}") from e
 
     @property
     def _type(self) -> str:
         return "model_based_answer_parser"
-
-
-if __name__ == "__main__":
-
-    # Define possible answers
-    possible_answers_1 = ["1. strongly disagree",
-                          "2. somewhat agree", "3. agree"]
-    possible_answers_2 = ["A. strongly disagree",
-                          "B. somewhat agree", "C. agree"]
-
-    # Instantiate the custom parser
-    parser_1 = MultipleChoiceJudge(possible_answers_1)
-    parser_2 = MultipleChoiceJudge(possible_answers_2)
-
-    # Example text to parse
-    text = "I think I would choose option 1 because it seems the best. Also, I somewhat disagree with option 2."
-
-    # Parse the output using both sets of possible answers
-    result_1 = parser_1.invoke(text)
-    print(f'Most likely answer with possible answers 1: {result_1}')
-
-    result_2 = parser_2.invoke(text)
-    print(f'Most likely answer with possible answers 2: {result_2}')

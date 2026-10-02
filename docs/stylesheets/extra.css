@@ -1,0 +1,13 @@
+.md-typeset h1 {
+  font-weight: 700;
+}
+
+.md-typeset h2 {
+  font-weight: 700;
+  border-bottom: 2px solid var(--md-primary-fg-color);
+  padding-bottom: 0.3em;
+}
+
+.md-typeset h3 {
+  font-weight: 700;
+}

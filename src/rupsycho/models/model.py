@@ -1,52 +1,56 @@
-# ===========================================================================
-#                           Data Model: Language Models
-# ===========================================================================
-# This file contains the data model for the language models configs.
+# model.py
+"""Data model: language model configurations.
 
+Each configuration describes how to build one LangChain model and exposes ``load_model()``.
+Provider SDKs are imported lazily inside ``load_model`` so that configurations can be
+created, validated and serialised without the corresponding extra installed. Loading a model
+whose extra is missing raises an ``ImportError`` naming the extra to install.
+"""
 
-# from langchain.llms import HuggingFacePipeline
-# import bitsandbytes as bnb  # Ensure this is installed for quantized loading
-import torch
-import warnings
-from pydantic import BaseModel, Field
-from typing import Dict, Any, Optional, Union
-from langchain_core.load import load
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline, BitsAndBytesConfig
+from __future__ import annotations
 
-from langchain_huggingface import HuggingFaceEndpoint
-from langchain_huggingface import HuggingFacePipeline
-from langchain_huggingface import ChatHuggingFace
-from langchain_ollama.llms import OllamaLLM
-from langchain_openai import ChatOpenAI
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_deepseek import ChatDeepSeek
+from typing import Annotated, Any
 
-from .prompt import (
+from langchain_core.runnables import Runnable
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, SecretStr
+
+from rupsycho._compat import load_serialized, require
+from rupsycho.models.prompt import (
     ChatPromptTemplateConfig,
     LangchainPromptTemplateConfig,
 )
 
+__all__ = [
+    "DEFAULT_MODEL_CONFIG",
+    "DEFAULT_MODEL_CONFIG_DICT",
+    "DeepSeekModelConfig",
+    "GoogleModelConfig",
+    "LangChainModelConfig",
+    "LocalHuggingFaceModelConfig",
+    "OllamaModelConfig",
+    "OpenAIModelConfig",
+    "RemoteHuggingFaceModelConfig",
+]
 
-# ------------------------------------------------
-#                Generic Config
-# ------------------------------------------------
+_MASK = "**********"
 
 
-# class ModelConfig(BaseModel):
-#     """Base class for all model configurations."""
-#     definition: Dict[str, Any] = Field(
-#         {}, description="The definition of the model"
-#     )
-#     parameters: Dict[str, Any] = Field(
-#         {}, description="The parameters for the model"
-#     )
-#     secrets_map: Dict[str, Any] = Field(
-#         {}, description="The secrets map for the model"
-#     )
+def _unmask(value: Any) -> Any:
+    """Treat blanks and the placeholder written by exports as 'no key given'."""
+    if isinstance(value, str) and value.strip() in ("", _MASK):
+        return None
+    return value
 
-#     prompt_template: Optional[Dict[str, Any]] = Field(
-#         None, description="The prompt template used by the model"
-#     )
+
+Secret = Annotated[SecretStr | None, BeforeValidator(_unmask)]
+"""A secret such as an API key: never shown in ``repr`` or exports (masked as ``**********``).
+When a configuration contains no key - or only that placeholder - the provider's environment
+variable (``OPENAI_API_KEY``, ``GOOGLE_API_KEY``, ``DEEPSEEK_API_KEY``, ...) is used."""
+
+
+def _reveal(secret: SecretStr | None) -> str | None:
+    return secret.get_secret_value() if secret else None
+
 
 # ------------------------------------------------
 #                LangChain Config
@@ -54,46 +58,47 @@ from .prompt import (
 
 
 class LangChainModelConfig(BaseModel):
-    """Configuration for a serialized LangChain model or any other runnable configuration."""
+    """Configuration for a serialized LangChain model or any other runnable configuration.
 
-    type: str = Field("langchain",
-                      description="The type of the model configuration.")
+    Attributes:
+        definition: The serialized model as produced by ``langchain_core.load.dumpd``.
+        parameters: Generation parameters (informational for serialized models).
+        prompt_template: Optional prompt template of the model.
+    """
 
-    definition: Dict[str, Any] = Field(
-        ..., description="A dictionary containing the serialized LangChain model or other runnable configuration."
+    type: str = Field("langchain", description="The type of the model configuration.")
+
+    definition: dict[str, Any] = Field(
+        ...,
+        description="A dictionary containing the serialized LangChain model or other runnable configuration.",
     )
 
-    parameters: Dict = Field(
-        {},
-        description="The parameters for text generation"
-    )
+    parameters: dict = Field({}, description="The parameters for text generation")
 
-    prompt_template: LangchainPromptTemplateConfig = Field(
+    prompt_template: LangchainPromptTemplateConfig | None = Field(
         None, description="The prompt template used by the model"
     )
 
-    def load_model(self):
-        """
-        Loads and returns a LangChain model based on the provided serialized configuration.
+    def load_model(self) -> Any:
+        """Deserialize and return the LangChain model.
 
-        Parameters
-        ----------
-        config : LangChainModelConfig
-            The configuration object containing the serialized LangChain model definition.
+        Returns:
+            The deserialized LangChain model.
 
-        Returns
-        -------
-        Any
-            The deserialized LangChain model ready for use, or None if loading fails.
+        Raises:
+            ValueError: If the definition cannot be deserialized.
         """
         try:
-            # Load the LangChain model using the provided definition
-            model = load(self.definition)
-            return model
-
+            model = load_serialized(self.definition)
         except Exception as e:
-            warnings.warn(f"Failed to load LangChain model: {e}", UserWarning)
-            return None
+            raise ValueError(f"Failed to load the LangChain model: {e}") from e
+        if not isinstance(model, Runnable):
+            raise ValueError(
+                "Failed to load the LangChain model: the definition does not describe a "
+                f"LangChain runnable (got {type(model).__name__})"
+            )
+        return model
+
 
 # ------------------------------------------------
 #                Local HF Config
@@ -101,107 +106,125 @@ class LangChainModelConfig(BaseModel):
 
 
 class LocalHuggingFaceModelConfig(BaseModel):
-    """Configuration for a local Hugging Face model."""
+    """Configuration for a Hugging Face model that runs in this process.
 
-    type: str = Field("local_huggingface",
-                      description="The type of the model configuration.")
+    Requires the ``huggingface`` extra. Pin ``revision`` to a commit hash to make the exact
+    model version part of your experiment configuration.
+
+    Example:
+        ```python
+        config = LocalHuggingFaceModelConfig(
+            name_or_path="HuggingFaceTB/SmolLM-1.7b-Instruct",
+            revision="main",
+            device_map="cpu",
+            parameters={"max_new_tokens": 64, "do_sample": True, "return_full_text": False},
+        )
+        model = config.load_model()
+        ```
+    """
+
+    type: str = Field("local_huggingface", description="The type of the model configuration.")
 
     name_or_path: str = Field(
         ..., description="The path to the local directory or the name of the Hugging Face model."
     )
 
-    revision: Optional[str] = Field(
-        None, description="The specific model version to use (e.g., a branch name, tag, or commit hash)."
+    revision: str | None = Field(
+        None,
+        description="The specific model version to use (e.g., a branch name, tag, or commit hash).",
     )
 
-    tokenizer_name_or_path: Optional[str] = Field(
-        None, description="The name or path to the tokenizer to use. Defaults to `model_name_or_path` if not specified."
+    tokenizer_name_or_path: str | None = Field(
+        None,
+        description="The name or path to the tokenizer to use. Defaults to `name_or_path` if not specified.",
     )
 
-    cache_dir: Optional[str] = Field(
-        None, description="Path to the directory where the downloaded model and tokenizer files will be cached."
+    cache_dir: str | None = Field(
+        None,
+        description="Path to the directory where the downloaded model and tokenizer files will be cached.",
     )
 
-    huggingfacehub_api_token:  Optional[str] = Field(
-        None, description="The API token for accessing Hugging Face endpoints."
+    huggingfacehub_api_token: Secret = Field(
+        None, description="The API token for accessing gated or private Hugging Face models."
     )
 
-    device_map: Optional[Any] = Field(
-        "auto", description="The device map to load the model onto ('cpu', 'cuda', or custom device map). See https://huggingface.co/docs/accelerate/concept_guides/big_model_inference#designing-a-device-map"
+    device_map: Any | None = Field(
+        "auto",
+        description="The device map to load the model onto ('cpu', 'cuda', or custom device map). See https://huggingface.co/docs/accelerate/concept_guides/big_model_inference#designing-a-device-map",
     )
 
-    task: Optional[str] = Field(
-        "text-generation", description="The type of pipeline to create (e.g., 'text-generation', 'text-classification', etc.)."
+    task: str | None = Field(
+        "text-generation",
+        description="The type of pipeline to create (e.g., 'text-generation').",
     )
 
-    parameters: Dict = Field(
-        {},
-        description="The parameters for text generation (e.g., max_length, temperature, etc.)."
+    parameters: dict = Field(
+        {}, description="The parameters for text generation (e.g., max_new_tokens, temperature)."
     )
 
-    prompt_template: Optional[Union[str, BaseModel]] = Field(
+    prompt_template: str | BaseModel | None = Field(
         None, description="The prompt template used by the model, if applicable."
     )
 
-    bitsandbytes_config: Optional[Dict] = Field(
+    bitsandbytes_config: dict | None = Field(
         None, description="Optional dictionary for bitsandbytes quantization configuration."
     )
 
-    class Config:
-        """Pydantic model configuration."""
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    def load_model(self):
+    def load_model(self) -> Any:
+        """Load the model, wrap it into a Transformers pipeline and return a chat model.
+
+        Returns:
+            A ``ChatHuggingFace`` around a ``HuggingFacePipeline``.
+
+        Raises:
+            ImportError: If the ``huggingface`` extra is not installed.
+            ValueError: If the model cannot be loaded.
         """
-        Loads and returns a quantized Hugging Face model pipeline wrapped in a LangChain HuggingFacePipeline.
+        transformers = require("transformers", "huggingface", feature="Local Hugging Face models")
+        lc_hf = require("langchain_huggingface", "huggingface", feature="Local Hugging Face models")
 
-        Parameters
-        ----------
-        None
+        hub_kwargs: dict[str, Any] = {}
+        if self.revision:
+            hub_kwargs["revision"] = self.revision
+        if self.cache_dir:
+            hub_kwargs["cache_dir"] = self.cache_dir
+        if self.huggingfacehub_api_token:
+            hub_kwargs["token"] = _reveal(self.huggingfacehub_api_token)
 
-        Returns
-        -------
-        HuggingFacePipeline
-            The LangChain HuggingFacePipeline ready for integration into LangChain workflows.
-        """
         try:
-            # Load the tokenizer
-            tokenizer = AutoTokenizer.from_pretrained(
-                self.tokenizer_name_or_path or self.name_or_path)
+            tokenizer = transformers.AutoTokenizer.from_pretrained(
+                self.tokenizer_name_or_path or self.name_or_path, **hub_kwargs
+            )
 
-            # Load the model, with quantization if bitsandbytes_config is provided
+            model_kwargs: dict[str, Any] = {"device_map": self.device_map, **hub_kwargs}
             if self.bitsandbytes_config:
-                quant_config = BitsAndBytesConfig(
-                    **self.bitsandbytes_config)
-                model = AutoModelForCausalLM.from_pretrained(
-                    self.name_or_path,
-                    device_map=self.device_map,  # Use the updated device_map
-                    quantization_config=quant_config,
+                model_kwargs["quantization_config"] = transformers.BitsAndBytesConfig(
+                    **self.bitsandbytes_config
                 )
-            else:
-                model = AutoModelForCausalLM.from_pretrained(
-                    self.name_or_path,
-                    device_map=self.device_map  # Use the updated device_map
-                )
+            model = transformers.AutoModelForCausalLM.from_pretrained(
+                self.name_or_path, **model_kwargs
+            )
 
-            # Ensure parameters are passed as keyword arguments correctly
-            pipeline_kwargs = {
-                "task": self.task,
-                "model": model,
-                "tokenizer": tokenizer,
-                **self.parameters  # Pass additional pipeline parameters
-            }
+            pipe = transformers.pipeline(
+                task=self.task,
+                model=model,
+                tokenizer=tokenizer,
+                **self.parameters,
+            )
 
-            # Create the pipeline
-            llm_pipeline = pipeline(**pipeline_kwargs)
-
-            # Wrap the HuggingFacePipeline in a ChatHuggingFace object for LangChain integration
-            return ChatHuggingFace(llm=HuggingFacePipeline(pipeline=llm_pipeline, model_id=self.name_or_path))
+            return lc_hf.ChatHuggingFace(
+                llm=lc_hf.HuggingFacePipeline(pipeline=pipe, model_id=self.name_or_path),
+                tokenizer=tokenizer,
+            )
 
         except Exception as e:
             raise ValueError(
-                f"Failed to load the Hugging Face model '{self.name_or_path}' with task '{self.task}': {str(e)}"
-            )
+                f"Failed to load the Hugging Face model '{self.name_or_path}' "
+                f"with task '{self.task}': {e}"
+            ) from e
+
 
 # ------------------------------------------------
 #                Remote HF Config
@@ -209,57 +232,49 @@ class LocalHuggingFaceModelConfig(BaseModel):
 
 
 class RemoteHuggingFaceModelConfig(BaseModel):
-    """Configuration for a remote Hugging Face model using the Inference Endpoint API."""
+    """Configuration for a model served by a Hugging Face Inference Endpoint.
 
-    type: str = Field("remote_huggingface",
-                      description="The type of the model configuration.")
+    Requires the ``huggingface`` extra and a Hugging Face token in the environment
+    (``HUGGINGFACEHUB_API_TOKEN``).
+    """
+
+    type: str = Field("remote_huggingface", description="The type of the model configuration.")
 
     repo_id: str = Field(
-        ..., description="The repository ID of the Hugging Face model (e.g., 'HuggingFaceH4/zephyr-7b-beta')."
+        ...,
+        description="The repository ID of the Hugging Face model (e.g., 'HuggingFaceH4/zephyr-7b-beta').",
     )
 
     task: str = Field(
-        ..., description="The task for the Hugging Face pipeline (e.g., 'text-generation', 'text-classification')."
+        ...,
+        description="The task for the Hugging Face pipeline (e.g., 'text-generation').",
     )
 
-    # huggingfacehub_api_token: Optional[str] = Field(
-    #     ..., description="The API token for accessing Hugging Face endpoints."
-    # )
-
-    parameters: Dict = Field(
-        {},
-        description="The parameters for text generation (e.g., max_length, temperature, etc.)."
+    parameters: dict = Field(
+        {}, description="The parameters for text generation (e.g., max_new_tokens, temperature)."
     )
 
-    class Config:
-        """Pydantic model configuration."""
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    def load_model(self):
-        """
-        Loads and returns a Hugging Face model pipeline from a remote inference endpoint,
-        wrapped in a LangChain HuggingFacePipeline.
+    def load_model(self) -> Any:
+        """Create the endpoint client and return it as a chat model.
 
-        Returns
-        -------
-        HuggingFacePipeline
-            The LangChain HuggingFacePipeline ready for integration into LangChain workflows.
+        Returns:
+            A ``ChatHuggingFace`` around a ``HuggingFaceEndpoint``.
+
+        Raises:
+            ImportError: If the ``huggingface`` extra is not installed.
+            ValueError: If the endpoint cannot be created.
         """
+        lc_hf = require("langchain_huggingface", "huggingface", feature="Hugging Face endpoints")
         try:
-            # Create the Hugging Face Endpoint using the specified parameters
-            endpoint = HuggingFaceEndpoint(
-                repo_id=self.repo_id,
-                task=self.task,
-                # huggingfacehub_api_token=self.huggingfacehub_api_token,
-                **self.parameters  # Pass the generation parameters
+            endpoint = lc_hf.HuggingFaceEndpoint(
+                repo_id=self.repo_id, task=self.task, **self.parameters
             )
-
-            # Return the LangChain HuggingFacePipeline object with the endpoint
-            return ChatHuggingFace(llm=endpoint)
-
+            return lc_hf.ChatHuggingFace(llm=endpoint)
         except Exception as e:
-            raise ValueError(
-                f"Failed to load the remote Hugging Face model: {str(e)}")
+            raise ValueError(f"Failed to load the remote Hugging Face model: {e}") from e
+
 
 # ------------------------------------------------
 #                Ollama Config
@@ -267,55 +282,42 @@ class RemoteHuggingFaceModelConfig(BaseModel):
 
 
 class OllamaModelConfig(BaseModel):
-    """
-    Configuration for loading an Ollama model.
-    This class holds all the necessary information for configuring and loading an OllamaLLM model.
+    """Configuration for a model served by a local or remote Ollama server.
+
+    Requires the ``ollama`` extra.
     """
 
-    type: str = Field("ollama",
-                      description="The type of the model configuration.")
+    type: str = Field("ollama", description="The type of the model configuration.")
 
-    model: str = Field(
-        ..., description="The identifier for the Ollama model (e.g., 'gemma2:2b')."
-    )
+    model: str = Field(..., description="The identifier for the Ollama model (e.g., 'gemma2:2b').")
 
     base_url: str = "http://localhost:11434"
     """Base url the model is hosted under."""
 
-    parameters: Dict = Field(
-        {},
-        description="The parameters for text generation"
-    )
+    parameters: dict = Field({}, description="The parameters for text generation")
 
-    prompt_template: ChatPromptTemplateConfig = Field(
+    prompt_template: ChatPromptTemplateConfig | None = Field(
         None, description="The prompt template used by the model"
     )
 
-    class Config:
-        """Pydantic model configuration."""
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    def load_model(self):
-        """
-        Loads and returns an Ollama model based on the provided configuration.
+    def load_model(self) -> Any:
+        """Create the Ollama client.
 
-        Returns
-        -------
-        OllamaLLM
-            The instantiated Ollama model ready for use.
+        Returns:
+            An ``OllamaLLM``.
+
+        Raises:
+            ImportError: If the ``ollama`` extra is not installed.
+            ValueError: If the client cannot be created.
         """
+        llms = require("langchain_ollama.llms", "ollama", feature="Ollama models")
         try:
-            # Create the Ollama model instance using the provided configuration
-            model_ollama = OllamaLLM(
-                model=self.model,
-                base_url=self.base_url,
-                **self.parameters  # Pass the text generation parameters
-            )
-
-            return model_ollama
-
+            return llms.OllamaLLM(model=self.model, base_url=self.base_url, **self.parameters)
         except Exception as e:
-            raise ValueError(f"Failed to load the Ollama model: {str(e)}")
+            raise ValueError(f"Failed to load the Ollama model: {e}") from e
+
 
 # ------------------------------------------------
 #                OpenAI Config
@@ -323,196 +325,167 @@ class OllamaModelConfig(BaseModel):
 
 
 class OpenAIModelConfig(BaseModel):
-    """Configuration for an OpenAI model."""
+    """Configuration for an OpenAI (or OpenAI-compatible) chat model.
 
-    type: str = Field(
-        "openai", description="The type of the model configuration.")
+    Requires the ``openai`` extra. The API key is read from ``api_key`` or, if unset, from the
+    ``OPENAI_API_KEY`` environment variable. Prefer the environment variable so that keys never
+    end up in shared configuration files.
+    """
+
+    type: str = Field("openai", description="The type of the model configuration.")
 
     name_or_path: str = Field(
         ..., description="The identifier for the OpenAI model (e.g., 'gpt-4')."
     )
 
-    api_key: Optional[str] = Field(
-        None, description="The API key for accessing OpenAI's models."
-    )
+    api_key: Secret = Field(None, description="The API key for accessing OpenAI's models.")
 
-    base_url: Optional[str] = Field(
-        None, description="The base URL for the OpenAI API endpoint."
-    )
+    base_url: str | None = Field(None, description="The base URL for the OpenAI API endpoint.")
 
-    organization: Optional[str] = Field(
+    organization: str | None = Field(
         None, description="The organization ID associated with the OpenAI API key."
     )
 
-    parameters: Dict = Field(
-        {},
-        description="The parameters for text generation"
-    )
+    parameters: dict = Field({}, description="The parameters for text generation")
 
-    prompt_template: ChatPromptTemplateConfig = Field(
+    prompt_template: ChatPromptTemplateConfig | None = Field(
         None, description="The prompt template used by the model"
     )
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    def load_model(self):
+    def load_model(self) -> Any:
+        """Create the OpenAI chat model.
+
+        Returns:
+            A ``ChatOpenAI``.
+
+        Raises:
+            ImportError: If the ``openai`` extra is not installed.
+            ValueError: If the client cannot be created.
         """
-        Loads and returns an OpenAI model based on the provided configuration.
-
-        Parameters
-        ----------
-        config : OpenAIModelConfig
-            The configuration object containing the details for loading the OpenAI model.
-
-        Returns
-        -------
-        ChatOpenAI
-            The instantiated OpenAI model ready for use.
-        """
+        lc_openai = require("langchain_openai", "openai", feature="OpenAI models")
         try:
-            # Create the OpenAI model instance using the provided config
-            model_openai = ChatOpenAI(
-                model=self.name_or_path,
-                api_key=self.api_key,
-                base_url=self.base_url,
-                organization=self.organization,
-                **self.parameters  # Pass generation parameters
-            )
-
-            return model_openai
-
+            # Only pass what is configured: an explicit None would hide the environment fallback
+            optional = {
+                "api_key": _reveal(self.api_key),
+                "base_url": self.base_url,
+                "organization": self.organization,
+            }
+            kwargs = {key: value for key, value in optional.items() if value}
+            return lc_openai.ChatOpenAI(model=self.name_or_path, **kwargs, **self.parameters)
         except Exception as e:
-            raise ValueError(f"Failed to load the OpenAI model: {e}")
+            raise ValueError(f"Failed to load the OpenAI model: {e}") from e
 
 
 # ------------------------------------------------
 #               Remote Google Config
 # ------------------------------------------------
 
-class GoogleModelConfig(BaseModel):
-    """Configuration for a Google model."""
 
-    type: str = Field(
-        "google", description="The type of the model configuration.")
+class GoogleModelConfig(BaseModel):
+    """Configuration for a Google Gemini chat model.
+
+    Requires the ``google`` extra. Gemini models cannot be seeded; see
+    [`rupsycho.seeding`][rupsycho.seeding].
+    """
+
+    type: str = Field("google", description="The type of the model configuration.")
 
     name_or_path: str = Field(
         ..., description="The identifier for the Google model (e.g., 'gemini-2.0-flash')."
     )
 
-    api_key: Optional[str] = Field(
-        None, description="The API key for accessing Google models."
-    )
+    api_key: Secret = Field(None, description="The API key for accessing Google models.")
 
-    parameters: Dict = Field(
-        {},
-        description="The parameters for text generation"
-    )
+    parameters: dict = Field({}, description="The parameters for text generation")
 
-    prompt_template: ChatPromptTemplateConfig = Field(
+    prompt_template: ChatPromptTemplateConfig | None = Field(
         None, description="The prompt template used by the model"
     )
 
-    def load_model(self):
-        """
-        Loads and returns a Google model based on the provided configuration.
+    def load_model(self) -> Any:
+        """Create the Google chat model.
 
-        Parameters
-        ----------
-        config : GoogleModelConfig
-            The configuration object containing the details for loading the Google model.
+        Returns:
+            A ``ChatGoogleGenerativeAI``.
 
-        Returns
-        -------
-        ChatGoogleGenerativeAI
-            The instantiated Google model ready for use.
+        Raises:
+            ImportError: If the ``google`` extra is not installed.
+            ValueError: If the client cannot be created.
         """
+        lc_google = require("langchain_google_genai", "google", feature="Google models")
         try:
-            # Create the google model instance using the provided config
-            model_google = ChatGoogleGenerativeAI(
-                model=self.name_or_path,
-                api_key=self.api_key,
-                **self.parameters  # Pass generation parameters
-            )
-
-            return model_google
-
+            kwargs: dict[str, Any] = dict(self.parameters)
+            if self.api_key:
+                kwargs["api_key"] = _reveal(self.api_key)
+            return lc_google.ChatGoogleGenerativeAI(model=self.name_or_path, **kwargs)
         except Exception as e:
-            raise ValueError(f"Failed to load the Google model: {e}")
-
+            raise ValueError(f"Failed to load the Google model: {e}") from e
 
 
 # ------------------------------------------------
 #               Remote DeepSeek Config
 # ------------------------------------------------
 
-class DeepSeekModelConfig(BaseModel):
-    """Configuration for a DeepSeek model."""
 
-    type: str = Field(
-        "deepseek", description="The type of the model configuration.")
+class DeepSeekModelConfig(BaseModel):
+    """Configuration for a DeepSeek chat model.
+
+    Requires the ``deepseek`` extra. The API key is read from ``api_key`` or, if unset, from
+    the ``DEEPSEEK_API_KEY`` environment variable.
+    """
+
+    type: str = Field("deepseek", description="The type of the model configuration.")
 
     name_or_path: str = Field(
         ..., description="The identifier for the DeepSeek model (e.g. 'deepseek-chat')."
     )
 
-    api_key: Optional[str] = Field(
-        None, description="The API key for accessing DeepSeek models."
-    )
+    api_key: Secret = Field(None, description="The API key for accessing DeepSeek models.")
 
-    parameters: Dict = Field(
-        {},
-        description="The parameters for text generation"
-    )
+    parameters: dict = Field({}, description="The parameters for text generation")
 
-    prompt_template: ChatPromptTemplateConfig = Field(
+    prompt_template: ChatPromptTemplateConfig | None = Field(
         None, description="The prompt template used by the model"
     )
 
-    def load_model(self):
-        """
-        Loads and returns a DeepSeek model based on the provided configuration.
+    def load_model(self) -> Any:
+        """Create the DeepSeek chat model.
 
-        Parameters
-        ----------
-        config : DeepSeekModelConfig
-            The configuration object containing the details for loading the Google model.
+        Returns:
+            A ``ChatDeepSeek``.
 
-        Returns
-        -------
-        ChatDeepSeek
-            The instantiated Google model ready for use.
+        Raises:
+            ImportError: If the ``deepseek`` extra is not installed.
+            ValueError: If the client cannot be created.
         """
+        lc_deepseek = require("langchain_deepseek", "deepseek", feature="DeepSeek models")
+        kwargs: dict[str, Any] = dict(self.parameters)
+        if self.api_key:
+            kwargs["api_key"] = _reveal(self.api_key)
         try:
-            # Create the DeepSeek model instance using the provided config
-            model_deepseek = ChatDeepSeek(
-                model=self.name_or_path,
-                # api_key=self.api_key, # key can for some reason only given explicitly or implicitly
-                # api_key=os.environ.get('DEEPSEEK_API_KEY'),
-                **self.parameters  # Pass generation parameters
-            )
-
-            return model_deepseek
-
+            return lc_deepseek.ChatDeepSeek(model=self.name_or_path, **kwargs)
         except Exception as e:
-            raise ValueError(f"Failed to load the DeepSeek model: {e}")
+            raise ValueError(f"Failed to load the DeepSeek model: {e}") from e
 
 
 # ------------------- Default Model -------------------
 
-DEFAULT_MODEL_CONFIG_DICT = {
+DEFAULT_MODEL_CONFIG_DICT: dict[str, Any] = {
     "type": "local_huggingface",
     "name_or_path": "HuggingFaceTB/SmolLM-1.7b-Instruct",
     "task": "text-generation",
     "device_map": "cpu",
-    "pipeline_kwargs": {
+    "parameters": {
         "max_new_tokens": 64,
         "temperature": 1.0,
         "do_sample": True,
         "top_k": 50,
         "top_p": 0.95,
         "return_full_text": False,
-    }
+    },
 }
+"""Small default model used when a configuration defines no ``models`` key at all."""
 
 DEFAULT_MODEL_CONFIG = LocalHuggingFaceModelConfig(**DEFAULT_MODEL_CONFIG_DICT)

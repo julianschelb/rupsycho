@@ -1,153 +1,146 @@
-# ===========================================================================
-#                           Model Management Mixin
-# ===========================================================================
-# This module defines a mixin class for managing models within an experiment.
-# The mixin provides methods to add, remove, replace, and manage models,
-# as well as convert model definitions into runnable models.
+# model_managing.py
+"""Add, inspect, replace and remove the models of an experiment."""
 
+from __future__ import annotations
 
-from langchain_core.load import dumpd, load
-from rupsycho.models.model import LangChainModelConfig
-from typing import Any, Dict, List, Optional
 import warnings
+from typing import TYPE_CHECKING, Any
+
+from langchain_core.load import dumpd
+
+from rupsycho._compat import load_serialized
+from rupsycho.models.model import LangChainModelConfig
+
+__all__ = ["ModelManagementMixin"]
 
 
 class ModelManagementMixin:
+    """Methods to manage the models of an experiment.
+
+    An experiment keeps two dictionaries under the same identifiers: ``models`` holds the
+    *configurations* (what gets exported), ``runnable_models`` holds what is run - either the
+    configuration itself (loaded lazily when the run reaches it) or a ready LangChain model
+    added with ``add_model``.
     """
-    Mixin providing methods to manage models in the experiment.
 
-    This includes adding models, setting models, and handling the conversion
-    of model definitions into runnable models.
-    """
+    if TYPE_CHECKING:
+        # Provided by ExperimentDocument, which mixes this class in.
+        models: dict[str, Any]
+        runnable_models: dict[str, Any]
 
-    def load_model(self, model_definition):
-        """
-        Load the model from its serialized definition.
+    def load_model(self, model_definition: dict[str, Any]) -> Any | None:
+        """Deserialize a model from its LangChain definition.
 
-        :param model_definition: Serialized model definition
-        :return: Loaded model, or None if an error occurs.
+        Args:
+            model_definition: Serialized model as produced by ``langchain_core.load.dumpd``.
+
+        Returns:
+            The model, or ``None`` (with a warning) if it cannot be deserialized.
         """
         try:
-            model = load(model_definition)
-            return model
+            return load_serialized(model_definition)
         except Exception as e:
-            warnings.warn(f"Failed to load model: {e}", UserWarning)
+            warnings.warn(f"Failed to load model: {e}", UserWarning, stacklevel=2)
             return None
 
-    def add_model(self, model: Any, identifier: Optional[str] = None) -> None: # bug when running exp with model that was added as a dict
-        """
-        Adds a model to the experiment.
+    def add_model(self, model: Any, identifier: str | None = None) -> None:
+        """Add a ready LangChain model to the experiment.
 
-        :param model: The model to be added.
-        :param identifier: Optional identifier for the model.
+        The model is run as it is. Its serialized definition is stored in ``models`` so that the
+        experiment can be exported; models that cannot be serialized (for example local
+        pipelines) are exported as a placeholder and have to be added again after loading.
+
+        Args:
+            model: Any LangChain runnable (chat model, LLM, ...).
+            identifier: Name of the model in the results. Defaults to its object id.
+
+        Example:
+            ```python
+            experiment.add_model(ChatOpenAI(model="gpt-4o-mini"), identifier="gpt-4o-mini")
+            ```
+
+        Note:
+            Adding a model under an identifier that exists replaces it and emits a warning.
         """
         key = identifier if identifier else str(id(model))
 
         if key in self.models:
             warnings.warn(
-                f"A model with the identifier '{key}' already exists.", UserWarning)
-        else:
-            self.models[key] = LangChainModelConfig(definition=dumpd(model))
-
-        # Ensure the model is added to runnable_models
-        # runnable_model = self.load_model(self.models[key].definition)
-        # if runnable_model:
+                f"A model with the identifier '{key}' already exists and is replaced.",
+                UserWarning,
+                stacklevel=2,
+            )
+        self.models[key] = LangChainModelConfig(definition=dumpd(model))
         self.runnable_models[key] = model
 
     def set_runnable_models(self) -> None:
-        """
-        Converts model definitions into runnable models, updating the runnable_models dictionary.
-        """
-        self.runnable_models = {}
-        for key, model in self.models.items():
-            runnable_model = self.load_model(model.definition)
-            if runnable_model:
-                self.runnable_models[key] = runnable_model
+        """Reset ``runnable_models`` to the configured ``models``.
 
-    def get_model(self, identifier: str) -> Optional[Any]:
+        Every model is then loaded from its configuration when the run reaches it. Models that
+        were added as live objects without a loadable configuration are no longer available
+        afterwards.
         """
-        Retrieves a model by its identifier.
+        self.runnable_models = dict(self.models)
 
-        :param identifier: The identifier of the model.
-        :return: The model if found, otherwise None.
+    def get_model(self, identifier: str) -> Any | None:
+        """Return the runnable entry of a model.
+
+        Args:
+            identifier: Identifier of the model.
+
+        Returns:
+            The LangChain model, or - for models that are loaded lazily - its configuration;
+            ``None`` if there is no such model.
         """
         return self.runnable_models.get(identifier, None)
 
     def remove_model(self, identifier: str) -> None:
-        """
-        Removes a model from the experiment by its identifier.
+        """Remove a model from the experiment.
 
-        :param identifier: The identifier of the model to be removed.
+        Args:
+            identifier: Identifier of the model. Unknown identifiers only emit a warning.
         """
         if identifier in self.models:
             del self.models[identifier]
-            if identifier in self.runnable_models:
-                del self.runnable_models[identifier]
+            self.runnable_models.pop(identifier, None)
         else:
             warnings.warn(
-                f"No model found with the identifier '{identifier}'.", UserWarning)
+                f"No model found with the identifier '{identifier}'.", UserWarning, stacklevel=2
+            )
 
-    def list_models(self) -> List[str]:
-        """
-        Lists all model identifiers in the experiment.
-
-        :return: A list of model identifiers.
-        """
+    def list_models(self) -> list[str]:
+        """Return the identifiers of all models of the experiment."""
         return list(self.models.keys())
 
     def has_model(self, identifier: str) -> bool:
-        """
-        Checks if a model exists in the experiment by its identifier.
-
-        :param identifier: The identifier of the model to check.
-        :return: True if the model exists, False otherwise.
-        """
+        """Return whether a model with this identifier exists."""
         return identifier in self.models
 
     def replace_model(self, identifier: str, new_model: Any) -> None:
-        """
-        Replaces an existing model in the experiment with a new one.
+        """Replace an existing model by a ready LangChain model.
 
-        :param identifier: The identifier of the model to replace.
-        :param new_model: The new model to replace the old one.
+        Args:
+            identifier: Identifier of the model to replace. Unknown identifiers only emit a
+                warning.
+            new_model: The new model.
         """
         if identifier in self.models:
-            self.models[identifier] = LangChainModelConfig(
-                definition=dumpd(new_model))
-            self.set_runnable_models()  # Refresh the runnable models dictionary
+            self.models[identifier] = LangChainModelConfig(definition=dumpd(new_model))
+            self.runnable_models[identifier] = new_model
         else:
             warnings.warn(
-                f"No model found with the identifier '{identifier}'.", UserWarning)
-
-    # def get_model_config(self, identifier: str) -> Optional[Dict[str, Any]]:
-    #     """
-    #     Retrieves the configuration dictionary of a model by its identifier.
-
-    #     :param identifier: The identifier of the model.
-    #     :return: The configuration dictionary of the model, or None if not found.
-    #     """
-    #     model = self.get_model(identifier)
-    #     return model.definition if model else None
+                f"No model found with the identifier '{identifier}'.", UserWarning, stacklevel=2
+            )
 
     def clear_models(self) -> None:
-        """
-        Removes all models from the experiment.
-        """
+        """Remove all models from the experiment."""
         self.models.clear()
         self.runnable_models.clear()
 
     def count_models(self) -> int:
-        """
-        Returns the number of models in the experiment.
-
-        :return: The number of models.
-        """
+        """Return the number of models in the experiment."""
         return len(self.models)
 
-    def get_all_runnable_models(self) -> Dict[str, Any]:
-        """
-        Retrieves a dictionary of all runnable models.
-
-        :return: A dictionary of runnable models with identifiers as keys.
-        """
+    def get_all_runnable_models(self) -> dict[str, Any]:
+        """Return the runnable entries of all models, keyed by identifier."""
         return self.runnable_models
