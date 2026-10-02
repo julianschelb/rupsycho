@@ -41,7 +41,7 @@ dependencies = [
 # Local Hugging Face models, remote endpoints and the model-based parsers
 huggingface = [
     "torch (>=2.2.0,<3.0.0)",
-    "transformers (>=4.40.0,<5.0.0)",
+    "transformers (>=5.17.0,<6.0.0)",
     "accelerate (>=0.25.0)",
     "sentencepiece (>=0.2.0)",
     "langchain-huggingface (>=0.3.1,<0.4.0)",
@@ -53,7 +53,7 @@ deepseek = ["langchain-deepseek (>=0.1.4,<1.0.0)"]
 # Every supported model back-end
 models = [
     "torch (>=2.2.0,<3.0.0)",
-    "transformers (>=4.40.0,<5.0.0)",
+    "transformers (>=5.17.0,<6.0.0)",
     "accelerate (>=0.25.0)",
     "sentencepiece (>=0.2.0)",
     "langchain-huggingface (>=0.3.1,<0.4.0)",
@@ -76,7 +76,7 @@ quantization = [
 ]
 all = [
     "torch (>=2.2.0,<3.0.0)",
-    "transformers (>=4.40.0,<5.0.0)",
+    "transformers (>=5.17.0,<6.0.0)",
     "accelerate (>=0.25.0)",
     "sentencepiece (>=0.2.0)",
     "langchain-huggingface (>=0.3.1,<0.4.0)",
