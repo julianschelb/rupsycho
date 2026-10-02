@@ -1,6 +1,6 @@
 [project]
 name = "rupsycho"
-version = "0.1.0"
+version = "1.0.0"
 description = "R.U.Psycho: robust, unified and reproducible psychometric testing of language models."
 authors = [
     {name = "Julian Schelb", email = "julian.schelb@uni-konstanz.de"},
@@ -12,7 +12,7 @@ readme = "README.md"
 license = {text = "MIT"}
 keywords = ["LLM", "psychometrics", "social science", "questionnaires", "reproducibility"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",

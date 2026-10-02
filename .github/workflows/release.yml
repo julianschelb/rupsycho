@@ -30,7 +30,7 @@ name: Release
 #
 # Manual runs: "Run workflow" releases like the automatic path. With the input
 # publish_current the checked-out version is built and published as-is, without
-# a version bump (for a version that is already tagged, e.g. the initial v0.1.0).
+# a version bump (for a version that is already tagged, e.g. the initial v1.0.0).
 
 on:
   workflow_run:
