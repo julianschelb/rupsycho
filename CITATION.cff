@@ -18,7 +18,7 @@ authors:
 license: MIT
 # version is kept in step with pyproject.toml by the release tooling;
 # date-released is deliberately left out until a release is published.
-version: "0.1.0"
+version: "1.0.0"
 repository-code: "https://github.com/julianschelb/rupsycho"
 url: "https://julianschelb.github.io/rupsycho/"
 keywords:

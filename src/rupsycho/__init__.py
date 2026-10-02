@@ -23,7 +23,7 @@ import importlib
 import warnings
 from typing import TYPE_CHECKING, Any
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 
 if TYPE_CHECKING:  # pragma: no cover - for type checkers and IDEs only
     from rupsycho import callbacks, models, parsers, postprocessing, scoring, seeding

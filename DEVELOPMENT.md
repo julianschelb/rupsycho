@@ -279,9 +279,9 @@ version and the changelog from [Conventional Commits](https://www.conventionalco
 
 | Prefix                                                                        | Example                                        | Version bump                    |
 | ----------------------------------------------------------------------------- | ---------------------------------------------- | ------------------------------- |
-| `fix:`                                                                        | `fix: pass the time argument to all callbacks` | patch (0.1.0 to 0.1.1)          |
+| `fix:`                                                                        | `fix: pass the time argument to all callbacks` | patch (1.0.0 to 1.0.1)          |
 | `perf:`                                                                       | `perf: build the prompt inputs once`           | patch                           |
-| `feat:`                                                                       | `feat: add an Anthropic model configuration`   | minor (0.1.0 to 0.2.0)          |
+| `feat:`                                                                       | `feat: add an Anthropic model configuration`   | minor (1.0.0 to 1.1.0)          |
 | `feat!:`, `fix!:` or a `BREAKING CHANGE:` footer                              | `feat!: rename the seeds parameter`            | major (minor while below 1.0.0) |
 | `docs:`, `style:`, `refactor:`, `test:`, `build:`, `ci:`, `chore:`, `revert:` | `docs: explain cumulative mode`                | no release                      |
 
@@ -323,9 +323,9 @@ pull requests, allow that actor to bypass the rule, otherwise the push fails.
 ### Publishing an already tagged version
 
 `semantic-release` only publishes versions it creates itself. To publish a version that is
-tagged already, for example the initial `v0.1.0` once the trusted publisher is registered,
+tagged already, for example the initial `v1.0.0` once the trusted publisher is registered,
 run the workflow by hand: *Actions, Release, Run workflow*, select the tag (for example
-`v0.1.0`) under *Use workflow from*, and tick **publish_current**. The workflow builds the
+`v1.0.0`) under *Use workflow from*, and tick **publish_current**. The workflow builds the
 checked-out commit, verifies that it carries the tag `vX.Y.Z` matching the version in
 `pyproject.toml`, and publishes it through the `pypi` environment. The upload needs the setup
 above, including the `PUBLISH_PYPI` variable.

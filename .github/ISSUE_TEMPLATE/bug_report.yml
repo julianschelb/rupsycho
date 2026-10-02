@@ -33,7 +33,7 @@ body:
     attributes:
       label: rupsycho version
       description: 'Output of `python -c "import rupsycho; print(rupsycho.__version__)"`.'
-      placeholder: "0.1.0"
+      placeholder: "1.0.0"
     validations:
       required: true
   - type: input
