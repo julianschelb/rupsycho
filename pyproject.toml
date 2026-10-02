@@ -72,7 +72,7 @@ notebook = [
     "ipywidgets (>=8.1.5,<9.0.0)",
 ]
 quantization = [
-    "bitsandbytes (>=0.43.0)",
+    "bitsandbytes (>=0.50.2)",
 ]
 all = [
     "torch (>=2.2.0,<3.0.0)",
